@@ -13,4 +13,12 @@ class AVaQuoleHUD : public AHUD
 {
 	GENERATED_UCLASS_BODY()
 
+	/** Web-based HUD rendering component */
+	UPROPERTY(Category = VaQuole, VisibleAnywhere, BlueprintReadOnly)
+	TSubobjectPtr<class UVaQuoleUIComponent> VaQuoleUI;
+
+public:
+
+	/** Main HUD update loop */
+	virtual void DrawHUD() OVERRIDE;
 };

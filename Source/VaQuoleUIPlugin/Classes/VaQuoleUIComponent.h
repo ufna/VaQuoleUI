@@ -16,10 +16,10 @@ class UVaQuoleUIComponent : public UActorComponent
 	//////////////////////////////////////////////////////////////////////////
 	// View configuration
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI|VaQuole", meta = (ClampMin = "0", UIMin = "0", UIMax = "4096"))
+	UPROPERTY(EditAnywhere, Category = "View", meta = (ClampMin = "0", UIMin = "0", UIMax = "4096"))
 	int32 Width;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI|VaQuole", meta = (ClampMin = "0", UIMin = "0", UIMax = "4096"))
+	UPROPERTY(EditAnywhere, Category = "View", meta = (ClampMin = "0", UIMin = "0", UIMax = "4096"))
 	int32 Height;
 
 
