@@ -16,7 +16,6 @@ void AVaQuoleHUD::DrawHUD()
 	if (VaQuoleUI->Width != Canvas->ClipX || VaQuoleUI->Height != Canvas->ClipY)
 	{
 		VaQuoleUI->Resize(Canvas->ClipX, Canvas->ClipY);
-		VaQuoleUI->Redraw();
 	}
 	
 	// Draw hud web view texture

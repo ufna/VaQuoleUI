@@ -5,13 +5,12 @@
 UVaQuoleUIComponent::UVaQuoleUIComponent(const class FPostConstructInitializeProperties& PCIP)
 	: Super(PCIP), RefCount(new FThreadSafeCounter)
 {
+	bAutoActivate = true;
 	bWantsInitializeComponent = true;
 	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.TickGroup = TG_PrePhysics;
 
 	DefaultURL = "http://ufna.ru";
-
-	// Init texture for the first time
-	Resize(512, 512);
 }
 
 void UVaQuoleUIComponent::InitializeComponent()
@@ -27,18 +26,28 @@ void UVaQuoleUIComponent::InitializeComponent()
 	// Create web view
 	UIWidget = MakeShareable(new VaQuole::VaQuoleWebView());
 
+	// Init texture for the first time
+	Resize(512,512);
+
 	// Open default URL
 	OpenURL(DefaultURL);
 }
 
 void UVaQuoleUIComponent::BeginDestroy()
 {
+	// Clear web view widget
+	if (UIWidget.IsValid())
+	{
+		UIWidget->Destroy();
+		UIWidget.Reset();
+	}
+
+	// Stop qApp if it was the last one
 	if (RefCount->Decrement() == 0)
 	{
-		delete RefCount;
 		UE_LOG(LogVaQuole, Log, TEXT("Last VaQuole component being deleted, stop qApp now"));
-		
-		// Stop qApp
+
+		delete RefCount;
 		VaQuole::Cleanup();
 	}
 
@@ -92,38 +101,64 @@ void UVaQuoleUIComponent::Resize(int32 NewWidth, int32 NewHeight)
 	Width = NewWidth;
 	Height = NewHeight;
 
+	if (UIWidget.IsValid())
+	{
+		UIWidget->Resize(Width, Height);
+	}
+
 	ResetUITexture();
 }
 
 void UVaQuoleUIComponent::Redraw() const
 {
+	// Minor timeout
+	if (GetWorld()->GetTimeSeconds() < 1)
+	{
+		return;
+	}
+
 	if (Texture && Texture->Resource && UIWidget.IsValid())
 	{
-		/*const UCHAR* my_data = UIWidget->GrabScreenD();
-
-		//UE_LOG(LogOcean, Warning, TEXT("Check RHI"));
-
+		// Check that texture is prepared
 		auto rhiRef = static_cast<FTexture2DResource*>(Texture->Resource)->GetTexture2DRHI();
 		if (!rhiRef)
 			return;
 
-		//UE_LOG(LogOcean, Warning, TEXT("Go render"));
+		// Load data from view
+		const UCHAR* my_data = UIWidget->GrabView();
+		const size_t size = Width * Height * sizeof(uint32);
 
-		const size_t size = 256 * 256 * 4;
+		// Copy buffer for rendering thread
+		TArray<uint32> ViewBuffer;
+		ViewBuffer.Init(Width * Height);
+		FMemory::Memcpy(ViewBuffer.GetData(), my_data, size);
+
+		// Constuct buffer storage
+		FVaQuoleTextureDataPtr DataPtr = MakeShareable(new FVaQuoleTextureData);
+		DataPtr->SetRawData(Width, Height, sizeof(uint32), ViewBuffer);
+
 		ENQUEUE_UNIQUE_RENDER_COMMAND_THREEPARAMETER(
-			UpdateTextureRHI,
-			const UCHAR*, SourceMemory, my_data,
-			FTexture2DRHIRef, ModifTexture, rhiRef,
-			const size_t, MemSize, size,
+			UpdateVaQuoleTexture,
+			FVaQuoleTextureDataPtr, ImageData, DataPtr,
+			FTexture2DRHIRef, TargetTexture, rhiRef,
+			const size_t, DataSize, size,
 			{
-			uint32 stride = 0;
-			void* MipData = GDynamicRHI->RHILockTexture2D(ModifTexture, 0, RLM_WriteOnly, stride, false);
-			if (MipData)
-			{
-				FMemory::Memcpy(MipData, SourceMemory, MemSize);
-				GDynamicRHI->RHIUnlockTexture2D(ModifTexture, 0, false);
-			}
-		});*/
+				uint32 stride = 0;
+				void* MipData = GDynamicRHI->RHILockTexture2D(TargetTexture, 0, RLM_WriteOnly, stride, false);
+
+				if (MipData)
+				{
+					FMemory::Memcpy(MipData, ImageData->GetRawBytesPtr(), ImageData->GetDataSize());
+					GDynamicRHI->RHIUnlockTexture2D(TargetTexture, 0, false);
+				}
+
+				ImageData.Reset();
+			});
+
+		// Cleanup
+		ViewBuffer.Empty();
+		UIWidget->ClearView();
+		my_data = 0;
 	}
 }
 
@@ -133,7 +168,10 @@ void UVaQuoleUIComponent::Redraw() const
 
 void UVaQuoleUIComponent::OpenURL(const FString& URL)
 {
-
+	if (UIWidget.IsValid())
+	{
+		UIWidget->OpenURL(*URL);
+	}
 }
 
 

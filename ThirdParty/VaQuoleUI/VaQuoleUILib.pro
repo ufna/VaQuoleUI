@@ -6,8 +6,6 @@
 
 QT       += network webkit webkitwidgets
 
-QT       -= gui
-
 TARGET = VaQuoleUILib
 TEMPLATE = lib
 CONFIG += staticlib

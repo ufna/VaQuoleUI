@@ -3,14 +3,21 @@
 #ifndef VAQUOLEUILIB_H
 #define VAQUOLEUILIB_H
 
+/** Some defines missed in QtCreator */
+typedef unsigned char uchar;
+
+#ifdef UNICODE
+typedef wchar_t TCHAR;
+#else
+typedef char TCHAR;
+#endif
+
 /** Forward declatation of Qt class members */
 class QWebView;
+class QImage;
 
 namespace VaQuole
 {
-
-typedef unsigned char uchar;
-
 
 /**
  * Common library functions
@@ -36,6 +43,27 @@ class VaQuoleWebView
 
 public:
 	VaQuoleWebView();
+
+	/** Destroy web view and clear memory */
+	void Destroy();
+
+	/** Open URL in the View */
+	void OpenURL(const TCHAR *NewURL);
+
+	/** Get reference to grabbed screen texture */
+	const uchar * GrabViewC();
+	uchar * GrabView();
+
+	/** Clear grabbed view memory */
+	void ClearView();
+
+	/** Set desired few size */
+	void Resize(int w, int h);
+
+private:
+	QWebView *View;
+	QImage *CachedImg;
+
 };
 
 

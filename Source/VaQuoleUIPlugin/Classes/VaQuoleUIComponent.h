@@ -6,6 +6,77 @@
 #include "VaQuoleUIComponent.generated.h"
 
 /**
+ * Holds texture data for upload to a rendering resource
+ */
+struct FVaQuoleTextureData
+{
+	FVaQuoleTextureData(uint32 InWidth = 0, uint32 InHeight = 0, uint32 InStride = 0, const TArray<uint32>& InBytes = TArray<uint32>())
+		: Bytes(InBytes)
+		, Width(InWidth)
+		, Height(InHeight)
+		, StrideBytes(InStride)
+	{
+
+	}
+
+	FVaQuoleTextureData(const FVaQuoleTextureData &Other)
+		: Bytes(Other.Bytes)
+		, Width(Other.Width)
+		, Height(Other.Height)
+		, StrideBytes(Other.StrideBytes)
+	{
+
+	}
+
+	FVaQuoleTextureData& operator=(const FVaQuoleTextureData& Other)
+	{
+		if (this != &Other)
+		{
+			SetRawData(Other.Width, Other.Height, Other.StrideBytes, Other.Bytes);
+		}
+		return *this;
+	}
+
+	void SetRawData(uint32 InWidth, uint32 InHeight, uint32 InStride, const TArray<uint32>& InBytes)
+	{
+		Width = InWidth;
+		Height = InHeight;
+		StrideBytes = InStride;
+		Bytes = InBytes;
+	}
+
+	void Empty()
+	{
+		Bytes.Empty();
+	}
+
+	uint32 GetWidth() const { return Width; }
+	uint32 GetHeight() const { return Height; }
+	uint32 GetStride() const { return StrideBytes; }
+	uint32 GetDataSize() const { return Width * Height * StrideBytes; }
+	const TArray<uint32>& GetRawBytes() const { return Bytes; }
+
+	/** Accesses the raw bytes of already sized texture data */
+	uint32* GetRawBytesPtr() { return Bytes.GetTypedData(); }
+
+private:
+	/** Raw uncompressed texture data */
+	TArray<uint32> Bytes;
+	/** Width of the texture */
+	uint32 Width;
+	/** Height of the texture */
+	uint32 Height;
+	/** The number of bytes of each pixel */
+	uint32 StrideBytes;
+
+};
+
+typedef TSharedPtr<FVaQuoleTextureData, ESPMode::ThreadSafe> FVaQuoleTextureDataPtr;
+typedef TSharedRef<FVaQuoleTextureData, ESPMode::ThreadSafe> FVaQuoleTextureDataRef;
+
+typedef TSharedPtr<class VaQuole::VaQuoleWebView, ESPMode::ThreadSafe> FVaQuoleWebViewPtr;
+
+/**
  * Class that handles view of one web page
  */
 UCLASS(ClassGroup=UI, editinlinenew, meta=(BlueprintSpawnableComponent))
@@ -73,7 +144,7 @@ protected:
 	UTexture2D* Texture;
 
 	/** Web view loaded from library */
-	TSharedPtr<class VaQuole::VaQuoleWebView> UIWidget;
+	FVaQuoleWebViewPtr UIWidget;
 
 private:
 	/** Counter to control life of qApp */
