@@ -5,20 +5,30 @@
 UVaQuoleUIComponent::UVaQuoleUIComponent(const class FPostConstructInitializeProperties& PCIP)
 	: Super(PCIP), RefCount(new FThreadSafeCounter)
 {
-	//bAutoActivate = false;
+	bWantsInitializeComponent = true;
 	PrimaryComponentTick.bCanEverTick = true;
 
-	RefCount->Increment();
-	UE_LOG(LogVaQuole, Warning, TEXT("VaQuoleComponentUI # %d created"), RefCount->GetValue());
+	DefaultURL = "http://ufna.ru";
 
 	// Init texture for the first time
 	Resize(512, 512);
+}
+
+void UVaQuoleUIComponent::InitializeComponent()
+{
+	Super::InitializeComponent();
+
+	RefCount->Increment();
+	UE_LOG(LogVaQuole, Warning, TEXT("VaQuoleComponentUI # %d created"), RefCount->GetValue());
 
 	// Init QApplication if we haven't one
 	VaQuole::Init();
 
 	// Create web view
 	UIWidget = MakeShareable(new VaQuole::VaQuoleWebView());
+
+	// Open default URL
+	OpenURL(DefaultURL);
 }
 
 void UVaQuoleUIComponent::BeginDestroy()

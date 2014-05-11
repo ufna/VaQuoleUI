@@ -22,6 +22,9 @@ class UVaQuoleUIComponent : public UActorComponent
 	UPROPERTY(EditAnywhere, Category = "View", meta = (ClampMin = "0", UIMin = "0", UIMax = "4096"))
 	int32 Height;
 
+	UPROPERTY(EditAnywhere, Category = "View")
+	FString DefaultURL;
+
 
 	//////////////////////////////////////////////////////////////////////////
 	// View control
@@ -54,6 +57,7 @@ class UVaQuoleUIComponent : public UActorComponent
 
 public:
 	// Begin UActorComponent Interface
+	virtual void InitializeComponent() OVERRIDE;
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) OVERRIDE;
 	// End UActorComponent Interface
 
