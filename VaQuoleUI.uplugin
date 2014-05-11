@@ -1,0 +1,20 @@
+{
+    "FileVersion" : 3,
+	
+	"FriendlyName" : "VaQuoleUI",
+	"Version" : 1,
+	"VersionName" : "0.2-a1",
+	"CreatedBy" : "Vladimir Alyamkin",
+	"CreatedByURL" : "http://ufna.ru",
+	"EngineVersion" : 1579795,
+	"Description" : "UI framework with Qt-written heart",
+	"Category" : "UI",
+	
+    "Modules" :
+	[
+		{
+			"Name" : "VaQuoleUIPlugin",
+			"Type" : "Runtime"
+		}
+	]
+}
