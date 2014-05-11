@@ -29,7 +29,7 @@ extern "C"
 
 
 /**
- * Class that handles a view of one web page
+ * Class that handles view of one web page
  */
 class VaQuoleWebView
 {
