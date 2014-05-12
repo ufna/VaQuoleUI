@@ -10,7 +10,7 @@ UVaQuoleUIComponent::UVaQuoleUIComponent(const class FPostConstructInitializePro
 	PrimaryComponentTick.bCanEverTick = true;
 	PrimaryComponentTick.TickGroup = TG_PrePhysics;
 
-	DefaultURL = "http://ufna.ru";
+	DefaultURL = "http://alyamkin.com";
 }
 
 void UVaQuoleUIComponent::InitializeComponent()
@@ -24,7 +24,7 @@ void UVaQuoleUIComponent::InitializeComponent()
 	VaQuole::Init();
 
 	// Create web view
-	UIWidget = MakeShareable(new VaQuole::VaQuoleWebView());
+	UIWidget = MakeShareable(new VaQuole::VaQuoleUI());
 
 	// Init texture for the first time
 	Resize(512,512);
@@ -85,9 +85,6 @@ void UVaQuoleUIComponent::TickComponent(float DeltaTime, enum ELevelTick TickTyp
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// Process Qt events
-	VaQuole::Update();
-
 	// Redraw UI texture with current widget state
 	Redraw();
 }
@@ -137,6 +134,10 @@ void UVaQuoleUIComponent::Redraw() const
 		FVaQuoleTextureDataPtr DataPtr = MakeShareable(new FVaQuoleTextureData);
 		DataPtr->SetRawData(Width, Height, sizeof(uint32), ViewBuffer);
 
+		// Cleanup
+		ViewBuffer.Empty();
+		my_data = 0;
+
 		ENQUEUE_UNIQUE_RENDER_COMMAND_THREEPARAMETER(
 			UpdateVaQuoleTexture,
 			FVaQuoleTextureDataPtr, ImageData, DataPtr,
@@ -154,11 +155,6 @@ void UVaQuoleUIComponent::Redraw() const
 
 				ImageData.Reset();
 			});
-
-		// Cleanup
-		ViewBuffer.Empty();
-		UIWidget->ClearView();
-		my_data = 0;
 	}
 }
 

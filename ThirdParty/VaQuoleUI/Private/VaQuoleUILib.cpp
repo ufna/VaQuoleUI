@@ -2,14 +2,12 @@
 
 #include "VaQuoleUILib.h"
 #include "VaQuoleWebView.h"
+#include "VaQuoleAppThread.h"
 
 #include <QApplication>
 #include <QNetworkProxyFactory>
 #include <QWebSettings>
-#include <QWebView>
 
-#include <QPainter>
-#include <QPixmap>
 #include <QImage>
 
 namespace VaQuole
@@ -17,7 +15,6 @@ namespace VaQuole
 
 /** Main Qt class object */
 static QApplication* pApp = NULL;
-
 
 //////////////////////////////////////////////////////////////////////////
 // Common lib functions
@@ -33,6 +30,7 @@ void Init()
 		char* argv[1] = {arg1};
 		pApp = new QApplication(argc, argv);
 		pApp->setQuitOnLastWindowClosed(false);
+		pApp->processEvents();
 
 		// Set network config
 		QNetworkProxyFactory::setUseSystemConfiguration (true);
@@ -43,9 +41,9 @@ void Init()
 
 void Update()
 {
-	if(pApp)
+	if(QApplication::instance())
 	{
-		pApp->processEvents();
+		QApplication::instance()->processEvents();
 	}
 }
 
@@ -54,11 +52,9 @@ void Cleanup()
 	// First process unfinished events if we have them
 	Update();
 
-	if(pApp)
+	if (QApplication::instance() != nullptr)
 	{
-		pApp->quit();
-		delete pApp;
-		pApp = NULL;
+		QApplication::instance()->quit();
 	}
 }
 
@@ -68,54 +64,44 @@ void Cleanup()
 
 VaQuoleUI::VaQuoleUI()
 {
-	CachedImg = 0;
-
-	View = new VaQuoleWebView();
-	View->resize(256,256);
-	View->show();
+	ViewThread = new VaQuoleAppThread();
+	ViewThread->createView();
 }
 
 void VaQuoleUI::Destroy()
 {
-	if(View)
+	if(ViewThread)
 	{
-		delete View;
+		ViewThread->stopThread();
 	}
 }
 
 void VaQuoleUI::OpenURL(const TCHAR* NewURL)
 {
+	Q_CHECK_PTR(ViewThread);
+
 	QString Str = QString::fromUtf16((const ushort*)NewURL);
-	View->load(QUrl(Str));
+	ViewThread->openURL(Str);
 }
 
 void VaQuoleUI::OpenBenchmark()
 {
-	OpenURL(L"http://www.smashcat.org/av/canvas_test/");
+	OpenURL(L"http://google.com");
+	//OpenURL(L"http://www.smashcat.org/av/canvas_test/");
 }
 
-const uchar * VaQuoleUI::GrabViewC()
+const uchar * VaQuoleUI::GrabView()
 {
-	return View->ImageCache.constBits();
-}
+	Q_CHECK_PTR(ViewThread);
 
-uchar * VaQuoleUI::GrabView()
-{
-	return View->ImageCache.bits();
-}
-
-void VaQuoleUI::ClearView()
-{
-	if(CachedImg)
-	{
-		delete CachedImg;
-		CachedImg = 0;
-	}
+	return ViewThread->grabView();
 }
 
 void VaQuoleUI::Resize(int w, int h)
 {
-	View->resize(w,h);
+	Q_CHECK_PTR(ViewThread);
+
+	ViewThread->resize(w,h);
 }
 
 } // namespace VaQuole

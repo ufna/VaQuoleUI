@@ -2,10 +2,8 @@
 
 #include "VaQuoleWebView.h"
 
-#include <QDebug>
 #include <QWebFrame>
 #include <QPaintEvent>
-#include <QTimer>
 
 VaQuoleWebView::VaQuoleWebView(QWidget *parent) :
 	QWebView(parent)
@@ -51,11 +49,4 @@ void VaQuoleWebView::paintEvent(QPaintEvent *ev)
 
 	frame->render(&p, ev->region());
 	p.end();
-
-	p.begin(this);
-	p.setRenderHints(renderHints());
-	p.drawImage(0,0,ImageCache);
-	p.end();
-
-	ev->setAccepted(true);
 }

@@ -74,7 +74,7 @@ private:
 typedef TSharedPtr<FVaQuoleTextureData, ESPMode::ThreadSafe> FVaQuoleTextureDataPtr;
 typedef TSharedRef<FVaQuoleTextureData, ESPMode::ThreadSafe> FVaQuoleTextureDataRef;
 
-typedef TSharedPtr<class VaQuole::VaQuoleWebView, ESPMode::ThreadSafe> FVaQuoleWebViewPtr;
+typedef TSharedPtr<class VaQuole::VaQuoleUI, ESPMode::ThreadSafe> FVaQuoleWebViewPtr;
 
 /**
  * Class that handles view of one web page

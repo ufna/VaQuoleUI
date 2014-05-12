@@ -3,18 +3,9 @@
 #ifndef VAQUOLEUILIB_H
 #define VAQUOLEUILIB_H
 
-/** Some defines missed in QtCreator */
-typedef unsigned char uchar;
+#include "VaQuolePublicPCH.h"
 
-#ifdef UNICODE
-typedef wchar_t TCHAR;
-#else
-typedef char TCHAR;
-#endif
-
-/** Forward declatation of Qt class members */
-class QImage;
-class VaQuoleWebView;
+class VaQuoleAppThread;
 
 namespace VaQuole
 {
@@ -54,18 +45,14 @@ public:
 	void OpenBenchmark();
 
 	/** Get reference to grabbed screen texture */
-	const uchar * GrabViewC();
-	uchar * GrabView();
-
-	/** Clear grabbed view memory */
-	void ClearView();
+	const uchar * GrabView();
 
 	/** Set desired few size */
 	void Resize(int w, int h);
 
 private:
-	VaQuoleWebView *View;
-	QImage *CachedImg;
+	/** Thread that operates web view */
+	VaQuoleAppThread *ViewThread;
 
 };
 
