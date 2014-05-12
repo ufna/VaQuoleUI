@@ -13,8 +13,8 @@ typedef char TCHAR;
 #endif
 
 /** Forward declatation of Qt class members */
-class QWebView;
 class QImage;
+class VaQuoleWebView;
 
 namespace VaQuole
 {
@@ -38,17 +38,20 @@ extern "C"
 /**
  * Class that handles view of one web page
  */
-class VaQuoleWebView
+class VaQuoleUI
 {
 
 public:
-	VaQuoleWebView();
+	VaQuoleUI();
 
 	/** Destroy web view and clear memory */
 	void Destroy();
 
 	/** Open URL in the View */
 	void OpenURL(const TCHAR *NewURL);
+
+	/** Load page with HTML5 benchmark */
+	void OpenBenchmark();
 
 	/** Get reference to grabbed screen texture */
 	const uchar * GrabViewC();
@@ -61,7 +64,7 @@ public:
 	void Resize(int w, int h);
 
 private:
-	QWebView *View;
+	VaQuoleWebView *View;
 	QImage *CachedImg;
 
 };

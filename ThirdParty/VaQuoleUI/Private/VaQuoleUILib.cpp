@@ -1,6 +1,7 @@
 // Copyright 2014 Vladimir Alyamkin. All Rights Reserved.
 
 #include "VaQuoleUILib.h"
+#include "VaQuoleWebView.h"
 
 #include <QApplication>
 #include <QNetworkProxyFactory>
@@ -65,16 +66,16 @@ void Cleanup()
 //////////////////////////////////////////////////////////////////////////
 // WebView class
 
-VaQuoleWebView::VaQuoleWebView()
+VaQuoleUI::VaQuoleUI()
 {
 	CachedImg = 0;
 
-	View = new QWebView();
+	View = new VaQuoleWebView();
 	View->resize(256,256);
-	//View->show();
+	View->show();
 }
 
-void VaQuoleWebView::Destroy()
+void VaQuoleUI::Destroy()
 {
 	if(View)
 	{
@@ -82,43 +83,28 @@ void VaQuoleWebView::Destroy()
 	}
 }
 
-void VaQuoleWebView::OpenURL(const TCHAR* NewURL)
+void VaQuoleUI::OpenURL(const TCHAR* NewURL)
 {
 	QString Str = QString::fromUtf16((const ushort*)NewURL);
 	View->load(QUrl(Str));
 }
 
-const uchar * VaQuoleWebView::GrabViewC()
+void VaQuoleUI::OpenBenchmark()
 {
-	const QWidget::RenderFlags renderFlags = QWidget::DrawChildren;
-
-	CachedImg = new QImage(View->width(),View->height(),QImage::Format_ARGB32);
-	CachedImg->fill(QColor(0,0,0,0));
-
-	QPainter p;
-	p.begin(CachedImg);
-	View->render(&p, QPoint(0,0),QRegion(CachedImg->rect()), renderFlags);
-	p.end();
-
-	return CachedImg->constBits();
+	OpenURL(L"http://www.smashcat.org/av/canvas_test/");
 }
 
-uchar * VaQuoleWebView::GrabView()
+const uchar * VaQuoleUI::GrabViewC()
 {
-	const QWidget::RenderFlags renderFlags = QWidget::DrawChildren;
-
-	CachedImg = new QImage(View->width(),View->height(),QImage::Format_ARGB32);
-	CachedImg->fill(QColor(0,0,0,0));
-
-	QPainter p;
-	p.begin(CachedImg);
-	View->render(&p, QPoint(0,0),QRegion(CachedImg->rect()), renderFlags);
-	p.end();
-
-	return CachedImg->bits();
+	return View->ImageCache.constBits();
 }
 
-void VaQuoleWebView::ClearView()
+uchar * VaQuoleUI::GrabView()
+{
+	return View->ImageCache.bits();
+}
+
+void VaQuoleUI::ClearView()
 {
 	if(CachedImg)
 	{
@@ -127,7 +113,7 @@ void VaQuoleWebView::ClearView()
 	}
 }
 
-void VaQuoleWebView::Resize(int w, int h)
+void VaQuoleUI::Resize(int w, int h)
 {
 	View->resize(w,h);
 }

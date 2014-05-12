@@ -10,6 +10,8 @@ TARGET = VaQuoleUILib
 TEMPLATE = lib
 CONFIG += staticlib
 
+DEFINES += _UNICODE
+
 contains(CONFIG,Win64){
     message("Building 64bit version")
     DESTDIR = ../VaQuoleUI/Lib/Win64
@@ -21,9 +23,11 @@ contains(CONFIG,Win64){
 INCLUDEPATH += ./Include \
     ./Private
 
-SOURCES += Private/VaQuoleUILib.cpp
+SOURCES += Private/VaQuoleUILib.cpp \
+    Private/VaQuoleWebView.cpp
 
-HEADERS += Include/VaQuoleUILib.h
+HEADERS += Include/VaQuoleUILib.h \
+    Private/VaQuoleWebView.h
 
 unix {
     target.path = /usr/lib
