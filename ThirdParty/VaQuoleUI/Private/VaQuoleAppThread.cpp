@@ -100,7 +100,14 @@ const uchar * VaQuoleAppThread::grabView()
 {
 	Q_CHECK_PTR(View);
 
-	return View->ImageCache.bits();
+	return View->getImageData();
+}
+
+void VaQuoleAppThread::setTransparent(bool transparent)
+{
+	Q_CHECK_PTR(View);
+
+	View->setTransparent(transparent);
 }
 
 void VaQuoleAppThread::resize(int w, int h)

@@ -49,9 +49,6 @@ void Update()
 
 void Cleanup()
 {
-	// First process unfinished events if we have them
-	Update();
-
 	if (QApplication::instance() != nullptr)
 	{
 		QApplication::instance()->quit();
@@ -95,6 +92,13 @@ const uchar * VaQuoleUI::GrabView()
 	Q_CHECK_PTR(ViewThread);
 
 	return ViewThread->grabView();
+}
+
+void VaQuoleUI::SetTransparent(bool transparent)
+{
+	Q_CHECK_PTR(ViewThread);
+
+	ViewThread->setTransparent(transparent);
 }
 
 void VaQuoleUI::Resize(int w, int h)

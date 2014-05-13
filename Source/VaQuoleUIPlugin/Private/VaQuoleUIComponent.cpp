@@ -10,6 +10,15 @@ UVaQuoleUIComponent::UVaQuoleUIComponent(const class FPostConstructInitializePro
 	PrimaryComponentTick.bCanEverTick = true;
 	PrimaryComponentTick.TickGroup = TG_PrePhysics;
 
+	bool bResizeRequested = false;
+	float LastResizeRequestTime = 0.0f;
+
+	bHUD = false;
+	bTransparent = false;
+
+	Width = 256;
+	Height = 256;
+
 	DefaultURL = "http://alyamkin.com";
 }
 
@@ -26,8 +35,28 @@ void UVaQuoleUIComponent::InitializeComponent()
 	// Create web view
 	UIWidget = MakeShareable(new VaQuole::VaQuoleUI());
 
-	// Init texture for the first time
-	Resize(512,512);
+	// Init texture for the first time 
+	SetTransparent(bTransparent);
+
+	// Load resolution settings to set right HUD texture size
+	if (bHUD)
+	{
+		auto GameUserSettings = GEngine->GetGameUserSettings();
+		if (GameUserSettings)
+		{
+			FIntPoint CurrentResolution = GameUserSettings->GetScreenResolution();
+
+			Width = CurrentResolution.X;
+			Height = CurrentResolution.Y;
+		}
+		else
+		{
+			UE_LOG(LogVaQuole, Warning, TEXT("Can't get user settings to adjust HUD texture size"));
+		}
+	}
+	
+	// Resize texture to correspond desired size
+	Resize(Width, Height);
 
 	// Open default URL
 	OpenURL(DefaultURL);
@@ -48,7 +77,6 @@ void UVaQuoleUIComponent::BeginDestroy()
 		UE_LOG(LogVaQuole, Log, TEXT("Last VaQuole component being deleted, stop qApp now"));
 
 		delete RefCount;
-		VaQuole::Cleanup();
 	}
 
 	DestroyUITexture();
@@ -81,18 +109,6 @@ void UVaQuoleUIComponent::DestroyUITexture()
 	}
 }
 
-void UVaQuoleUIComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// Redraw UI texture with current widget state
-	Redraw();
-}
-
-
-//////////////////////////////////////////////////////////////////////////
-// View control
-
 void UVaQuoleUIComponent::Resize(int32 NewWidth, int32 NewHeight)
 {
 	Width = NewWidth;
@@ -104,6 +120,37 @@ void UVaQuoleUIComponent::Resize(int32 NewWidth, int32 NewHeight)
 	}
 
 	ResetUITexture();
+}
+
+void UVaQuoleUIComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	auto GameUserSettings = GEngine->GetGameUserSettings();
+	FIntPoint CurrentResolution = GameUserSettings->GetScreenResolution();
+
+	// Check that hud has right size
+	if (Width != CurrentResolution.X || Height != CurrentResolution.Y)
+	{
+		Resize(CurrentResolution.X, CurrentResolution.Y);
+	}
+	
+	// Redraw UI texture with current widget state
+	Redraw();
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+// View control
+
+void UVaQuoleUIComponent::SetTransparent(bool Transparent)
+{
+	bTransparent = Transparent;
+
+	if (UIWidget.IsValid())
+	{
+		UIWidget->SetTransparent(bTransparent);
+	}
 }
 
 void UVaQuoleUIComponent::Redraw() const

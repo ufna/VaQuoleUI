@@ -47,6 +47,9 @@ public:
 	/** Get reference to grabbed screen texture */
 	const uchar * GrabView();
 
+	/** Change background transparency */
+	void SetTransparent(bool transparent = true);
+
 	/** Set desired few size */
 	void Resize(int w, int h);
 

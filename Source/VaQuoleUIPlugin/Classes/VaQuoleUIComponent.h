@@ -87,18 +87,33 @@ class UVaQuoleUIComponent : public UActorComponent
 	//////////////////////////////////////////////////////////////////////////
 	// View configuration
 
+	/** Indicates whether the View used as HUD or classic render target */
+	UPROPERTY(EditAnywhere, Category = "View")
+	bool bHUD;
+
+	/** Indicates whether the View is transparent or composed on white */
+	UPROPERTY(EditAnywhere, Category = "View")
+	bool bTransparent;
+
+	/** Width of target texture */
 	UPROPERTY(EditAnywhere, Category = "View", meta = (ClampMin = "0", UIMin = "0", UIMax = "4096"))
 	int32 Width;
 
+	/** Height of target texture */
 	UPROPERTY(EditAnywhere, Category = "View", meta = (ClampMin = "0", UIMin = "0", UIMax = "4096"))
 	int32 Height;
 
+	/** URL that will be opened on startup */
 	UPROPERTY(EditAnywhere, Category = "View")
 	FString DefaultURL;
 
 
 	//////////////////////////////////////////////////////////////////////////
 	// View control
+
+	/** Changes background transparency */
+	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
+	void SetTransparent(bool Transparent);
 
 	/** Resizes the View */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")

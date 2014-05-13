@@ -25,6 +25,8 @@ public:
 	void closeView();
 
 	void openURL(const QString& NewURL);
+
+	void setTransparent(bool transparent = true);
 	void resize(int w, int h);
 
 	const uchar * grabView();

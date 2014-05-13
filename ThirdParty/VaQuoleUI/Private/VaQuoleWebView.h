@@ -13,17 +13,27 @@ class VaQuoleWebView : public QWebView
 
 public:
 	explicit VaQuoleWebView(QWidget *parent = 0);
-	~VaQuoleWebView();
 
+	/** Changes background transparency */
+	void setTransparent(bool transparent = true);
+
+	/** Resizes the View */
 	void resize(int w, int h);
 
-	QImage ImageCache;
+	/** Get refence to image cache data */
+	const uchar * getImageData();
 
 private:
-	void updateImageCache();
+	/** Recreates image cache buffer */
+	void updateImageCache(QSize ImageSize = QSize());
+
+	/** Rendered widget buffer */
+	QImage ImageCache;
+
+	/** Indicates whether the View is transparent or composed on white */
+	bool bTransparent;
 
 protected:
-	void resizeEvent(QResizeEvent*);
 	void paintEvent(QPaintEvent*);
 
 };
