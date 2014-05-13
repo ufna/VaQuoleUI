@@ -20,6 +20,8 @@ UVaQuoleUIComponent::UVaQuoleUIComponent(const class FPostConstructInitializePro
 	Height = 256;
 
 	DefaultURL = "http://alyamkin.com";
+
+	TextureParameterName = TEXT("VaQuoleUITexture");
 }
 
 void UVaQuoleUIComponent::InitializeComponent()
@@ -91,6 +93,8 @@ void UVaQuoleUIComponent::ResetUITexture()
 	Texture = UTexture2D::CreateTransient(Width,Height);
 	Texture->AddToRoot();
 	Texture->UpdateResource();
+
+	ResetMaterialInstance();
 }
 
 void UVaQuoleUIComponent::DestroyUITexture()
@@ -111,6 +115,32 @@ void UVaQuoleUIComponent::DestroyUITexture()
 	}
 }
 
+void UVaQuoleUIComponent::ResetMaterialInstance()
+{
+	if (bHUD || !Texture || !BaseMaterial || TextureParameterName.IsNone())
+	{
+		return;
+	}
+
+	// Create material instance
+	MaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterial, NULL);
+	if (!MaterialInstance)
+	{
+		UE_LOG(LogVaQuole, Warning, TEXT("UI Material instance can't be created"));
+		return;
+	}
+
+	// Check we have desired parameter
+	UTexture* Tex = nullptr;
+	if (!MaterialInstance->GetTextureParameterValue(TextureParameterName, Tex))
+	{
+		UE_LOG(LogVaQuole, Warning, TEXT("UI Material instance Texture parameter not found"));
+		return;
+	}
+
+	MaterialInstance->SetTextureParameterValue(TextureParameterName, GetTexture());
+}
+
 void UVaQuoleUIComponent::Resize(int32 NewWidth, int32 NewHeight)
 {
 	Width = NewWidth;
@@ -128,13 +158,23 @@ void UVaQuoleUIComponent::TickComponent(float DeltaTime, enum ELevelTick TickTyp
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	auto GameUserSettings = GEngine->GetGameUserSettings();
-	FIntPoint CurrentResolution = GameUserSettings->GetScreenResolution();
-
-	// Check that hud has right size
-	if (Width != CurrentResolution.X || Height != CurrentResolution.Y)
+	// HUD should be scaled to fit screen
+	if (bHUD)
 	{
-		Resize(CurrentResolution.X, CurrentResolution.Y);
+		auto GameUserSettings = GEngine->GetGameUserSettings();
+		if (GameUserSettings)
+		{
+			FIntPoint CurrentResolution = GameUserSettings->GetScreenResolution();
+
+			if (Width != CurrentResolution.X || Height != CurrentResolution.Y)
+			{
+				Resize(CurrentResolution.X, CurrentResolution.Y);
+			}
+		}
+		else
+		{
+			UE_LOG(LogVaQuole, Warning, TEXT("Can't get user settings to adjust HUD texture size"));
+		}
 	}
 	
 	// Redraw UI texture with current widget state
@@ -222,4 +262,16 @@ UTexture2D* UVaQuoleUIComponent::GetTexture() const
 	check(Texture);
 
 	return Texture;
+}
+
+UMaterialInstanceDynamic* UVaQuoleUIComponent::GetMaterialInstance() const
+{
+	if (bHUD)
+	{
+		return nullptr;
+	}
+
+	check(MaterialInstance);
+
+	return MaterialInstance;
 }

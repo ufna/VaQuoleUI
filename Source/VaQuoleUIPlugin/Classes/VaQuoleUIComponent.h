@@ -107,6 +107,14 @@ class UVaQuoleUIComponent : public UActorComponent
 	UPROPERTY(EditAnywhere, Category = "View")
 	FString DefaultURL;
 
+	/** Material that will be instanced to load UI texture into it */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Material)
+	UMaterialInterface* BaseMaterial;
+
+	/** Name of parameter to load UI texture into material */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Material)
+	FName TextureParameterName;
+
 
 	//////////////////////////////////////////////////////////////////////////
 	// View control
@@ -138,6 +146,10 @@ class UVaQuoleUIComponent : public UActorComponent
 	/** Texture that stores current widget UI */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
 	UTexture2D* GetTexture() const;
+
+	/** Material instance that contains texture inside it */
+	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
+	UMaterialInstanceDynamic* GetMaterialInstance() const;
 	
 
 
@@ -155,8 +167,13 @@ protected:
 	void ResetUITexture();
 	void DestroyUITexture();
 
+	void ResetMaterialInstance();
+
 	/** Texture that stores current widget UI */
 	UTexture2D* Texture;
+
+	/** Material instance that contains texture inside it */
+	UMaterialInstanceDynamic* MaterialInstance;
 
 	/** Web view loaded from library */
 	FVaQuoleWebViewPtr UIWidget;
