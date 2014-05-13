@@ -101,7 +101,9 @@ void UVaQuoleUIComponent::DestroyUITexture()
 
 		if (Texture->Resource)
 		{
-			Texture->ReleaseResource();
+			BeginReleaseResource(Texture->Resource);
+
+			FlushRenderingCommands();
 		}
 
 		Texture->MarkPendingKill();
@@ -155,12 +157,6 @@ void UVaQuoleUIComponent::SetTransparent(bool Transparent)
 
 void UVaQuoleUIComponent::Redraw() const
 {
-	// Minor timeout
-	if (GetWorld()->GetTimeSeconds() < 1)
-	{
-		return;
-	}
-
 	if (Texture && Texture->Resource && UIWidget.IsValid())
 	{
 		// Check that texture is prepared
