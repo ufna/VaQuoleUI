@@ -12,6 +12,7 @@ VaQuoleAppThread::VaQuoleAppThread(QObject *parent) :
 	QThread(parent)
 {
 	View = 0;
+	pApp = 0;
 
 	// Check that we haven't qApp already
 	if (QApplication::instance() == nullptr)
@@ -49,8 +50,6 @@ void VaQuoleAppThread::createView(int w, int h)
 	View->moveToThread(this);
 	View->resize(w,h);
 	View->show();
-
-	start(NormalPriority);
 }
 
 void VaQuoleAppThread::closeView()

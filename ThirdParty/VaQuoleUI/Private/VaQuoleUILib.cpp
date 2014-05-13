@@ -21,27 +21,13 @@ static QApplication* pApp = NULL;
 
 void Init()
 {
-	// Check that we haven't qApp already
-	if (QApplication::instance() == nullptr)
-	{
-		// Create qApp
-		int argc = 1;
-		char arg1[] = "VaQuoleUILib";
-		char* argv[1] = {arg1};
-		pApp = new QApplication(argc, argv);
-		pApp->setQuitOnLastWindowClosed(false);
-		pApp->processEvents();
-
-		// Set network config
-		QNetworkProxyFactory::setUseSystemConfiguration (true);
-		QWebSettings::globalSettings()->setAttribute(QWebSettings::PluginsEnabled, true);
-		QWebSettings::globalSettings()->setAttribute(QWebSettings::AutoLoadImages, true);
-	}
+	// @TODO I pretty sure I can delete it
+	return;
 }
 
 void Update()
 {
-	if(QApplication::instance())
+	if (QApplication::instance() != nullptr)
 	{
 		QApplication::instance()->processEvents();
 	}
@@ -63,6 +49,7 @@ VaQuoleUI::VaQuoleUI()
 {
 	ViewThread = new VaQuoleAppThread();
 	ViewThread->createView();
+	ViewThread->start();
 }
 
 void VaQuoleUI::Destroy()
