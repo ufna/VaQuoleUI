@@ -105,7 +105,7 @@ void VaQuoleUI::MouseMove(int x, int y)
 	ViewThread->mouseMove(x,y);
 }
 
-void VaQuoleUI::MouseClick(int x, int y, VaQuole::MouseButton button,
+void VaQuoleUI::MouseClick(int x, int y, VaQuole::EMouseButton::Type button,
 						   bool bPressed, unsigned int modifiers)
 {
 	Q_CHECK_PTR(ViewThread);

@@ -10,7 +10,7 @@ TARGET = VaQuoleUILib
 TEMPLATE = lib
 CONFIG += staticlib
 
-DEFINES += _UNICODE
+DEFINES += _UNICODE NOT_UE
 
 contains(CONFIG,Win64){
     message("Building 64bit version")

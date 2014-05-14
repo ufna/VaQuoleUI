@@ -127,7 +127,7 @@ void VaQuoleAppThread::mouseMove(int x, int y)
 }
 
 void VaQuoleAppThread::mouseClick(int x, int y,
-								  VaQuole::MouseButton button,
+								  VaQuole::EMouseButton::Type button,
 								  bool bPressed,
 								  unsigned int modifiers)
 {

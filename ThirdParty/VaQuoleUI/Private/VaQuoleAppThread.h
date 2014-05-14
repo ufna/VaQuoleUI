@@ -36,8 +36,9 @@ public:
 	// Player input
 
 	void mouseMove(int x, int y);
-	void mouseClick(int x, int y, VaQuole::MouseButton button,
-					bool bPressed = true, unsigned int modifiers = VaQuole::NoModifier);
+	void mouseClick(int x, int y, VaQuole::EMouseButton::Type button,
+					bool bPressed = true,
+					unsigned int modifiers = VaQuole::EKeyboardModifier::NoModifier);
 
 
 protected:

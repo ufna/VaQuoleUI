@@ -57,8 +57,8 @@ public:
 	// Player input
 
 	void MouseMove(int x, int y);
-	void MouseClick(int x, int y, VaQuole::MouseButton button,
-					bool bPressed = true, unsigned int modifiers = VaQuole::NoModifier);
+	void MouseClick(int x, int y, VaQuole::EMouseButton::Type button,
+					bool bPressed = true, unsigned int modifiers = VaQuole::EKeyboardModifier::NoModifier);
 
 private:
 	/** Thread that operates web view */
