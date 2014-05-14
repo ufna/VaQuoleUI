@@ -5,7 +5,7 @@
 AVaQuoleUIPlayerController::AVaQuoleUIPlayerController(const class FPostConstructInitializeProperties& PCIP)
 	: Super(PCIP)
 {
-	
+	bDebugMouseInput = false;
 }
 
 void AVaQuoleUIPlayerController::InitInputSystem()
