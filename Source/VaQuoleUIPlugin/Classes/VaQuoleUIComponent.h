@@ -131,6 +131,18 @@ class UVaQuoleUIComponent : public UActorComponent
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
 	void Redraw() const;
 
+	//////////////////////////////////////////////////////////////////////////
+	// Player input
+
+	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
+	void MouseMove(int32 X, int32 Y);
+
+	// @TODO Make enum type blueprintable
+	// UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
+	void MouseClick(int32 X, int32 Y, VaQuole::EMouseButton::Type Button,
+		bool bPressed = true, unsigned int Modifiers = VaQuole::EKeyboardModifier::NoModifier);
+
+
 
 	//////////////////////////////////////////////////////////////////////////
 	// Content control
@@ -142,6 +154,14 @@ class UVaQuoleUIComponent : public UActorComponent
 
 	//////////////////////////////////////////////////////////////////////////
 	// Content access
+
+	/** Texture that stores current widget UI */
+	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
+	int32 GetWidth() const;
+
+	/** Texture that stores current widget UI */
+	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
+	int32 GetHeight() const;
 
 	/** Texture that stores current widget UI */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")

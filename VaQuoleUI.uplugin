@@ -2,12 +2,12 @@
     "FileVersion" : 3,
 	
 	"FriendlyName" : "VaQuoleUI",
-	"Version" : 3,
-	"VersionName" : "0.2-a3",
+	"Version" : 4,
+	"VersionName" : "0.2-a4",
 	"CreatedBy" : "Vladimir Alyamkin",
 	"CreatedByURL" : "http://ufna.ru",
 	"EngineVersion" : 1579795,
-	"Description" : "UI framework with Qt-written heart",
+	"Description" : "UI framework with Qt heart",
 	"Category" : "UI",
 	
     "Modules" :

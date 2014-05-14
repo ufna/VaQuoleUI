@@ -243,6 +243,30 @@ void UVaQuoleUIComponent::Redraw() const
 
 
 //////////////////////////////////////////////////////////////////////////
+// Player input
+
+void UVaQuoleUIComponent::MouseMove(int32 X, int32 Y)
+{
+	if (!UIWidget.IsValid())
+	{
+		return;
+	}
+
+	UIWidget->MouseMove(X, Y);
+}
+
+void UVaQuoleUIComponent::MouseClick(int32 X, int32 Y, VaQuole::EMouseButton::Type Button, bool bPressed, unsigned int Modifiers)
+{
+	if (!UIWidget.IsValid())
+	{
+		return;
+	}
+
+	UIWidget->MouseClick(X, Y, Button, bPressed, Modifiers);
+}
+
+
+//////////////////////////////////////////////////////////////////////////
 // Content control
 
 void UVaQuoleUIComponent::OpenURL(const FString& URL)
@@ -256,6 +280,16 @@ void UVaQuoleUIComponent::OpenURL(const FString& URL)
 
 //////////////////////////////////////////////////////////////////////////
 // Content access
+
+int32 UVaQuoleUIComponent::GetWidth() const
+{
+	return Width;
+}
+
+int32 UVaQuoleUIComponent::GetHeight() const
+{
+	return Height;
+}
 
 UTexture2D* UVaQuoleUIComponent::GetTexture() const
 {

@@ -14,6 +14,9 @@ DECLARE_LOG_CATEGORY_EXTERN(LogVaQuole, Log, All);
 
 #include "IVaQuoleUIPlugin.h"
 
+#include "VaQuolePublicPCH.h"
 #include "VaQuoleUILib.h"
+
 #include "VaQuoleUIComponent.h"
 #include "VaQuoleHUD.h"
+#include "VaQuoleUIPlayerController.h"
