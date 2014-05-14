@@ -70,7 +70,7 @@ void VaQuoleUI::OpenURL(const TCHAR* NewURL)
 
 void VaQuoleUI::OpenBenchmark()
 {
-	OpenURL(L"http://google.com");
+	OpenURL(L"http://html5test.com");
 	//OpenURL(L"http://www.smashcat.org/av/canvas_test/");
 }
 
@@ -93,6 +93,24 @@ void VaQuoleUI::Resize(int w, int h)
 	Q_CHECK_PTR(ViewThread);
 
 	ViewThread->resize(w,h);
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Player input
+
+void VaQuoleUI::MouseMove(int x, int y)
+{
+	Q_CHECK_PTR(ViewThread);
+
+	ViewThread->mouseMove(x,y);
+}
+
+void VaQuoleUI::MouseClick(int x, int y, VaQuole::MouseButton button,
+						   bool bPressed, unsigned int modifiers)
+{
+	Q_CHECK_PTR(ViewThread);
+
+	ViewThread->mouseClick(x, y, button, bPressed, modifiers);
 }
 
 } // namespace VaQuole

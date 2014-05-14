@@ -53,6 +53,13 @@ public:
 	/** Set desired few size */
 	void Resize(int w, int h);
 
+	//////////////////////////////////////////////////////////////////////////
+	// Player input
+
+	void MouseMove(int x, int y);
+	void MouseClick(int x, int y, VaQuole::MouseButton button,
+					bool bPressed = true, unsigned int modifiers = VaQuole::NoModifier);
+
 private:
 	/** Thread that operates web view */
 	VaQuoleAppThread *ViewThread;

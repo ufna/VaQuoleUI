@@ -31,6 +31,15 @@ public:
 
 	const uchar * grabView();
 
+
+	//////////////////////////////////////////////////////////////////////////
+	// Player input
+
+	void mouseMove(int x, int y);
+	void mouseClick(int x, int y, VaQuole::MouseButton button,
+					bool bPressed = true, unsigned int modifiers = VaQuole::NoModifier);
+
+
 protected:
 	void run();
 

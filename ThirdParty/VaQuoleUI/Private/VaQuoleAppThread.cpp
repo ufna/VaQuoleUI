@@ -2,6 +2,7 @@
 
 #include "VaQuoleAppThread.h"
 #include "VaQuoleWebView.h"
+#include "VaQuoleInputHelpers.h"
 
 #include <QApplication>
 #include <QNetworkProxyFactory>
@@ -114,4 +115,24 @@ void VaQuoleAppThread::resize(int w, int h)
 	Q_CHECK_PTR(View);
 
 	View->resize(w,h);
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+// Player input
+
+void VaQuoleAppThread::mouseMove(int x, int y)
+{
+	VaQuole::simulateMouseMove(View, QPoint(x,y));
+}
+
+void VaQuoleAppThread::mouseClick(int x, int y,
+								  VaQuole::MouseButton button,
+								  bool bPressed,
+								  unsigned int modifiers)
+{
+	VaQuole::simulateMouseClick(View, QPoint(x,y),
+								(Qt::MouseButton) button,
+								(Qt::KeyboardModifiers) modifiers,
+								bPressed);
 }
