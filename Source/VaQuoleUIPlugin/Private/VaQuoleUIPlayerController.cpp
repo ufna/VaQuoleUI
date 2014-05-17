@@ -83,6 +83,32 @@ void AVaQuoleUIPlayerController::MouseEvent(EMouseEvent::Type MouseEvent, VaQuol
 			break;
 		}
 	}
+
+	AVaQuoleHUD* MyHUD = GetVaQuoleHUD();
+	if (MyHUD && MyHUD->VaQuoleUI.IsValid())
+	{
+		FVector2D MousePosition = FVector2D::ZeroVector;
+		if (GetMouseScreenPosition(MousePosition))
+		{
+			switch (MouseEvent)
+			{
+			case EMouseEvent::MouseMove:
+				MyHUD->VaQuoleUI->MouseMove(MousePosition.X, MousePosition.Y);
+				break;
+
+			case EMouseEvent::MousePressed:
+				MyHUD->VaQuoleUI->MouseClick(MousePosition.X, MousePosition.Y, Button, true);
+				break;
+
+			case EMouseEvent::MouseReleased:
+				MyHUD->VaQuoleUI->MouseClick(MousePosition.X, MousePosition.Y, Button, false);
+				break;
+
+			default:
+				break;
+			}
+		}
+	}
 }
 
 
