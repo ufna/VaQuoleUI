@@ -49,6 +49,13 @@ class AVaQuoleUIPlayerController : public APlayerController
 	/** Left mouse button released */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
 	void MouseUp();
+
+	//////////////////////////////////////////////////////////////////////////
+	// Web functions
+
+	/** JS code will be passed directly to web view */
+	UFUNCTION(exec)
+	void EvalJS(FString ScriptSource);
 	
 
 protected:

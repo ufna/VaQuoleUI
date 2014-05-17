@@ -156,6 +156,9 @@ class UVaQuoleUIComponent : public UActorComponent
 	//////////////////////////////////////////////////////////////////////////
 	// Content access
 
+	/** UI widget direct access for test purposes */
+	FVaQuoleWebViewPtr GetUIWidget() { return UIWidget; }
+
 	/** Texture that stores current widget UI */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
 	int32 GetWidth() const;

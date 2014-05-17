@@ -25,6 +25,7 @@ public:
 	void closeView();
 
 	void openURL(const QString& NewURL);
+	void evaluateJavaScript(const QString & scriptSource);
 
 	void setTransparent(bool transparent = true);
 	void resize(int w, int h);

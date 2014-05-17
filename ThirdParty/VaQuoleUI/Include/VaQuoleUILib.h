@@ -44,6 +44,9 @@ public:
 	/** Load page with HTML5 benchmark */
 	void OpenBenchmark();
 
+	/** Evaluate JS script on current page */
+	void EvaluateJavaScript(const TCHAR *ScriptSource);
+
 	/** Get reference to grabbed screen texture */
 	const uchar * GrabView();
 

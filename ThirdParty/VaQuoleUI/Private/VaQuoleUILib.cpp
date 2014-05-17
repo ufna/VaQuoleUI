@@ -70,8 +70,15 @@ void VaQuoleUI::OpenURL(const TCHAR* NewURL)
 
 void VaQuoleUI::OpenBenchmark()
 {
-	OpenURL(L"http://html5test.com");
-	//OpenURL(L"http://www.smashcat.org/av/canvas_test/");
+	OpenURL(L"http://www.smashcat.org/av/canvas_test/");
+}
+
+void VaQuoleUI::EvaluateJavaScript(const TCHAR *ScriptSource)
+{
+	Q_CHECK_PTR(ViewThread);
+
+	QString Str = QString::fromUtf16((const ushort*)ScriptSource);
+	ViewThread->evaluateJavaScript(Str);
 }
 
 const uchar * VaQuoleUI::GrabView()

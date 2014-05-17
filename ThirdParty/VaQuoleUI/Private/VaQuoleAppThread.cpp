@@ -8,6 +8,7 @@
 #include <QNetworkProxyFactory>
 #include <QWebSettings>
 #include <QWebView>
+#include <QWebFrame>
 
 VaQuoleAppThread::VaQuoleAppThread(QObject *parent) :
 	QThread(parent)
@@ -94,6 +95,13 @@ void VaQuoleAppThread::openURL(const QString& NewURL)
 	Q_CHECK_PTR(View);
 
 	View->load(QUrl(NewURL));
+}
+
+void VaQuoleAppThread::evaluateJavaScript(const QString & scriptSource)
+{
+	Q_CHECK_PTR(View);
+
+	View->page()->mainFrame()->evaluateJavaScript(scriptSource);
 }
 
 const uchar * VaQuoleAppThread::grabView()

@@ -2,12 +2,12 @@
     "FileVersion" : 3,
 	
 	"FriendlyName" : "VaQuoleUI",
-	"Version" : 4,
-	"VersionName" : "0.2-a4",
+	"Version" : 6,
+	"VersionName" : "0.2-a6",
 	"CreatedBy" : "Vladimir Alyamkin",
-	"CreatedByURL" : "http://ufna.ru",
+	"CreatedByURL" : "http://alyamkin.com",
 	"EngineVersion" : 1579795,
-	"Description" : "UI framework with Qt heart",
+	"Description" : "UI framework plugin for Unreal Engine 4 proudly based on Qt framework",
 	"Category" : "UI",
 	
     "Modules" :

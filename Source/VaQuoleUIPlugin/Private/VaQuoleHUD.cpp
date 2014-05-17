@@ -11,9 +11,12 @@ AVaQuoleHUD::AVaQuoleHUD(const class FPostConstructInitializeProperties& PCIP)
 void AVaQuoleHUD::DrawHUD()
 {
 	Super::DrawHUD();
-	
-	// Draw hud web view texture
-	FCanvasTileItem TileItem(FVector2D(0, 0), VaQuoleUI->GetTexture()->Resource, FVector2D(Canvas->ClipX, Canvas->ClipY), FLinearColor::White);
-	TileItem.BlendMode = SE_BLEND_Translucent;
-	Canvas->DrawItem(TileItem);
+
+	if (bShowHUD)
+	{
+		// Draw hud web view texture
+		FCanvasTileItem TileItem(FVector2D(0, 0), VaQuoleUI->GetTexture()->Resource, FVector2D(Canvas->ClipX, Canvas->ClipY), FLinearColor::White);
+		TileItem.BlendMode = SE_BLEND_Translucent;
+		Canvas->DrawItem(TileItem);
+	}
 }
