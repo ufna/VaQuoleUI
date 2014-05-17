@@ -10,6 +10,9 @@
 namespace VaQuole
 {
 
+//////////////////////////////////////////////////////////////////////////
+// Mouse input
+
 QMouseEvent* createMouseEvent(	const QWidget* const pWidget,
 								const QEvent::Type eventType,
 								const QPoint& widgetPos,
@@ -33,10 +36,10 @@ QMouseEvent* createMouseEvent(	const QWidget* const pWidget,
 }
 
 void simulateMouseClick(QWidget* const pWidget,
-							const QPoint& widgetPos,
-							const Qt::MouseButton button,
-							const Qt::KeyboardModifiers modifiers,
-							const bool bButtonPressed)
+						const QPoint& widgetPos,
+						const Qt::MouseButton button,
+						const Qt::KeyboardModifiers modifiers,
+						const bool bButtonPressed)
 {
 	if (pWidget == NULL || QApplication::instance() == NULL)
 	{
@@ -74,6 +77,51 @@ void simulateMouseMove(	QWidget* const pWidget, const QPoint& widgetPos)
 										Qt::NoModifier, Qt::NoButton);
 
 	QApplication::instance()->sendEvent(pWidget, pMouseEvent);
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+// Keyboard input
+
+QKeyEvent* createKeyEvent(	const QEvent::Type eventType,
+							int key,
+							const Qt::KeyboardModifiers modifiers,
+							QString & text,
+							bool autorep,
+							ushort count)
+{
+	QKeyEvent* pEvent = new QKeyEvent(	eventType,
+										key,
+										modifiers,
+										text,
+										autorep,
+										count);
+
+	return pEvent;
+}
+
+void simulateKey(	QWidget* const pWidget,
+					const unsigned int key,
+					const Qt::KeyboardModifiers modifiers,
+					const bool bKeyPressed)
+{
+	if (pWidget == NULL || QApplication::instance() == NULL)
+	{
+		return;
+	}
+
+	QKeyEvent* pKeyEvent;
+
+	if(bKeyPressed)
+	{
+		pKeyEvent = createKeyEvent(QEvent::KeyPress, key, modifiers);
+	}
+	else
+	{
+		pKeyEvent = createKeyEvent(QEvent::KeyRelease, key, modifiers);
+	}
+
+	QApplication::instance()->sendEvent(pWidget, pKeyEvent);
 }
 
 } // namespace VaQuole

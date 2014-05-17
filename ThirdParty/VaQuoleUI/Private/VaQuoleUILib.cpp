@@ -113,4 +113,13 @@ void VaQuoleUI::MouseClick(int x, int y, VaQuole::EMouseButton::Type button,
 	ViewThread->mouseClick(x, y, button, bPressed, modifiers);
 }
 
+void VaQuoleUI::InputKey(const unsigned int key,
+						 const bool bPressed,
+						 const unsigned int modifiers)
+{
+	Q_CHECK_PTR(ViewThread);
+
+	ViewThread->inputKey(key, bPressed, modifiers);
+}
+
 } // namespace VaQuole

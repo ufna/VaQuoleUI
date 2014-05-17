@@ -136,3 +136,10 @@ void VaQuoleAppThread::mouseClick(int x, int y,
 								(Qt::KeyboardModifiers) modifiers,
 								bPressed);
 }
+
+void VaQuoleAppThread::inputKey(const unsigned int key,
+								const bool bPressed,
+								const unsigned int modifiers)
+{
+	VaQuole::simulateKey(View, key, (Qt::KeyboardModifiers) modifiers, bPressed);
+}

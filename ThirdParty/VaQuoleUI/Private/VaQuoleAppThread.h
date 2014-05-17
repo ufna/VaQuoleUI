@@ -40,6 +40,10 @@ public:
 					bool bPressed = true,
 					unsigned int modifiers = VaQuole::EKeyboardModifier::NoModifier);
 
+	void inputKey(const unsigned int key,
+				  const bool bPressed = true,
+				  const unsigned int modifiers = VaQuole::EKeyboardModifier::NoModifier);
+
 
 protected:
 	void run();

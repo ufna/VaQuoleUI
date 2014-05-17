@@ -58,7 +58,12 @@ public:
 
 	void MouseMove(int x, int y);
 	void MouseClick(int x, int y, VaQuole::EMouseButton::Type button,
-					bool bPressed = true, unsigned int modifiers = VaQuole::EKeyboardModifier::NoModifier);
+					bool bPressed = true,
+					unsigned int modifiers = VaQuole::EKeyboardModifier::NoModifier);
+
+	void InputKey(	const unsigned int key,
+					const bool bPressed = true,
+					const unsigned int modifiers = VaQuole::EKeyboardModifier::NoModifier);
 
 private:
 	/** Thread that operates web view */
