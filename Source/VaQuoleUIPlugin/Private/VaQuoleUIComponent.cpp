@@ -19,7 +19,7 @@ UVaQuoleUIComponent::UVaQuoleUIComponent(const class FPostConstructInitializePro
 	Width = 256;
 	Height = 256;
 
-	DefaultURL = "http://alyamkin.com";
+	DefaultURL = "http://html5test.com";
 
 	TextureParameterName = TEXT("VaQuoleUITexture");
 }
@@ -30,6 +30,9 @@ void UVaQuoleUIComponent::InitializeComponent()
 
 	RefCount->Increment();
 	UE_LOG(LogVaQuole, Warning, TEXT("VaQuoleComponentUI # %d created"), RefCount->GetValue());
+
+	// Init key map storage
+	InitKeyMap();
 
 	// Init QApplication if we haven't one
 	VaQuole::Init();
@@ -265,6 +268,87 @@ void UVaQuoleUIComponent::MouseClick(int32 X, int32 Y, VaQuole::EMouseButton::Ty
 	UIWidget->MouseClick(X, Y, Button, bPressed, Modifiers);
 }
 
+void UVaQuoleUIComponent::InputKeyQ(FViewport* Viewport, FKey Key, EInputEvent EventType, float AmountDepressed, bool bGamepad)
+{
+	if (!UIWidget.IsValid() || !Key.IsValid())
+	{
+		return;
+	}
+
+	if (Key.IsMouseButton())
+	{
+		// @TODO Process mouse button
+	}
+	else if (Key.IsModifierKey())
+	{
+		
+	}
+	else
+	{
+		// Check modifiers
+		bool bShiftDown = Viewport->KeyState(EKeys::LeftShift) || Viewport->KeyState(EKeys::RightShift);
+		bool bCtrlDown = Viewport->KeyState(EKeys::LeftControl) || Viewport->KeyState(EKeys::RightControl);
+		bool bAltDown = Viewport->KeyState(EKeys::LeftAlt) || Viewport->KeyState(EKeys::RightAlt);
+
+		uint32 Modifiers = VaQuole::EKeyboardModifier::NoModifier;
+
+		if (bShiftDown)
+		{
+			Modifiers |= VaQuole::EKeyboardModifier::ShiftModifier;
+		}
+
+		if (bCtrlDown)
+		{
+			Modifiers |= VaQuole::EKeyboardModifier::ControlModifier;
+		}
+
+		if (bAltDown)
+		{
+			Modifiers |= VaQuole::EKeyboardModifier::AltModifier;
+		}
+
+		// Check extra key codes
+		uint32 KeyCode = 0x20;
+		if (Key == EKeys::BackSpace)
+		{
+			KeyCode = 0x01000003;
+		}
+		else
+		{
+			KeyCode = GetKeyCodeFromKey(Key);
+		}
+
+		// Send event
+		switch (EventType)
+		{
+		case IE_Pressed:
+			UIWidget->InputKey(KeyCode, true, Modifiers);
+			break;
+		case IE_Released:
+			UIWidget->InputKey(KeyCode, false, Modifiers);
+			break;
+		case IE_Repeat:
+			UIWidget->InputKey(KeyCode, true, Modifiers);
+			break;
+		case IE_DoubleClick:
+			break;
+		case IE_Axis:
+			break;
+		case IE_MAX:
+			break;
+		default:
+			break;
+		}
+	}
+}
+
+void UVaQuoleUIComponent::InitKeyMap()
+{
+	for (int i = 0; i <= MAX_int16; i++)
+	{
+		KeyMapEnumToCode.Add(FInputKeyManager::Get().GetKeyFromCodes(i, i), i);
+	}
+}
 
 //////////////////////////////////////////////////////////////////////////
 // Content control
@@ -308,4 +392,16 @@ UMaterialInstanceDynamic* UVaQuoleUIComponent::GetMaterialInstance() const
 	check(MaterialInstance);
 
 	return MaterialInstance;
+}
+
+uint16 UVaQuoleUIComponent::GetKeyCodeFromKey(FKey& Key) const
+{
+	const uint16* Value = KeyMapEnumToCode.Find(Key);
+
+	if (Value != NULL)
+	{
+		return *Value;
+	}
+	
+	return 0;
 }

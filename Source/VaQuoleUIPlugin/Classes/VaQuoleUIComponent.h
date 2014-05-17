@@ -142,7 +142,8 @@ class UVaQuoleUIComponent : public UActorComponent
 	void MouseClick(int32 X, int32 Y, VaQuole::EMouseButton::Type Button,
 		bool bPressed = true, unsigned int Modifiers = VaQuole::EKeyboardModifier::NoModifier);
 
-
+	//UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
+	void InputKeyQ(FViewport* Viewport, FKey Key, EInputEvent EventType, float AmountDepressed, bool bGamepad);
 
 	//////////////////////////////////////////////////////////////////////////
 	// Content control
@@ -170,8 +171,11 @@ class UVaQuoleUIComponent : public UActorComponent
 	/** Material instance that contains texture inside it */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
 	UMaterialInstanceDynamic* GetMaterialInstance() const;
-	
 
+	/** Key to unicode conversion */
+	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
+	uint16 GetKeyCodeFromKey(FKey& Key) const;
+	
 
 public:
 	// Begin UActorComponent Interface
@@ -201,5 +205,15 @@ protected:
 private:
 	/** Counter to control life of qApp */
 	FThreadSafeCounter* RefCount;
+
+
+	//////////////////////////////////////////////////////////////////////////
+	// Keyboard input helpers
+
+	/** Map unicode values for keys (because some UE4 functions are not implemented yet) */
+	TMap<FKey, uint16> KeyMapEnumToCode;
+
+	/** Initializes key map */
+	void InitKeyMap();
 
 };

@@ -31,6 +31,9 @@ class AVaQuoleUIPlayerController : public APlayerController
 	virtual void PlayerTick(float DeltaTime) OVERRIDE;
 	// End APlayerController Interface
 
+	/** Custom input to handle keyboard events with VaQuoleUI */
+	void InputKeyQ(FViewport* Viewport, FKey Key, EInputEvent EventType, float AmountDepressed, bool bGamepad);
+
 	/** Helper to send events to VaQuoleUI components */
 	// @TODO Make enum type blueprintable
 	//UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
@@ -54,5 +57,8 @@ protected:
 
 	/** Mouse screen position helper */
 	bool GetMouseScreenPosition(FVector2D& MousePosition);
+
+	/** Get UI component we're aiming to */
+	bool GetTargetUIComponent(FVector& ActorImpact, UVaQuoleUIComponent** View, UStaticMeshComponent** Mesh);
 
 };
