@@ -179,6 +179,9 @@ void UVaQuoleUIComponent::TickComponent(float DeltaTime, enum ELevelTick TickTyp
 			UE_LOG(LogVaQuole, Warning, TEXT("Can't get user settings to adjust HUD texture size"));
 		}
 	}
+
+	// Process Qt events
+	VaQuole::Update();
 	
 	// Redraw UI texture with current widget state
 	Redraw();
@@ -210,7 +213,7 @@ void UVaQuoleUIComponent::Redraw() const
 		// Load data from view
 		const UCHAR* my_data = UIWidget->GrabView();
 		const size_t size = Width * Height * sizeof(uint32);
-
+		
 		// Copy buffer for rendering thread
 		TArray<uint32> ViewBuffer;
 		ViewBuffer.Init(Width * Height);
