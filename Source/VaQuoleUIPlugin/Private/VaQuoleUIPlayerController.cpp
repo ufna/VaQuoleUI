@@ -29,9 +29,17 @@ void AVaQuoleUIPlayerController::InputKeyQ(FViewport* Viewport, FKey Key, EInput
 	UVaQuoleUIComponent* View;
 	UStaticMeshComponent* Mesh;
 
+	// Check we're targeting UI on scene
 	if (GetTargetUIComponent(ActorImpact, &View, &Mesh))
 	{
 		View->InputKeyQ(Viewport, Key, EventType, AmountDepressed, bGamepad);
+	}
+
+	// Check we have HUD
+	AVaQuoleHUD* MyHUD = GetVaQuoleHUD();
+	if (MyHUD && MyHUD->VaQuoleUI.IsValid())
+	{
+		MyHUD->VaQuoleUI->InputKeyQ(Viewport, Key, EventType, AmountDepressed, bGamepad);
 	}
 }
 
@@ -94,6 +102,11 @@ void AVaQuoleUIPlayerController::MouseUp()
 
 //////////////////////////////////////////////////////////////////////////
 // Internal helpers
+
+AVaQuoleHUD* AVaQuoleUIPlayerController::GetVaQuoleHUD() const
+{
+	return Cast<AVaQuoleHUD>(GetHUD());
+}
 
 bool AVaQuoleUIPlayerController::GetTargetUIComponent(FVector& ActorImpact, UVaQuoleUIComponent** View, UStaticMeshComponent** Mesh)
 {

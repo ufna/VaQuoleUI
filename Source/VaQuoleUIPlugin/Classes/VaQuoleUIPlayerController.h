@@ -55,6 +55,9 @@ protected:
 	//////////////////////////////////////////////////////////////////////////
 	// Internal helpers
 
+	/** Fast HUD casting */
+	AVaQuoleHUD* GetVaQuoleHUD() const;
+
 	/** Mouse screen position helper */
 	bool GetMouseScreenPosition(FVector2D& MousePosition);
 
