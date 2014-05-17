@@ -2,13 +2,14 @@
 
 #include "VaQuoleUILib.h"
 #include "VaQuoleWebView.h"
-#include "VaQuoleAppThread.h"
+#include "VaQuoleInputHelpers.h"
 
 #include <QApplication>
 #include <QNetworkProxyFactory>
 #include <QWebSettings>
 
 #include <QImage>
+#include <QWebFrame>
 
 namespace VaQuole
 {
@@ -21,8 +22,26 @@ static QApplication* pApp = NULL;
 
 void Init()
 {
-	// @TODO I pretty sure I can delete it
-	return;
+	// Check that we haven't qApp already
+	if (QApplication::instance() == nullptr)
+	{
+		// Create qApp
+		int argc = 1;
+		char arg1[] = "VaQuoleUILib";
+		char* argv[1] = {arg1};
+		pApp = new QApplication(argc, argv);
+		pApp->setQuitOnLastWindowClosed(false);
+		pApp->processEvents();
+
+		// Set network config
+		QNetworkProxyFactory::setUseSystemConfiguration (true);
+		QWebSettings::globalSettings()->setAttribute(QWebSettings::PluginsEnabled, true);
+		QWebSettings::globalSettings()->setAttribute(QWebSettings::AutoLoadImages, true);
+	}
+	else
+	{
+		pApp = qApp;
+	}
 }
 
 void Update()
@@ -47,25 +66,26 @@ void Cleanup()
 
 VaQuoleUI::VaQuoleUI()
 {
-	ViewThread = new VaQuoleAppThread();
-	ViewThread->createView();
-	ViewThread->start();
+	WebView = new VaQuoleWebView();
+	WebView->show();
 }
 
 void VaQuoleUI::Destroy()
 {
-	if(ViewThread)
+	if(WebView)
 	{
-		ViewThread->stopThread();
+		WebView->close();
+		delete WebView;
+		WebView = 0;
 	}
 }
 
 void VaQuoleUI::OpenURL(const TCHAR* NewURL)
 {
-	Q_CHECK_PTR(ViewThread);
+	Q_CHECK_PTR(WebView);
 
 	QString Str = QString::fromUtf16((const ushort*)NewURL);
-	ViewThread->openURL(Str);
+	WebView->load(QUrl(Str));
 }
 
 void VaQuoleUI::OpenBenchmark()
@@ -75,31 +95,31 @@ void VaQuoleUI::OpenBenchmark()
 
 void VaQuoleUI::EvaluateJavaScript(const TCHAR *ScriptSource)
 {
-	Q_CHECK_PTR(ViewThread);
+	Q_CHECK_PTR(WebView);
 
 	QString Str = QString::fromUtf16((const ushort*)ScriptSource);
-	ViewThread->evaluateJavaScript(Str);
+	WebView->page()->mainFrame()->evaluateJavaScript(Str);
 }
 
 const uchar * VaQuoleUI::GrabView()
 {
-	Q_CHECK_PTR(ViewThread);
+	Q_CHECK_PTR(WebView);
 
-	return ViewThread->grabView();
+	return WebView->getImageData();
 }
 
 void VaQuoleUI::SetTransparent(bool transparent)
 {
-	Q_CHECK_PTR(ViewThread);
+	Q_CHECK_PTR(WebView);
 
-	ViewThread->setTransparent(transparent);
+	WebView->setTransparent(transparent);
 }
 
 void VaQuoleUI::Resize(int w, int h)
 {
-	Q_CHECK_PTR(ViewThread);
+	Q_CHECK_PTR(WebView);
 
-	ViewThread->resize(w,h);
+	WebView->resize(w,h);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -107,26 +127,32 @@ void VaQuoleUI::Resize(int w, int h)
 
 void VaQuoleUI::MouseMove(int x, int y)
 {
-	Q_CHECK_PTR(ViewThread);
+	Q_CHECK_PTR(WebView);
 
-	ViewThread->mouseMove(x,y);
+	VaQuole::simulateMouseMove(WebView, QPoint(x,y));
+	pApp->processEvents();
 }
 
 void VaQuoleUI::MouseClick(int x, int y, VaQuole::EMouseButton::Type button,
 						   bool bPressed, unsigned int modifiers)
 {
-	Q_CHECK_PTR(ViewThread);
+	Q_CHECK_PTR(WebView);
 
-	ViewThread->mouseClick(x, y, button, bPressed, modifiers);
+	VaQuole::simulateMouseClick(WebView, QPoint(x,y),
+								(Qt::MouseButton) button,
+								(Qt::KeyboardModifiers) modifiers,
+								bPressed);
+	pApp->processEvents();
 }
 
 void VaQuoleUI::InputKey(const unsigned int key,
 						 const bool bPressed,
 						 const unsigned int modifiers)
 {
-	Q_CHECK_PTR(ViewThread);
+	Q_CHECK_PTR(WebView);
 
-	ViewThread->inputKey(key, bPressed, modifiers);
+	VaQuole::simulateKey(WebView, key, (Qt::KeyboardModifiers) modifiers, bPressed);
+	pApp->processEvents();
 }
 
 } // namespace VaQuole

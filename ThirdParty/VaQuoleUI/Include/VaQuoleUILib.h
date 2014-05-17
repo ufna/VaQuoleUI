@@ -5,7 +5,7 @@
 
 #include "VaQuolePublicPCH.h"
 
-class VaQuoleAppThread;
+class VaQuoleWebView;
 
 namespace VaQuole
 {
@@ -69,8 +69,8 @@ public:
 					const unsigned int modifiers = VaQuole::EKeyboardModifier::NoModifier);
 
 private:
-	/** Thread that operates web view */
-	VaQuoleAppThread *ViewThread;
+	/** Widget that operates web view */
+	VaQuoleWebView *WebView;
 
 };
 

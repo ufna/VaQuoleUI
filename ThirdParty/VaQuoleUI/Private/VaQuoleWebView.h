@@ -3,6 +3,8 @@
 #ifndef VAQUOLEWEBVIEW_H
 #define VAQUOLEWEBVIEW_H
 
+#include "VaQuolePublicPCH.h"
+
 #include <QWebView>
 
 class QImage;
@@ -22,6 +24,7 @@ public:
 
 	/** Get refence to image cache data */
 	const uchar * getImageData();
+
 
 private:
 	/** Recreates image cache buffer */

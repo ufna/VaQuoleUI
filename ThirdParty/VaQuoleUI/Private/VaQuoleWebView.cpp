@@ -1,6 +1,7 @@
 // Copyright 2014 Vladimir Alyamkin. All Rights Reserved.
 
 #include "VaQuoleWebView.h"
+#include "VaQuoleInputHelpers.h"
 
 #include <QWebFrame>
 #include <QPaintEvent>

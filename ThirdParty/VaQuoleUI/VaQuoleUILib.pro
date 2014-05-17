@@ -25,12 +25,10 @@ INCLUDEPATH += ./Include \
 
 SOURCES += Private/VaQuoleUILib.cpp \
     Private/VaQuoleWebView.cpp \
-    Private/VaQuoleAppThread.cpp \
     Private/VaQuoleInputHelpers.cpp
 
 HEADERS += Include/VaQuoleUILib.h \
     Private/VaQuoleWebView.h \
-    Private/VaQuoleAppThread.h \
     Include/VaQuolePublicPCH.h \
     Private/VaQuoleInputHelpers.h
 
