@@ -5,6 +5,7 @@
 
 #include <QWebFrame>
 #include <QPaintEvent>
+#include <QBackingStore>
 
 VaQuoleWebView::VaQuoleWebView(QWidget *parent) :
 	QWebView(parent)
@@ -32,8 +33,7 @@ void VaQuoleWebView::updateImageCache(QSize ImageSize)
 	}
 	else
 	{
-		ImageCache = QImage(ImageSize, QImage::Format_RGB32);
-		ImageCache.fill(Qt::white);
+		ImageCache = QImage();
 	}
 }
 
@@ -75,7 +75,13 @@ void VaQuoleWebView::resize(int w, int h)
 
 const uchar * VaQuoleWebView::getImageData()
 {
-	return ImageCache.bits();
+	if (bTransparent)
+	{
+		return ImageCache.bits();
+	}
+
+	QImage *backBuffer = dynamic_cast<QImage*>(backingStore()->paintDevice());
+	return backBuffer->bits();
 }
 
 
@@ -92,7 +98,16 @@ void VaQuoleWebView::paintEvent(QPaintEvent *ev)
 
 	QWebFrame *frame = page->mainFrame();
 	QPainter p;
-	p.begin(&ImageCache);
+
+	if (bTransparent)
+	{
+		p.begin(&ImageCache);
+	}
+	else
+	{
+		p.begin(this);;
+	}
+
 	p.setRenderHints(renderHints());
 
 	if(bTransparent)
