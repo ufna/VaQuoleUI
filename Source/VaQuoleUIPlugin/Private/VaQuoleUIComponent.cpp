@@ -162,7 +162,6 @@ void UVaQuoleUIComponent::TickComponent(float DeltaTime, enum ELevelTick TickTyp
 
 			for (int i = 0; i < Amount; i++)
 			{
-				UE_LOG(LogVaQuole, Warning, TEXT("Ho-Ho-Hp %d"), Amount);
 				Command = UIWidget->GetCachedCommand(i);
 
 				if (!Command.IsEmpty())
