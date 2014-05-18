@@ -13,6 +13,7 @@ UVaQuoleUIComponent::UVaQuoleUIComponent(const class FPostConstructInitializePro
 	bool bResizeRequested = false;
 	float LastResizeRequestTime = 0.0f;
 
+	bEnabled = true;
 	bHUD = false;
 	bTransparent = false;
 
@@ -191,6 +192,11 @@ void UVaQuoleUIComponent::TickComponent(float DeltaTime, enum ELevelTick TickTyp
 //////////////////////////////////////////////////////////////////////////
 // View control
 
+void UVaQuoleUIComponent::SetEnabled(bool Enabled)
+{
+	bEnabled = Enabled;
+}
+
 void UVaQuoleUIComponent::SetTransparent(bool Transparent)
 {
 	bTransparent = Transparent;
@@ -203,6 +209,12 @@ void UVaQuoleUIComponent::SetTransparent(bool Transparent)
 
 void UVaQuoleUIComponent::Redraw() const
 {
+	// Ignore texture update
+	if (!bEnabled)
+	{
+		return;
+	}
+
 	if (Texture && Texture->Resource && UIWidget.IsValid())
 	{
 		// Check that texture is prepared
@@ -247,13 +259,23 @@ void UVaQuoleUIComponent::Redraw() const
 	}
 }
 
+void UVaQuoleUIComponent::EvaluateJavaScript(const FString& ScriptSource)
+{
+	if (!bEnabled || !UIWidget.IsValid())
+	{
+		return;
+	}
+
+	UIWidget->EvaluateJavaScript(*ScriptSource);
+}
+
 
 //////////////////////////////////////////////////////////////////////////
 // Player input
 
 void UVaQuoleUIComponent::MouseMove(int32 X, int32 Y)
 {
-	if (!UIWidget.IsValid())
+	if (!bEnabled || !UIWidget.IsValid())
 	{
 		return;
 	}
@@ -263,7 +285,7 @@ void UVaQuoleUIComponent::MouseMove(int32 X, int32 Y)
 
 void UVaQuoleUIComponent::MouseClick(int32 X, int32 Y, VaQuole::EMouseButton::Type Button, bool bPressed, unsigned int Modifiers)
 {
-	if (!UIWidget.IsValid())
+	if (!bEnabled || !UIWidget.IsValid())
 	{
 		return;
 	}
@@ -273,7 +295,7 @@ void UVaQuoleUIComponent::MouseClick(int32 X, int32 Y, VaQuole::EMouseButton::Ty
 
 void UVaQuoleUIComponent::InputKeyQ(FViewport* Viewport, FKey Key, EInputEvent EventType, float AmountDepressed, bool bGamepad)
 {
-	if (!UIWidget.IsValid() || !Key.IsValid())
+	if (!bEnabled || !UIWidget.IsValid() || !Key.IsValid())
 	{
 		return;
 	}
@@ -358,7 +380,7 @@ void UVaQuoleUIComponent::InitKeyMap()
 
 void UVaQuoleUIComponent::OpenURL(const FString& URL)
 {
-	if (UIWidget.IsValid())
+	if (!bEnabled || UIWidget.IsValid())
 	{
 		UIWidget->OpenURL(*URL);
 	}

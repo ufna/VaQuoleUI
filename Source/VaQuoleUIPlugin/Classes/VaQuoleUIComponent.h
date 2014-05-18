@@ -87,6 +87,10 @@ class UVaQuoleUIComponent : public UActorComponent
 	//////////////////////////////////////////////////////////////////////////
 	// View configuration
 
+	/** Indicates whether the View enabled (receive player input or not) */
+	UPROPERTY(EditAnywhere, Category = "View")
+	bool bEnabled;
+
 	/** Indicates whether the View used as HUD or classic render target */
 	UPROPERTY(EditAnywhere, Category = "View")
 	bool bHUD;
@@ -119,9 +123,13 @@ class UVaQuoleUIComponent : public UActorComponent
 	//////////////////////////////////////////////////////////////////////////
 	// View control
 
+	/** Changes view activity state. Attn.! qApp will be still active in background! */
+	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
+	void SetEnabled(const bool Enabled);
+
 	/** Changes background transparency */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
-	void SetTransparent(bool Transparent);
+	void SetTransparent(const bool Transparent);
 
 	/** Resizes the View */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
@@ -130,6 +138,10 @@ class UVaQuoleUIComponent : public UActorComponent
 	/** Requests a View to completely re-draw itself */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
 	void Redraw() const;
+
+	/** JS code will be passed directly to web view */
+	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
+	void EvaluateJavaScript(const FString& ScriptSource);
 
 	//////////////////////////////////////////////////////////////////////////
 	// Player input
