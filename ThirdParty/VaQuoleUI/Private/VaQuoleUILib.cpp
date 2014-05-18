@@ -130,18 +130,14 @@ int VaQuoleUI::GetCachedCommandsNumber()
 {
 	Q_CHECK_PTR(WebView);
 
-	return WebView->getCachedCommands().size();
+	return WebView->getCachedCommandsNumber();
 }
 
 TCHAR * VaQuoleUI::GetCachedCommand(int Index)
 {
 	Q_CHECK_PTR(WebView);
-	Q_ASSERT(Index < WebView->getCachedCommands().size());
 
-	TCHAR * RetVal = NULL;
-	WebView->getCachedCommands().at(Index).toWCharArray(RetVal);
-
-	return RetVal;
+	return (TCHAR *)WebView->getCachedCommand(Index).utf16();
 }
 
 void VaQuoleUI::ClearCachedCommands()

@@ -25,8 +25,11 @@ public:
 	/** Get refence to image cache data */
 	const uchar * getImageData();
 
-	/** Cached JS commands list */
-	const QStringList& getCachedCommands();
+	/** Count cached commands */
+	int getCachedCommandsNumber();
+
+	/** Get one particular command */
+	QString getCachedCommand(int index);
 
 	/** Clears cached JS commands */
 	void clearCachedCommands();

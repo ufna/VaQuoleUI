@@ -88,9 +88,16 @@ const uchar * VaQuoleWebView::getImageData()
 	return backBuffer->bits();
 }
 
-const QStringList& VaQuoleWebView::getCachedCommands()
+int VaQuoleWebView::getCachedCommandsNumber()
 {
-	return cachedJavaScriptCommands;
+	return cachedJavaScriptCommands.size();
+}
+
+QString VaQuoleWebView::getCachedCommand(int index)
+{
+	Q_ASSERT(index < cachedJavaScriptCommands.size());
+
+	return cachedJavaScriptCommands.at(index);
 }
 
 void VaQuoleWebView::clearCachedCommands()
@@ -145,7 +152,7 @@ void VaQuoleWebView::registerJavaScriptWindowObject(bool pageLoaded)
 {
 	if(pageLoaded)
 	{
-		page()->mainFrame()->addToJavaScriptWindowObject("VaQuoleUI", this);
+		page()->mainFrame()->addToJavaScriptWindowObject("VaQuoleWebView", this);
 	}
 }
 
