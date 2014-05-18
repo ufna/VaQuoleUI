@@ -148,11 +148,11 @@ void UVaQuoleUIComponent::TickComponent(float DeltaTime, enum ELevelTick TickTyp
 	// Process Qt events
 	VaQuole::Update();
 
-	// Process JS callback commands
+	// Process JS callback commands (currenly HUD only)
 	if (UIWidget.IsValid())
 	{
-		APawn* MyPawn = Cast<APawn>(GetOwner());
-		APlayerController* const PlayerController = MyPawn ? Cast<APlayerController>(MyPawn->Controller) : NULL;
+		AHUD* MyHUD = Cast<AHUD>(GetOwner());
+		APlayerController* const PlayerController = MyHUD ? MyHUD->PlayerOwner : NULL;
 
 		// It will work only for players
 		if (PlayerController)
@@ -162,6 +162,7 @@ void UVaQuoleUIComponent::TickComponent(float DeltaTime, enum ELevelTick TickTyp
 
 			for (int i = 0; i < Amount; i++)
 			{
+				UE_LOG(LogVaQuole, Warning, TEXT("Ho-Ho-Hp %d"), Amount);
 				Command = UIWidget->GetCachedCommand(i);
 
 				if (!Command.IsEmpty())
@@ -373,7 +374,20 @@ void UVaQuoleUIComponent::OpenURL(const FString& URL)
 {
 	if (!bEnabled || UIWidget.IsValid())
 	{
-		UIWidget->OpenURL(*URL);
+		if (URL.Contains(TEXT("vaquole://"), ESearchCase::IgnoreCase, ESearchDir::FromStart))
+		{
+			FString GameDir = FPaths::GameDir();
+			FString LocalFile = URL.Replace(TEXT("vaquole://"), *GameDir, ESearchCase::IgnoreCase);
+			LocalFile = FString(TEXT("file:///")) + LocalFile;
+
+			UE_LOG(LogVaQuole, Log, TEXT("VaQuole opens %s"), *LocalFile);
+
+			UIWidget->OpenURL(*LocalFile);
+		}
+		else
+		{
+			UIWidget->OpenURL(*URL);
+		}
 	}
 }
 
