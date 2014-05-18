@@ -55,7 +55,7 @@ class AVaQuoleUIPlayerController : public APlayerController
 
 	/** JS code will be passed directly to web view */
 	UFUNCTION(exec)
-	void EvalJS(FString ScriptSource);
+	void EvalJS(const FString& ScriptSource);
 	
 
 protected:

@@ -125,7 +125,7 @@ void AVaQuoleUIPlayerController::MouseUp()
 	MouseEvent(EMouseEvent::MouseReleased, VaQuole::EMouseButton::LeftButton);
 }
 
-void AVaQuoleUIPlayerController::EvalJS(FString ScriptSource)
+void AVaQuoleUIPlayerController::EvalJS(const FString& ScriptSource)
 {
 	AVaQuoleHUD* MyHUD = GetVaQuoleHUD();
 	if (MyHUD && MyHUD->VaQuoleUI.IsValid())
