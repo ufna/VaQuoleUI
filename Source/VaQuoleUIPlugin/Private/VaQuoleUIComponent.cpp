@@ -14,8 +14,8 @@ UVaQuoleUIComponent::UVaQuoleUIComponent(const class FPostConstructInitializePro
 	float LastResizeRequestTime = 0.0f;
 
 	bEnabled = true;
-	bHUD = false;
-	bTransparent = false;
+	bHUD = true;
+	bTransparent = true;
 
 	Width = 256;
 	Height = 256;
@@ -43,23 +43,6 @@ void UVaQuoleUIComponent::InitializeComponent()
 
 	// Init texture for the first time 
 	SetTransparent(bTransparent);
-
-	// Load resolution settings to set right HUD texture size
-	if (bHUD)
-	{
-		auto GameUserSettings = GEngine->GetGameUserSettings();
-		if (GameUserSettings)
-		{
-			FIntPoint CurrentResolution = GameUserSettings->GetScreenResolution();
-
-			Width = CurrentResolution.X;
-			Height = CurrentResolution.Y;
-		}
-		else
-		{
-			UE_LOG(LogVaQuole, Warning, TEXT("Can't get user settings to adjust HUD texture size"));
-		}
-	}
 	
 	// Resize texture to correspond desired size
 	Resize(Width, Height);
@@ -161,25 +144,6 @@ void UVaQuoleUIComponent::Resize(int32 NewWidth, int32 NewHeight)
 void UVaQuoleUIComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// HUD should be scaled to fit screen
-	if (bHUD)
-	{
-		auto GameUserSettings = GEngine->GetGameUserSettings();
-		if (GameUserSettings)
-		{
-			FIntPoint CurrentResolution = GameUserSettings->GetScreenResolution();
-
-			if (Width != CurrentResolution.X || Height != CurrentResolution.Y)
-			{
-				Resize(CurrentResolution.X, CurrentResolution.Y);
-			}
-		}
-		else
-		{
-			UE_LOG(LogVaQuole, Warning, TEXT("Can't get user settings to adjust HUD texture size"));
-		}
-	}
 
 	// Process Qt events
 	VaQuole::Update();

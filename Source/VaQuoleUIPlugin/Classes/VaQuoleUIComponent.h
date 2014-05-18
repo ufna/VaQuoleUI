@@ -91,7 +91,7 @@ class UVaQuoleUIComponent : public UActorComponent
 	UPROPERTY(EditAnywhere, Category = "View")
 	bool bEnabled;
 
-	/** Indicates whether the View used as HUD or classic render target */
+	/** Indicates whether the View used as HUD (material instance won't be created for HUD)*/
 	UPROPERTY(EditAnywhere, Category = "View")
 	bool bHUD;
 
@@ -143,6 +143,15 @@ class UVaQuoleUIComponent : public UActorComponent
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
 	void EvaluateJavaScript(const FString& ScriptSource);
 
+
+	//////////////////////////////////////////////////////////////////////////
+	// Content control
+
+	/** Requests a new URL to be loaded in the View */
+	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
+	void OpenURL(const FString& URL);
+
+
 	//////////////////////////////////////////////////////////////////////////
 	// Player input
 
@@ -151,18 +160,10 @@ class UVaQuoleUIComponent : public UActorComponent
 
 	// @TODO Make enum type blueprintable
 	// UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
-	void MouseClick(int32 X, int32 Y, VaQuole::EMouseButton::Type Button,
-		bool bPressed = true, unsigned int Modifiers = VaQuole::EKeyboardModifier::NoModifier);
+	void MouseClick(int32 X, int32 Y, VaQuole::EMouseButton::Type Button, bool bPressed = true, unsigned int Modifiers = VaQuole::EKeyboardModifier::NoModifier);
 
 	//UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
 	void InputKeyQ(FViewport* Viewport, FKey Key, EInputEvent EventType, float AmountDepressed, bool bGamepad);
-
-	//////////////////////////////////////////////////////////////////////////
-	// Content control
-
-	/** Requests a new URL to be loaded in the View */
-	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
-	void OpenURL(const FString& URL);
 
 
 	//////////////////////////////////////////////////////////////////////////

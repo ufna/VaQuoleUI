@@ -12,6 +12,12 @@ void AVaQuoleHUD::DrawHUD()
 {
 	Super::DrawHUD();
 
+	// Check main HUD texture resolution
+	if (VaQuoleUI->GetWidth() != Canvas->ClipX || VaQuoleUI->GetHeight() != Canvas->ClipY)
+	{
+		VaQuoleUI->Resize(Canvas->ClipX, Canvas->ClipY);
+	}
+
 	if (bShowHUD)
 	{
 		// Draw hud web view texture
