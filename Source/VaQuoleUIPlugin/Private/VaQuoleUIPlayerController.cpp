@@ -128,9 +128,9 @@ void AVaQuoleUIPlayerController::MouseUp()
 void AVaQuoleUIPlayerController::EvalJS(FString ScriptSource)
 {
 	AVaQuoleHUD* MyHUD = GetVaQuoleHUD();
-	if (MyHUD && MyHUD->VaQuoleUI.IsValid() && MyHUD->VaQuoleUI->GetUIWidget().IsValid())
+	if (MyHUD && MyHUD->VaQuoleUI.IsValid())
 	{
-		MyHUD->VaQuoleUI->GetUIWidget()->EvaluateJavaScript(*ScriptSource);
+		MyHUD->VaQuoleUI->EvaluateJavaScript(ScriptSource);
 	}
 }
 
