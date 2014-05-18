@@ -1,5 +1,5 @@
-Welcome to the VaQuoleUI source code!
-=====================================
+Overview
+========
 
 VaQuoleUI is the Web UI framework plugin for [Unreal Engine 4](https://www.unrealengine.com/) proudly based on [Qt framework](http://qt-project.org/).
 
@@ -36,11 +36,11 @@ Futher improvements are on the way. Check the [Issues](https://github.com/ufna/V
 HowTo
 -----
 
-> How to open local files with UIComponent?
+> How to open *_local_* files with UIComponent?
 
-You should set the link as _**vaquole://**Relative/Path/To/MyPage.html_, where the path is relative to your project dir (where .uproject file is situated).
+You should set the link as *__vaquole://__Relative/Path/To/MyPage.html*, where the path is relative to your project dir (where .uproject file is situated).
 
-> How to open _https_ links?
+> How to open *_https_* links?
 
 To use the SSL connection (https) you have to rebuild the Qt-based project with its support. Pre-built binaries work without encryption only.
 
