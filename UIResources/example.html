@@ -1,0 +1,43 @@
+<html>
+<head>
+
+<script type="text/javascript">
+function showhud()
+{
+	VaQuoleWebView.scriptCommand("showhud");
+}
+
+function statfps()
+{
+	VaQuoleWebView.scriptCommand("stat fps");
+}
+
+function statengine()
+{
+	VaQuoleWebView.scriptCommand("stat engine");
+}
+
+function statunit()
+{
+	VaQuoleWebView.scriptCommand("stat unit");
+}
+
+function exitue()
+{
+	VaQuoleWebView.scriptCommand("exit");
+}
+</script>
+
+</head>
+<body>
+	<button onclick="showhud()" type="button">ShowHUD</button> <br/>
+	<button onclick="statfps()" type="button">Stat FPS</button> <br/>
+	<button onclick="statengine()" type="button">Stat Engine</button> <br/>
+	<button onclick="statunit()" type="button">Stat Unit</button> <br/>
+	<button onclick="exitue()" type="button">Exit</button> <br/>
+
+	<div id="output">
+	</div>
+
+</body>
+</html>
