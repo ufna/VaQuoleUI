@@ -122,6 +122,36 @@ void VaQuoleUI::Resize(int w, int h)
 	WebView->resize(w,h);
 }
 
+
+//////////////////////////////////////////////////////////////////////////
+// JS commands callback
+
+int VaQuoleUI::GetCachedCommandsNumber()
+{
+	Q_CHECK_PTR(WebView);
+
+	return WebView->getCachedCommands().size();
+}
+
+TCHAR * VaQuoleUI::GetCachedCommand(int Index)
+{
+	Q_CHECK_PTR(WebView);
+	Q_ASSERT(Index < WebView->getCachedCommands().size());
+
+	TCHAR * RetVal = NULL;
+	WebView->getCachedCommands().at(Index).toWCharArray(RetVal);
+
+	return RetVal;
+}
+
+void VaQuoleUI::ClearCachedCommands()
+{
+	Q_CHECK_PTR(WebView);
+
+	WebView->clearCachedCommands();
+}
+
+
 //////////////////////////////////////////////////////////////////////////
 // Player input
 

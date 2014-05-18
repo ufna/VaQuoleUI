@@ -25,6 +25,12 @@ public:
 	/** Get refence to image cache data */
 	const uchar * getImageData();
 
+	/** Cached JS commands list */
+	const QStringList& getCachedCommands();
+
+	/** Clears cached JS commands */
+	void clearCachedCommands();
+
 
 private:
 	/** Recreates image cache buffer */
@@ -36,8 +42,20 @@ private:
 	/** Indicates whether the View is transparent or composed on white */
 	bool bTransparent;
 
+	/** Cache of commands received from JS */
+	QStringList cachedJavaScriptCommands;
+
+
 protected:
 	void paintEvent(QPaintEvent*);
+
+private slots:
+	/** Puts reference to this class object into JS code */
+	void registerJavaScriptWindowObject(bool pageLoaded);
+
+public slots:
+	/** Simple text command from javascript received here */
+	void scriptCommand(QString command);
 
 };
 

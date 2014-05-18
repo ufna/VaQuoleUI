@@ -147,6 +147,33 @@ void UVaQuoleUIComponent::TickComponent(float DeltaTime, enum ELevelTick TickTyp
 
 	// Process Qt events
 	VaQuole::Update();
+
+	// Process JS callback commands
+	if (UIWidget.IsValid())
+	{
+		APawn* MyPawn = Cast<APawn>(GetOwner());
+		APlayerController* const PlayerController = MyPawn ? Cast<APlayerController>(MyPawn->Controller) : NULL;
+
+		// It will work only for players
+		if (PlayerController)
+		{
+			int32 Amount = UIWidget->GetCachedCommandsNumber();
+			FString Command;
+
+			for (int i = 0; i < Amount; i++)
+			{
+				Command = UIWidget->GetCachedCommand(i);
+
+				if (!Command.IsEmpty())
+				{
+					PlayerController->ConsoleCommand(Command);
+				}
+			}
+		}
+
+		// Attn.! It's neccessary to prevent commands spam!
+		UIWidget->ClearCachedCommands();
+	}
 	
 	// Redraw UI texture with current widget state
 	Redraw();

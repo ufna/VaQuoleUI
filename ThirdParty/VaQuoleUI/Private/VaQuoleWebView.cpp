@@ -17,6 +17,10 @@ VaQuoleWebView::VaQuoleWebView(QWidget *parent) :
 	// Hide window in taskbar
 	setWindowFlags(Qt::SplashScreen);
 #endif
+
+	// Register us with JavaScript
+	connect(this, SIGNAL(loadFinished(bool)),
+			this, SLOT(registerJavaScriptWindowObject(bool)));
 }
 
 void VaQuoleWebView::updateImageCache(QSize ImageSize)
@@ -84,6 +88,16 @@ const uchar * VaQuoleWebView::getImageData()
 	return backBuffer->bits();
 }
 
+const QStringList& VaQuoleWebView::getCachedCommands()
+{
+	return cachedJavaScriptCommands;
+}
+
+void VaQuoleWebView::clearCachedCommands()
+{
+	cachedJavaScriptCommands.clear();
+}
+
 
 //////////////////////////////////////////////////////////////////////////
 // Qt Events
@@ -105,7 +119,7 @@ void VaQuoleWebView::paintEvent(QPaintEvent *ev)
 	}
 	else
 	{
-		p.begin(this);;
+		p.begin(this);
 	}
 
 	p.setRenderHints(renderHints());
@@ -121,4 +135,21 @@ void VaQuoleWebView::paintEvent(QPaintEvent *ev)
 
 	frame->render(&p, ev->region());
 	p.end();
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+// Page communication
+
+void VaQuoleWebView::registerJavaScriptWindowObject(bool pageLoaded)
+{
+	if(pageLoaded)
+	{
+		page()->mainFrame()->addToJavaScriptWindowObject("VaQuoleUI", this);
+	}
+}
+
+void VaQuoleWebView::scriptCommand(QString command)
+{
+	cachedJavaScriptCommands.append(command);
 }

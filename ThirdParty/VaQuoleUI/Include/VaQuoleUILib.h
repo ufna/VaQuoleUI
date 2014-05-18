@@ -56,6 +56,20 @@ public:
 	/** Set desired few size */
 	void Resize(int w, int h);
 
+
+	//////////////////////////////////////////////////////////////////////////
+	// JS commands callback
+
+	/** Count cached commands */
+	int GetCachedCommandsNumber();
+
+	/** Get one particular command */
+	TCHAR * GetCachedCommand(int Index);
+
+	/** Clear commands cache */
+	void ClearCachedCommands();
+
+
 	//////////////////////////////////////////////////////////////////////////
 	// Player input
 
