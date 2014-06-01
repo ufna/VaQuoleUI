@@ -375,7 +375,7 @@ void UVaQuoleUIComponent::OpenURL(const FString& URL)
 	{
 		if (URL.Contains(TEXT("vaquole://"), ESearchCase::IgnoreCase, ESearchDir::FromStart))
 		{
-			FString GameDir = FPaths::GameDir();
+			FString GameDir = FPaths::ConvertRelativePathToFull(FPaths::GameDir());
 			FString LocalFile = URL.Replace(TEXT("vaquole://"), *GameDir, ESearchCase::IgnoreCase);
 			LocalFile = FString(TEXT("file:///")) + LocalFile;
 
