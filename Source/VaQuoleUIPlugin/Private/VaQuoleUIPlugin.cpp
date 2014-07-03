@@ -8,12 +8,14 @@ class FVaQuoleUIPlugin : public IVaQuoleUIPlugin
 	/** IModuleInterface implementation */
 	virtual void StartupModule() OVERRIDE
 	{
-
+		// Start QApplication thread
+		VaQuole::Init();
 	}
 
 	virtual void ShutdownModule() OVERRIDE
 	{
-
+		// Exit QApplication
+		VaQuole::Cleanup();
 	}
 };
 

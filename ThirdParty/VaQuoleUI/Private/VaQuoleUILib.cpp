@@ -1,21 +1,22 @@
 // Copyright 2014 Vladimir Alyamkin. All Rights Reserved.
 
 #include "VaQuoleUILib.h"
+#include "VaQuoleAppThread.h"
+
 #include "VaQuoleWebView.h"
 #include "VaQuoleInputHelpers.h"
 
 #include <QApplication>
-#include <QNetworkProxyFactory>
-#include <QWebSettings>
 
 #include <QImage>
 #include <QWebFrame>
+#include <QString>
 
 namespace VaQuole
 {
 
-/** Main Qt class object */
-static QApplication* pApp = NULL;
+/** Main app thread with QApplication */
+static VaQuoleUIManager* pAppThread = NULL;
 
 //////////////////////////////////////////////////////////////////////////
 // Common lib functions
@@ -25,160 +26,164 @@ void Init()
 	// Check that we haven't qApp already
 	if (QApplication::instance() == nullptr)
 	{
-		// Create qApp
-		int argc = 1;
-		char arg1[] = "VaQuoleUILib";
-		char* argv[1] = {arg1};
-		pApp = new QApplication(argc, argv);
-		pApp->setQuitOnLastWindowClosed(false);
-		pApp->processEvents();
-
-		// Set network config
-		QNetworkProxyFactory::setUseSystemConfiguration (true);
-		QWebSettings::globalSettings()->setAttribute(QWebSettings::PluginsEnabled, true);
-		QWebSettings::globalSettings()->setAttribute(QWebSettings::AutoLoadImages, true);
-	}
-	else
-	{
-		pApp = qApp;
-	}
-}
-
-void Update()
-{
-	if (QApplication::instance() != nullptr)
-	{
-		QApplication::instance()->processEvents();
+		pAppThread = new VaQuoleUIManager();
+		pAppThread->start();
 	}
 }
 
 void Cleanup()
 {
-	if (QApplication::instance() != nullptr)
+	if (pAppThread != nullptr)
 	{
-		QApplication::instance()->quit();
+		pAppThread->stop();
 	}
+}
+
+VaQuoleWebPage* ConstructNewPage()
+{
+	VaQuoleWebPage* NewUI = new VaQuoleWebPage();
+	NewUI->Register();
+
+	return NewUI;
 }
 
 
 //////////////////////////////////////////////////////////////////////////
-// WebView class
+// WebPage class
 
-VaQuoleUI::VaQuoleUI()
+VaQuoleWebPage::VaQuoleWebPage()
 {
-	WebView = new VaQuoleWebView();
-	WebView->show();
+	ExtComm = new UIDataKeeper;
 }
 
-void VaQuoleUI::Destroy()
+void VaQuoleWebPage::Destroy()
 {
-	if(WebView)
-	{
-		WebView->close();
-		delete WebView;
-		WebView = 0;
-	}
+	// @TODO Mark for deletion
 }
 
-void VaQuoleUI::OpenURL(const TCHAR* NewURL)
+UIDataKeeper* VaQuoleWebPage::GetData()
 {
-	Q_CHECK_PTR(WebView);
-
-	QString Str = QString::fromUtf16((const ushort*)NewURL);
-	WebView->load(QUrl(Str));
+	return ExtComm;
 }
 
-void VaQuoleUI::OpenBenchmark()
+/** Register UI page in global UI manager */
+void VaQuoleWebPage::Register()
+{
+	Q_CHECK_PTR(pAppThread);
+
+	pAppThread->AddPage(this);
+}
+
+void VaQuoleWebPage::OpenURL(const TCHAR* NewURL)
+{
+	std::lock_guard<std::mutex> guard(mutex);
+
+	Q_CHECK_PTR(ExtComm);
+	ExtComm->NewURL = QString::fromUtf16((const ushort*)NewURL);
+}
+
+void VaQuoleWebPage::OpenBenchmark()
 {
 	OpenURL(L"http://www.smashcat.org/av/canvas_test/");
 }
 
-void VaQuoleUI::EvaluateJavaScript(const TCHAR *ScriptSource)
+void VaQuoleWebPage::EvaluateJavaScript(const TCHAR *ScriptSource)
 {
-	Q_CHECK_PTR(WebView);
+	return;
+	Q_CHECK_PTR(ExtComm);
 
-	QString Str = QString::fromUtf16((const ushort*)ScriptSource);
-	WebView->page()->mainFrame()->evaluateJavaScript(Str);
+	//QString Str = QString::fromUtf16((const ushort*)ScriptSource);
+	//WebView->page()->mainFrame()->evaluateJavaScript(Str);
 }
 
-const uchar * VaQuoleUI::GrabView()
+const uchar * VaQuoleWebPage::GrabView()
 {
-	Q_CHECK_PTR(WebView);
+	return NULL;
+	Q_CHECK_PTR(ExtComm);
 
-	return WebView->getImageData();
+	//return WebView->getImageData();
 }
 
-void VaQuoleUI::SetTransparent(bool transparent)
+void VaQuoleWebPage::SetTransparent(bool Transparent)
 {
-	Q_CHECK_PTR(WebView);
+	std::lock_guard<std::mutex> guard(mutex);
 
-	WebView->setTransparent(transparent);
+	Q_CHECK_PTR(ExtComm);
+	ExtComm->bTransparent = Transparent;
+	ExtComm->bTransparencyChanged = true;
 }
 
-void VaQuoleUI::Resize(int w, int h)
+void VaQuoleWebPage::Resize(int w, int h)
 {
-	Q_CHECK_PTR(WebView);
+	return;
+	Q_CHECK_PTR(ExtComm);
 
-	WebView->resize(w,h);
+	//WebView->resize(w,h);
 }
 
 
 //////////////////////////////////////////////////////////////////////////
 // JS commands callback
 
-int VaQuoleUI::GetCachedCommandsNumber()
+int VaQuoleWebPage::GetCachedCommandsNumber()
 {
-	Q_CHECK_PTR(WebView);
+	return 0;
+	Q_CHECK_PTR(ExtComm);
 
-	return WebView->getCachedCommandsNumber();
+	//return WebView->getCachedCommandsNumber();
 }
 
-TCHAR * VaQuoleUI::GetCachedCommand(int Index)
+TCHAR * VaQuoleWebPage::GetCachedCommand(int Index)
 {
-	Q_CHECK_PTR(WebView);
+	return NULL;
+	Q_CHECK_PTR(ExtComm);
 
-	return (TCHAR *)WebView->getCachedCommand(Index).utf16();
+	//return (TCHAR *)WebView->getCachedCommand(Index).utf16();
 }
 
-void VaQuoleUI::ClearCachedCommands()
+void VaQuoleWebPage::ClearCachedCommands()
 {
-	Q_CHECK_PTR(WebView);
+	return;
+	Q_CHECK_PTR(ExtComm);
 
-	WebView->clearCachedCommands();
+	//WebView->clearCachedCommands();
 }
 
 
 //////////////////////////////////////////////////////////////////////////
 // Player input
 
-void VaQuoleUI::MouseMove(int x, int y)
+void VaQuoleWebPage::MouseMove(int x, int y)
 {
-	Q_CHECK_PTR(WebView);
+	return;
+	Q_CHECK_PTR(ExtComm);
 
-	VaQuole::simulateMouseMove(WebView, QPoint(x,y));
-	pApp->processEvents();
+	//VaQuole::simulateMouseMove(WebView, QPoint(x,y));
+	//pApp->processEvents();
 }
 
-void VaQuoleUI::MouseClick(int x, int y, VaQuole::EMouseButton::Type button,
+void VaQuoleWebPage::MouseClick(int x, int y, VaQuole::EMouseButton::Type button,
 						   bool bPressed, unsigned int modifiers)
 {
-	Q_CHECK_PTR(WebView);
+	return;
+	Q_CHECK_PTR(ExtComm);
 
-	VaQuole::simulateMouseClick(WebView, QPoint(x,y),
+	/*VaQuole::simulateMouseClick(WebView, QPoint(x,y),
 								(Qt::MouseButton) button,
 								(Qt::KeyboardModifiers) modifiers,
-								bPressed);
-	pApp->processEvents();
+								bPressed);*/
+	//pApp->processEvents();
 }
 
-void VaQuoleUI::InputKey(const unsigned int key,
+void VaQuoleWebPage::InputKey(const unsigned int key,
 						 const bool bPressed,
 						 const unsigned int modifiers)
 {
-	Q_CHECK_PTR(WebView);
+	return;
+	Q_CHECK_PTR(ExtComm);
 
-	VaQuole::simulateKey(WebView, key, (Qt::KeyboardModifiers) modifiers, bPressed);
-	pApp->processEvents();
+	//VaQuole::simulateKey(WebView, key, (Qt::KeyboardModifiers) modifiers, bPressed);
+	//pApp->processEvents();
 }
 
 } // namespace VaQuole

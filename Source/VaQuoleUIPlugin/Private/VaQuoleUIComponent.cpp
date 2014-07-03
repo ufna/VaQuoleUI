@@ -3,7 +3,7 @@
 #include "VaQuoleUIPluginPrivatePCH.h"
 
 UVaQuoleUIComponent::UVaQuoleUIComponent(const class FPostConstructInitializeProperties& PCIP)
-	: Super(PCIP), RefCount(new FThreadSafeCounter)
+	: Super(PCIP)
 {
 	bAutoActivate = true;
 	bWantsInitializeComponent = true;
@@ -29,17 +29,11 @@ void UVaQuoleUIComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
 
-	RefCount->Increment();
-	UE_LOG(LogVaQuole, Warning, TEXT("VaQuoleComponentUI # %d created"), RefCount->GetValue());
-
 	// Init key map storage
 	InitKeyMap();
 
-	// Init QApplication if we haven't one
-	VaQuole::Init();
-
 	// Create web view
-	UIWidget = MakeShareable(new VaQuole::VaQuoleUI());
+	UIWidget = MakeShareable(VaQuole::ConstructNewPage());
 
 	// Init texture for the first time 
 	SetTransparent(bTransparent);
@@ -58,14 +52,6 @@ void UVaQuoleUIComponent::BeginDestroy()
 	{
 		UIWidget->Destroy();
 		UIWidget.Reset();
-	}
-
-	// Stop qApp if it was the last one
-	if (RefCount->Decrement() == 0)
-	{
-		UE_LOG(LogVaQuole, Log, TEXT("Last VaQuole component being deleted, stop qApp now"));
-
-		delete RefCount;
 	}
 
 	DestroyUITexture();
@@ -145,9 +131,6 @@ void UVaQuoleUIComponent::TickComponent(float DeltaTime, enum ELevelTick TickTyp
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// Process Qt events
-	VaQuole::Update();
-
 	// Process JS callback commands (currenly HUD only)
 	if (UIWidget.IsValid())
 	{
@@ -205,6 +188,7 @@ void UVaQuoleUIComponent::Redraw() const
 	{
 		return;
 	}
+	return;
 
 	if (Texture && Texture->Resource && UIWidget.IsValid())
 	{

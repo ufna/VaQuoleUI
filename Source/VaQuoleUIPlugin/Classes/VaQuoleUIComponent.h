@@ -74,7 +74,7 @@ private:
 typedef TSharedPtr<FVaQuoleTextureData, ESPMode::ThreadSafe> FVaQuoleTextureDataPtr;
 typedef TSharedRef<FVaQuoleTextureData, ESPMode::ThreadSafe> FVaQuoleTextureDataRef;
 
-typedef TSharedPtr<class VaQuole::VaQuoleUI, ESPMode::ThreadSafe> FVaQuoleWebViewPtr;
+typedef TSharedPtr<class VaQuole::VaQuoleWebPage, ESPMode::ThreadSafe> FVaQuoleWebViewPtr;
 
 /**
  * Class that handles view of one web page
@@ -219,10 +219,6 @@ protected:
 	FVaQuoleWebViewPtr UIWidget;
 
 private:
-	/** Counter to control life of qApp */
-	FThreadSafeCounter* RefCount;
-
-
 	//////////////////////////////////////////////////////////////////////////
 	// Keyboard input helpers
 

@@ -5,10 +5,13 @@
 
 #include "VaQuolePublicPCH.h"
 
-class VaQuoleWebView;
+#include <mutex>
 
 namespace VaQuole
 {
+
+class VaQuoleWebPage;
+struct UIDataKeeper;
 
 /**
  * Common library functions
@@ -18,22 +21,29 @@ extern "C"
 	/** Initialize QApplication */
 	void Init();
 
-	/** Process Qt events (we have to use it because lib lives in main thread */
-	void Update();
-
 	/** Clean all Qt and lib related data */
 	void Cleanup();
-}
 
+	/** Construct new web page view */
+	VaQuoleWebPage* ConstructNewPage();
+}
 
 /**
  * Class that handles view of one web page
  */
-class VaQuoleUI
+class VaQuoleWebPage
 {
-
 public:
-	VaQuoleUI();
+#ifdef NOT_UE
+	/** Create new instance of web UI */
+	VaQuoleWebPage();
+
+	/** Register UI page in global UI manager */
+	void Register();
+
+	/** Get internal data pointer */
+	UIDataKeeper* GetData();
+#endif
 
 	/** Destroy web view and clear memory */
 	void Destroy();
@@ -51,7 +61,7 @@ public:
 	const uchar * GrabView();
 
 	/** Change background transparency */
-	void SetTransparent(bool transparent = true);
+	void SetTransparent(bool Transparent = true);
 
 	/** Set desired few size */
 	void Resize(int w, int h);
@@ -82,9 +92,16 @@ public:
 					const bool bPressed = true,
 					const unsigned int modifiers = VaQuole::EKeyboardModifier::NoModifier);
 
+
+	//////////////////////////////////////////////////////////////////////////
+	// Internal data
+
 private:
-	/** Widget that operates web view */
-	VaQuoleWebView *WebView;
+	/** Locker to be used with external commands */
+	std::mutex mutex;
+
+	/** Data keeper to store external commands */
+	UIDataKeeper* ExtComm;
 
 };
 

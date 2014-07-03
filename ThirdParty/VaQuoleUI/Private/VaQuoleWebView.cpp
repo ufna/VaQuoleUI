@@ -7,6 +7,9 @@
 #include <QPaintEvent>
 #include <QBackingStore>
 
+namespace VaQuole
+{
+
 VaQuoleWebView::VaQuoleWebView(QWidget *parent) :
 	QWebView(parent)
 {
@@ -160,3 +163,5 @@ void VaQuoleWebView::scriptCommand(QString command)
 {
 	cachedJavaScriptCommands.append(command);
 }
+
+} // namespace VaQuole

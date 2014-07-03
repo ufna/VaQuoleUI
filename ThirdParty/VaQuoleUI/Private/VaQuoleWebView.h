@@ -9,6 +9,9 @@
 
 class QImage;
 
+namespace VaQuole
+{
+
 class VaQuoleWebView : public QWebView
 {
 	Q_OBJECT
@@ -61,5 +64,7 @@ public slots:
 	void scriptCommand(QString command);
 
 };
+
+} // namespace VaQuole
 
 #endif // VAQUOLEWEBVIEW_H
