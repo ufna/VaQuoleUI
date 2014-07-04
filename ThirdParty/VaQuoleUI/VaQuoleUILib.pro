@@ -10,7 +10,7 @@ TARGET = VaQuoleUILib
 TEMPLATE = lib
 CONFIG += staticlib
 
-DEFINES += _UNICODE NOT_UE VA_DEBUG
+DEFINES += _UNICODE NOT_UE
 
 win32 {
     !contains(QMAKE_TARGET.arch, x86_64) {
