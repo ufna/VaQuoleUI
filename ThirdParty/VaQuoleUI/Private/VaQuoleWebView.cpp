@@ -47,6 +47,11 @@ void VaQuoleWebView::updateImageCache(QSize ImageSize)
 //////////////////////////////////////////////////////////////////////////
 // View control functions
 
+bool VaQuoleWebView::getTransparency() const
+{
+	return bTransparent;
+}
+
 void VaQuoleWebView::setTransparent(bool transparent)
 {
 	bTransparent = transparent;
@@ -80,7 +85,7 @@ void VaQuoleWebView::resize(int w, int h)
 //////////////////////////////////////////////////////////////////////////
 // Data access
 
-const uchar * VaQuoleWebView::getImageData()
+uchar *VaQuoleWebView::getImageData()
 {
 	if (bTransparent)
 	{

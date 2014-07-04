@@ -28,16 +28,35 @@ struct UIDataKeeper
 	/** Unique object instance id */
 	QString ObjectId;
 
+	/** Is page should be deleted? */
+	bool bMarkedForDelete;
+
 	/** URL managament */
 	QString NewURL;
 
 	/** Transparency */
-	bool bTransparencyChanged;
 	bool bTransparent;
+	bool bDesiredTransparency;
 
+	/** Window size */
+	int Width;
+	int Height;
+	int DesiredWidth;
+	int DesiredHeight;
+
+	/** Image data */
+	uchar* ImageBits;
+
+	/** Defaults */
 	UIDataKeeper::UIDataKeeper()
 		: ObjectId(QUuid::createUuid().toString())
-	{}
+	{
+		bMarkedForDelete = false;
+
+		bDesiredTransparency = false;
+		DesiredWidth = 32;
+		DesiredHeight = 32;
+	}
 };
 
 /**
@@ -46,7 +65,7 @@ struct UIDataKeeper
 class VaThread
 {
 public:
-	VaThread() : m_stop(), m_thread() { }
+	VaThread() : m_stop(false), m_thread() { }
 	virtual ~VaThread() { try { stop(); } catch(...) { /* make something */ } }
 
 	VaThread(VaThread const&) = delete;
@@ -69,6 +88,9 @@ private:
 class VaQuoleUIManager : public VaThread
 {
 	// Begin VaThread Interface
+public:
+	~VaQuoleUIManager();
+
 protected:
 	void run();
 	// End VaThread Interface

@@ -19,6 +19,9 @@ class VaQuoleWebView : public QWebView
 public:
 	explicit VaQuoleWebView(QWidget *parent = 0);
 
+	/** Get current background transparency state */
+	bool getTransparency() const;
+
 	/** Changes background transparency */
 	void setTransparent(bool transparent = true);
 
@@ -26,7 +29,7 @@ public:
 	void resize(int w, int h);
 
 	/** Get refence to image cache data */
-	const uchar * getImageData();
+	uchar * getImageData();
 
 	/** Count cached commands */
 	int getCachedCommandsNumber();

@@ -74,8 +74,6 @@ private:
 typedef TSharedPtr<FVaQuoleTextureData, ESPMode::ThreadSafe> FVaQuoleTextureDataPtr;
 typedef TSharedRef<FVaQuoleTextureData, ESPMode::ThreadSafe> FVaQuoleTextureDataRef;
 
-typedef TSharedPtr<class VaQuole::VaQuoleWebPage, ESPMode::ThreadSafe> FVaQuoleWebViewPtr;
-
 /**
  * Class that handles view of one web page
  */
@@ -169,9 +167,6 @@ class UVaQuoleUIComponent : public UActorComponent
 	//////////////////////////////////////////////////////////////////////////
 	// Content access
 
-	/** UI widget direct access for test purposes */
-	FVaQuoleWebViewPtr GetUIWidget() { return UIWidget; }
-
 	/** Texture that stores current widget UI */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
 	int32 GetWidth() const;
@@ -216,7 +211,7 @@ protected:
 	UMaterialInstanceDynamic* MaterialInstance;
 
 	/** Web view loaded from library */
-	FVaQuoleWebViewPtr UIWidget;
+	VaQuole::VaQuoleWebPage* WebPage;
 
 private:
 	//////////////////////////////////////////////////////////////////////////

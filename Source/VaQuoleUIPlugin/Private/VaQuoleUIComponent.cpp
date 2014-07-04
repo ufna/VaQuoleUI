@@ -10,6 +10,8 @@ UVaQuoleUIComponent::UVaQuoleUIComponent(const class FPostConstructInitializePro
 	PrimaryComponentTick.bCanEverTick = true;
 	PrimaryComponentTick.TickGroup = TG_PrePhysics;
 
+	WebPage = NULL;
+
 	bool bResizeRequested = false;
 	float LastResizeRequestTime = 0.0f;
 
@@ -33,7 +35,7 @@ void UVaQuoleUIComponent::InitializeComponent()
 	InitKeyMap();
 
 	// Create web view
-	UIWidget = MakeShareable(VaQuole::ConstructNewPage());
+	WebPage = VaQuole::ConstructNewPage();
 
 	// Init texture for the first time 
 	SetTransparent(bTransparent);
@@ -48,10 +50,9 @@ void UVaQuoleUIComponent::InitializeComponent()
 void UVaQuoleUIComponent::BeginDestroy()
 {
 	// Clear web view widget
-	if (UIWidget.IsValid())
+	if (WebPage)
 	{
-		UIWidget->Destroy();
-		UIWidget.Reset();
+		WebPage->Destroy();
 	}
 
 	DestroyUITexture();
@@ -119,9 +120,9 @@ void UVaQuoleUIComponent::Resize(int32 NewWidth, int32 NewHeight)
 	Width = NewWidth;
 	Height = NewHeight;
 
-	if (UIWidget.IsValid())
+	if (WebPage)
 	{
-		UIWidget->Resize(Width, Height);
+		WebPage->Resize(Width, Height);
 	}
 
 	ResetUITexture();
@@ -132,7 +133,7 @@ void UVaQuoleUIComponent::TickComponent(float DeltaTime, enum ELevelTick TickTyp
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// Process JS callback commands (currenly HUD only)
-	if (UIWidget.IsValid())
+	/*if (UIWidget.IsValid())
 	{
 		AHUD* MyHUD = Cast<AHUD>(GetOwner());
 		APlayerController* const PlayerController = MyHUD ? MyHUD->PlayerOwner : NULL;
@@ -156,7 +157,7 @@ void UVaQuoleUIComponent::TickComponent(float DeltaTime, enum ELevelTick TickTyp
 
 		// Attn.! It's neccessary to prevent commands spam!
 		UIWidget->ClearCachedCommands();
-	}
+	}*/
 	
 	// Redraw UI texture with current widget state
 	Redraw();
@@ -175,22 +176,26 @@ void UVaQuoleUIComponent::SetTransparent(bool Transparent)
 {
 	bTransparent = Transparent;
 
-	if (UIWidget.IsValid())
+	if (WebPage)
 	{
-		UIWidget->SetTransparent(bTransparent);
+		WebPage->SetTransparent(bTransparent);
 	}
 }
 
 void UVaQuoleUIComponent::Redraw() const
 {
 	// Ignore texture update
-	if (!bEnabled)
+	if (!bEnabled || WebPage == NULL)
 	{
 		return;
 	}
-	return;
+	
+	if (WebPage->IsPendingVisualEvents())
+	{
+		return;
+	}
 
-	if (Texture && Texture->Resource && UIWidget.IsValid())
+	if (Texture && Texture->Resource)
 	{
 		// Check that texture is prepared
 		auto rhiRef = static_cast<FTexture2DResource*>(Texture->Resource)->GetTexture2DRHI();
@@ -198,7 +203,7 @@ void UVaQuoleUIComponent::Redraw() const
 			return;
 
 		// Load data from view
-		const UCHAR* my_data = UIWidget->GrabView();
+		const UCHAR* my_data = WebPage->GrabView();
 		const size_t size = Width * Height * sizeof(uint32);
 		
 		// Copy buffer for rendering thread
@@ -236,12 +241,12 @@ void UVaQuoleUIComponent::Redraw() const
 
 void UVaQuoleUIComponent::EvaluateJavaScript(const FString& ScriptSource)
 {
-	if (!bEnabled || !UIWidget.IsValid())
+	if (!bEnabled || WebPage == NULL)
 	{
 		return;
 	}
 
-	UIWidget->EvaluateJavaScript(*ScriptSource);
+	WebPage->EvaluateJavaScript(*ScriptSource);
 }
 
 
@@ -250,27 +255,27 @@ void UVaQuoleUIComponent::EvaluateJavaScript(const FString& ScriptSource)
 
 void UVaQuoleUIComponent::MouseMove(int32 X, int32 Y)
 {
-	if (!bEnabled || !UIWidget.IsValid())
+	if (!bEnabled || WebPage == NULL)
 	{
 		return;
 	}
 
-	UIWidget->MouseMove(X, Y);
+	WebPage->MouseMove(X, Y);
 }
 
 void UVaQuoleUIComponent::MouseClick(int32 X, int32 Y, VaQuole::EMouseButton::Type Button, bool bPressed, unsigned int Modifiers)
 {
-	if (!bEnabled || !UIWidget.IsValid())
+	if (!bEnabled || WebPage == NULL)
 	{
 		return;
 	}
 
-	UIWidget->MouseClick(X, Y, Button, bPressed, Modifiers);
+	WebPage->MouseClick(X, Y, Button, bPressed, Modifiers);
 }
 
 void UVaQuoleUIComponent::InputKeyQ(FViewport* Viewport, FKey Key, EInputEvent EventType, float AmountDepressed, bool bGamepad)
 {
-	if (!bEnabled || !UIWidget.IsValid() || !Key.IsValid())
+	if (!bEnabled || WebPage == NULL || !Key.IsValid())
 	{
 		return;
 	}
@@ -322,13 +327,13 @@ void UVaQuoleUIComponent::InputKeyQ(FViewport* Viewport, FKey Key, EInputEvent E
 		switch (EventType)
 		{
 		case IE_Pressed:
-			UIWidget->InputKey(KeyCode, true, Modifiers);
+			WebPage->InputKey(KeyCode, true, Modifiers);
 			break;
 		case IE_Released:
-			UIWidget->InputKey(KeyCode, false, Modifiers);
+			WebPage->InputKey(KeyCode, false, Modifiers);
 			break;
 		case IE_Repeat:
-			UIWidget->InputKey(KeyCode, true, Modifiers);
+			WebPage->InputKey(KeyCode, true, Modifiers);
 			break;
 		case IE_DoubleClick:
 			break;
@@ -355,22 +360,24 @@ void UVaQuoleUIComponent::InitKeyMap()
 
 void UVaQuoleUIComponent::OpenURL(const FString& URL)
 {
-	if (!bEnabled || UIWidget.IsValid())
+	if (!bEnabled || WebPage == NULL)
 	{
-		if (URL.Contains(TEXT("vaquole://"), ESearchCase::IgnoreCase, ESearchDir::FromStart))
-		{
-			FString GameDir = FPaths::ConvertRelativePathToFull(FPaths::GameDir());
-			FString LocalFile = URL.Replace(TEXT("vaquole://"), *GameDir, ESearchCase::IgnoreCase);
-			LocalFile = FString(TEXT("file:///")) + LocalFile;
+		return;
+	}
 
-			UE_LOG(LogVaQuole, Log, TEXT("VaQuole opens %s"), *LocalFile);
+	if (URL.Contains(TEXT("vaquole://"), ESearchCase::IgnoreCase, ESearchDir::FromStart))
+	{
+		FString GameDir = FPaths::ConvertRelativePathToFull(FPaths::GameDir());
+		FString LocalFile = URL.Replace(TEXT("vaquole://"), *GameDir, ESearchCase::IgnoreCase);
+		LocalFile = FString(TEXT("file:///")) + LocalFile;
 
-			UIWidget->OpenURL(*LocalFile);
-		}
-		else
-		{
-			UIWidget->OpenURL(*URL);
-		}
+		UE_LOG(LogVaQuole, Log, TEXT("VaQuole opens %s"), *LocalFile);
+
+		WebPage->OpenURL(*LocalFile);
+	}
+	else
+	{
+		WebPage->OpenURL(*URL);
 	}
 }
 

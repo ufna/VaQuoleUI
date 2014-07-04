@@ -7,6 +7,7 @@
 #include "VaQuoleInputHelpers.h"
 
 #include <QApplication>
+#include <QDebug>
 
 #include <QImage>
 #include <QWebFrame>
@@ -33,9 +34,11 @@ void Init()
 
 void Cleanup()
 {
-	if (pAppThread != nullptr)
+	qDebug() << "Clean so clean";
+
+	if (pAppThread != NULL)
 	{
-		pAppThread->stop();
+		pAppThread->~VaQuoleUIManager();//->stop();
 	}
 }
 
@@ -58,11 +61,15 @@ VaQuoleWebPage::VaQuoleWebPage()
 
 void VaQuoleWebPage::Destroy()
 {
-	// @TODO Mark for deletion
+	std::lock_guard<std::mutex> guard(mutex);
+
+	Q_CHECK_PTR(ExtComm);
+	ExtComm->bMarkedForDelete = true;
 }
 
 UIDataKeeper* VaQuoleWebPage::GetData()
 {
+	Q_CHECK_PTR(ExtComm);
 	return ExtComm;
 }
 
@@ -98,10 +105,10 @@ void VaQuoleWebPage::EvaluateJavaScript(const TCHAR *ScriptSource)
 
 const uchar * VaQuoleWebPage::GrabView()
 {
-	return NULL;
-	Q_CHECK_PTR(ExtComm);
+	std::lock_guard<std::mutex> guard(mutex);
 
-	//return WebView->getImageData();
+	Q_CHECK_PTR(ExtComm);
+	return ExtComm->ImageBits;
 }
 
 void VaQuoleWebPage::SetTransparent(bool Transparent)
@@ -109,16 +116,27 @@ void VaQuoleWebPage::SetTransparent(bool Transparent)
 	std::lock_guard<std::mutex> guard(mutex);
 
 	Q_CHECK_PTR(ExtComm);
-	ExtComm->bTransparent = Transparent;
-	ExtComm->bTransparencyChanged = true;
+	ExtComm->bDesiredTransparency = Transparent;
 }
 
 void VaQuoleWebPage::Resize(int w, int h)
 {
-	return;
-	Q_CHECK_PTR(ExtComm);
+	std::lock_guard<std::mutex> guard(mutex);
 
-	//WebView->resize(w,h);
+	Q_CHECK_PTR(ExtComm);
+	ExtComm->DesiredWidth = w;
+	ExtComm->DesiredHeight = h;
+}
+
+bool VaQuoleWebPage::IsPendingVisualEvents()
+{
+	std::lock_guard<std::mutex> guard(mutex);
+
+	Q_CHECK_PTR(ExtComm);
+	bool bPendingTransparency = ExtComm->bTransparent != ExtComm->bDesiredTransparency;
+	bool bPendingSize = (ExtComm->Width != ExtComm->DesiredWidth) || (ExtComm->Height != ExtComm->DesiredHeight);
+
+	return (bPendingTransparency || bPendingSize);
 }
 
 

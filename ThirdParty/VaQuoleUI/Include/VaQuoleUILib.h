@@ -66,6 +66,9 @@ public:
 	/** Set desired few size */
 	void Resize(int w, int h);
 
+	/** Is resize and transparency commands are processes? */
+	bool IsPendingVisualEvents();
+
 
 	//////////////////////////////////////////////////////////////////////////
 	// JS commands callback
@@ -95,11 +98,11 @@ public:
 
 	//////////////////////////////////////////////////////////////////////////
 	// Internal data
-
-private:
+public:
 	/** Locker to be used with external commands */
 	std::mutex mutex;
 
+private:
 	/** Data keeper to store external commands */
 	UIDataKeeper* ExtComm;
 
