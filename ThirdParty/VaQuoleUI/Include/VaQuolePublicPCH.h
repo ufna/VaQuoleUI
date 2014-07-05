@@ -28,6 +28,8 @@ namespace EMouseButton
 		MiddleButton,
 		BackButton,
 		ForwardButton,
+		ScrollUp,
+		ScrollDown
 	};
 }
 

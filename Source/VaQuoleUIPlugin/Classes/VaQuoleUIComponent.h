@@ -98,15 +98,6 @@ class UVaQuoleUIComponent : public UActorComponent
 	//////////////////////////////////////////////////////////////////////////
 	// View configuration
 
-	/** Scene UI receives input we're looking on it.
-	 * Non-scene UI (f.e. HUD) receives input directly before local PlayerController */
-	UPROPERTY(EditAnywhere, Category = "Input")
-	bool bSceneUI;
-
-	/** Maximum distance the UI can reveice input when enabled */
-	UPROPERTY(EditAnywhere, Category = "Input")
-	float SceneInputDistanceMax;
-
 	/** Indicates whether the View enabled (receive player input or not) */
 	UPROPERTY(EditAnywhere, Category = "View")
 	bool bEnabled;
@@ -128,11 +119,11 @@ class UVaQuoleUIComponent : public UActorComponent
 	FString DefaultURL;
 
 	/** Material that will be instanced to load UI texture into it */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Material)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Material")
 	UMaterialInterface* BaseMaterial;
 
 	/** Name of parameter to load UI texture into material */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Material)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Material")
 	FName TextureParameterName;
 
 
@@ -149,7 +140,7 @@ class UVaQuoleUIComponent : public UActorComponent
 
 	/** Resizes the View */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
-	void Resize(int32 NewWidth, int32 NewHeight);
+	virtual void Resize(int32 NewWidth, int32 NewHeight);
 
 	/** JS code will be passed directly to web view */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
@@ -162,6 +153,10 @@ class UVaQuoleUIComponent : public UActorComponent
 
 	//////////////////////////////////////////////////////////////////////////
 	// Content access
+
+	/** Is current view enabled? */
+	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
+	bool IsEnabled() const;
 
 	/** Texture that stores current widget UI */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
@@ -185,8 +180,15 @@ class UVaQuoleUIComponent : public UActorComponent
 
 	virtual bool InputKey(FViewport* Viewport, int32 ControllerId, FKey Key, EInputEvent EventType, float AmountDepressed = 1.f, bool bGamepad = false);
 
-	void MouseMove(int32 X, int32 Y);
-	void MouseClick(int32 X, int32 Y, VaQuole::EMouseButton::Type Button, bool bPressed = true, VaQuole::KeyModifiers Modifiers = VaQuole::KeyModifiers());
+	/** Set new mouse position (relative to widget!) */
+	void SetMousePosition(float X, float Y);
+
+protected:
+	/** Send MouseMove event to the widget */
+	void UpdateMousePosition();
+
+	/** Cached mouse position */
+	FVector2D MouseWidgetPosition;
 
 
 	//////////////////////////////////////////////////////////////////////////
@@ -205,8 +207,6 @@ protected:
 	/** Update Texture with WebView cached data */
 	void UpdateUITexture();
 
-	
-
 	/** Texture that stores current widget UI */
 	UTexture2D* Texture;
 
@@ -219,9 +219,8 @@ protected:
 
 	//////////////////////////////////////////////////////////////////////////
 	// Input helpers
-private:
 
-	/** Mouse screen position helper */
+	/** Player mouse screen position */
 	bool GetMouseScreenPosition(FVector2D& MousePosition);
 
 };

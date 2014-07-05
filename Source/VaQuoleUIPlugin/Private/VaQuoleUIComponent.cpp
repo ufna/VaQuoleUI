@@ -15,9 +15,6 @@ UVaQuoleUIComponent::UVaQuoleUIComponent(const class FPostConstructInitializePro
 	bEnabled = true;
 	bTransparent = true;
 
-	bSceneUI = false;
-	SceneInputDistanceMax = 400;
-
 	Width = 256;
 	Height = 256;
 
@@ -41,30 +38,10 @@ void UVaQuoleUIComponent::InitializeComponent()
 
 	// Open default URL
 	OpenURL(DefaultURL);
-
-	// Register page with Viewport Client to receive input
-	if (!bSceneUI && GEngine && GEngine->GameViewport)
-	{
-		UVaQuoleUIViewportClient* ViewportClient = Cast<UVaQuoleUIViewportClient>(GEngine->GameViewport);
-		if (ViewportClient)
-		{
-			ViewportClient->RegisterWebUI(this);
-		}
-	}
 }
 
 void UVaQuoleUIComponent::BeginDestroy()
 {
-	// Unregister page from Viewport
-	if (!bSceneUI && GEngine && GEngine->GameViewport)
-	{
-		UVaQuoleUIViewportClient* ViewportClient = Cast<UVaQuoleUIViewportClient>(GEngine->GameViewport);
-		if (ViewportClient)
-		{
-			ViewportClient->UnregisterWebUI(this);
-		}
-	}
-
 	// Clear web view widget
 	if (WebPage)
 	{
@@ -189,9 +166,25 @@ void UVaQuoleUIComponent::UpdateUITexture()
 	}
 }
 
+void UVaQuoleUIComponent::UpdateMousePosition()
+{
+	if (!bEnabled || WebPage == NULL)
+	{
+		return;
+	}
+
+	WebPage->MouseMove((int32)MouseWidgetPosition.X, (int32)MouseWidgetPosition.Y);
+}
+
 void UVaQuoleUIComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	// Redraw UI texture with current widget state
+	UpdateUITexture();
+
+	// Mouse move is updated each frame
+	UpdateMousePosition();
 
 	// Process JS callback commands (currenly HUD only)
 	/*if (UIWidget.IsValid())
@@ -219,9 +212,6 @@ void UVaQuoleUIComponent::TickComponent(float DeltaTime, enum ELevelTick TickTyp
 		// Attn.! It's neccessary to prevent commands spam!
 		UIWidget->ClearCachedCommands();
 	}*/
-	
-	// Redraw UI texture with current widget state
-	UpdateUITexture();
 }
 
 
@@ -293,6 +283,11 @@ void UVaQuoleUIComponent::OpenURL(const FString& URL)
 //////////////////////////////////////////////////////////////////////////
 // Content access
 
+bool UVaQuoleUIComponent::IsEnabled() const
+{
+	return bEnabled;
+}
+
 int32 UVaQuoleUIComponent::GetWidth() const
 {
 	return Width;
@@ -327,42 +322,44 @@ bool UVaQuoleUIComponent::InputKey(FViewport* Viewport, int32 ControllerId, FKey
 	}
 
 	// Check modifiers
-	bool bShiftDown = Viewport->KeyState(EKeys::LeftShift) || Viewport->KeyState(EKeys::RightShift);
-	bool bCtrlDown = Viewport->KeyState(EKeys::LeftControl) || Viewport->KeyState(EKeys::RightControl);
-	bool bAltDown = Viewport->KeyState(EKeys::LeftAlt) || Viewport->KeyState(EKeys::RightAlt);
+	VaQuole::KeyModifiers Modifiers;
+	Modifiers.bShiftDown = Viewport->KeyState(EKeys::LeftShift) || Viewport->KeyState(EKeys::RightShift);
+	Modifiers.bCtrlDown = Viewport->KeyState(EKeys::LeftControl) || Viewport->KeyState(EKeys::RightControl);
+	Modifiers.bAltDown = Viewport->KeyState(EKeys::LeftAlt) || Viewport->KeyState(EKeys::RightAlt);
 
 	if (Key.IsMouseButton())
 	{
+		VaQuole::EMouseButton::Type MouseButton;
+
 		if (Key == EKeys::MouseScrollUp)
 		{
-
+			MouseButton = VaQuole::EMouseButton::ScrollUp;
 		}
 		else if (Key == EKeys::MouseScrollDown)
 		{
-
+			MouseButton = VaQuole::EMouseButton::ScrollDown;
 		}
 		else if (Key == EKeys::LeftMouseButton)
 		{
-
+			MouseButton = VaQuole::EMouseButton::LeftButton;
 		}
 		else if (Key == EKeys::RightMouseButton)
 		{
-
+			MouseButton = VaQuole::EMouseButton::RightButton;
 		}
 		else if (Key == EKeys::MiddleMouseButton)
 		{
-
+			MouseButton = VaQuole::EMouseButton::MiddleButton;
 		}
 		else if (Key == EKeys::ThumbMouseButton)
 		{
-
+			MouseButton = VaQuole::EMouseButton::BackButton;
 		}
 		else if (Key == EKeys::ThumbMouseButton2)
 		{
-
+			MouseButton = VaQuole::EMouseButton::ForwardButton;
 		}
 
-		UE_LOG(LogVaQuole, Warning, TEXT("Views: %d"), (int)EventType);
 		// @TODO Process mouse button
 	}
 	else if (Key.IsModifierKey())
@@ -408,25 +405,14 @@ bool UVaQuoleUIComponent::InputKey(FViewport* Viewport, int32 ControllerId, FKey
 	return false;
 }
 
-void UVaQuoleUIComponent::MouseMove(int32 X, int32 Y)
+void UVaQuoleUIComponent::SetMousePosition(float X, float Y)
 {
-	if (!bEnabled || WebPage == NULL)
-	{
-		return;
-	}
-
-	WebPage->MouseMove(X, Y);
+	MouseWidgetPosition = FVector2D(X, Y);
 }
 
-void UVaQuoleUIComponent::MouseClick(int32 X, int32 Y, VaQuole::EMouseButton::Type Button, bool bPressed, VaQuole::KeyModifiers Modifiers)
-{
-	if (!bEnabled || WebPage == NULL)
-	{
-		return;
-	}
 
-	WebPage->MouseClick(X, Y, Button, bPressed, Modifiers);
-}
+//////////////////////////////////////////////////////////////////////////
+// Input helpers
 
 bool UVaQuoleUIComponent::GetMouseScreenPosition(FVector2D& MousePosition)
 {
@@ -436,7 +422,7 @@ bool UVaQuoleUIComponent::GetMouseScreenPosition(FVector2D& MousePosition)
 		MousePosition = GEngine->GameViewport->GetMousePosition();
 		return true;
 	}
-#endif	
+#endif
 
 	return false;
 }
