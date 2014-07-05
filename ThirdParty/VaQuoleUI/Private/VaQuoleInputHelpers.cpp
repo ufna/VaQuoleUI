@@ -57,12 +57,11 @@ void simulateMouseClick(QWidget* const pWidget,
 	else
 	{
 		pMouseEvent = createMouseEvent(	pWidget, QEvent::MouseButtonRelease,
-										widgetPos, Qt::NoButton,
+										widgetPos, button,
 										modifiers, button);
 	}
 
-	QApplication::instance()->sendEvent(pWidget, pMouseEvent);
-	// QApplication::processEvents();
+	QApplication::instance()->postEvent(pWidget, pMouseEvent);
 }
 
 void simulateMouseMove(	QWidget* const pWidget, const QPoint& widgetPos)
@@ -76,7 +75,7 @@ void simulateMouseMove(	QWidget* const pWidget, const QPoint& widgetPos)
 										widgetPos, Qt::NoButton,
 										Qt::NoModifier, Qt::NoButton);
 
-	QApplication::instance()->sendEvent(pWidget, pMouseEvent);
+	QApplication::instance()->postEvent(pWidget, pMouseEvent);
 }
 
 

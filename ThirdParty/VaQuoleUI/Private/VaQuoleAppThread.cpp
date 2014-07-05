@@ -114,11 +114,15 @@ void VaQuoleUIManager::run()
 			bool bTransparencyChanged = bNewTransparency != WebView->getTransparency();
 			bool bSizeChanged = (WebView->width() != NewWidth || WebView->height() != NewHeight);
 
+			// Extract mouse events
+			QList<MouseEvent> MouseEvents = ExtComm->MouseEvents;
+
 			// External data update
 			ExtComm->NewURL = "";
 			ExtComm->bTransparent = WebView->getTransparency();
 			ExtComm->Width = WebView->width();
 			ExtComm->Height = WebView->height();
+			ExtComm->MouseEvents.clear();
 
 			// Update grabbed view
 			ExtComm->ImageBits = WebView->getImageData();
@@ -157,7 +161,23 @@ void VaQuoleUIManager::run()
 			// Check URL
 			if(!NewURL.isEmpty())
 			{
+				qDebug() << "Load url:" << NewURL;
 				WebView->load(QUrl(NewURL));
+			}
+
+			// Process mouse events
+			MouseEvent Event;
+			foreach(Event, MouseEvents)
+			{
+				if(Event.button == Qt::NoButton)
+				{
+					// It's a mouse move event
+					VaQuole::simulateMouseMove(WebView, Event.eventPos);
+				}
+				else
+				{
+					VaQuole::simulateMouseClick(WebView, Event.eventPos, Event.button, Event.modifiers, Event.bButtonPressed);
+				}
 			}
 
 			// Update pages num to be sure that we're in array bounds

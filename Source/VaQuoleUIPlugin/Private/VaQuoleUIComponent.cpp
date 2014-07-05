@@ -173,7 +173,7 @@ void UVaQuoleUIComponent::UpdateMousePosition()
 		return;
 	}
 
-	WebPage->MouseMove((int32)MouseWidgetPosition.X, (int32)MouseWidgetPosition.Y);
+	WebPage->InputMouse((int32)MouseWidgetPosition.X, (int32)MouseWidgetPosition.Y);
 }
 
 void UVaQuoleUIComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
@@ -353,14 +353,26 @@ bool UVaQuoleUIComponent::InputKey(FViewport* Viewport, int32 ControllerId, FKey
 		}
 		else if (Key == EKeys::ThumbMouseButton)
 		{
-			MouseButton = VaQuole::EMouseButton::BackButton;
+			MouseButton = VaQuole::EMouseButton::XButton1;
 		}
 		else if (Key == EKeys::ThumbMouseButton2)
 		{
-			MouseButton = VaQuole::EMouseButton::ForwardButton;
+			MouseButton = VaQuole::EMouseButton::XButton2;
 		}
 
-		// @TODO Process mouse button
+		switch (EventType)
+		{
+		case IE_Pressed:
+			WebPage->InputMouse((int32)MouseWidgetPosition.X, (int32)MouseWidgetPosition.Y, MouseButton, true, Modifiers);
+			break;
+
+		case IE_Released:
+			WebPage->InputMouse((int32)MouseWidgetPosition.X, (int32)MouseWidgetPosition.Y, MouseButton, false, Modifiers);
+			break;
+
+		default:
+			break;
+		}
 	}
 	else if (Key.IsModifierKey())
 	{

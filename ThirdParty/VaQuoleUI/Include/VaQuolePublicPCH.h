@@ -26,8 +26,9 @@ namespace EMouseButton
 		LeftButton,
 		RightButton,
 		MiddleButton,
-		BackButton,
-		ForwardButton,
+		XButton1,
+		XButton2,
+		// Scroll will be processed as a mouse button too
 		ScrollUp,
 		ScrollDown
 	};

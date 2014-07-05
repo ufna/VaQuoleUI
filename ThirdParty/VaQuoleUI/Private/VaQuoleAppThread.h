@@ -5,6 +5,7 @@
 
 #include "VaQuolePublicPCH.h"
 #include "VaQuoleWebView.h"
+#include "VaQuoleInputHelpers.h"
 
 #include <atomic>
 #include <mutex>
@@ -47,6 +48,9 @@ struct UIDataKeeper
 	/** Image data */
 	uchar* ImageBits;
 	int ImageDataSize;
+
+	/** Input data */
+	QList<MouseEvent> MouseEvents;
 
 	/** Defaults */
 	UIDataKeeper::UIDataKeeper()

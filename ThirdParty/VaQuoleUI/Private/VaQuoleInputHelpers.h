@@ -3,16 +3,37 @@
 #ifndef VAQUOLEINPUTHELPERS_H
 #define VAQUOLEINPUTHELPERS_H
 
+#include "VaQuolePublicPCH.h"
+
 #include <QEvent>
 #include <QString>
+#include <QPoint>
 
 class QMouseEvent;
 class QKeyEvent;
 class QWidget;
-class QPoint;
 
 namespace VaQuole
 {
+
+//////////////////////////////////////////////////////////////////////////
+// Data structs
+
+struct MouseEvent
+{
+	QPoint eventPos;
+	Qt::MouseButton button;
+	Qt::KeyboardModifiers modifiers;
+	bool bButtonPressed;
+
+	MouseEvent::MouseEvent()
+	{
+		button = Qt::NoButton;
+		modifiers = Qt::NoModifier;
+		bButtonPressed = false;
+	}
+};
+
 
 //////////////////////////////////////////////////////////////////////////
 // Mouse input

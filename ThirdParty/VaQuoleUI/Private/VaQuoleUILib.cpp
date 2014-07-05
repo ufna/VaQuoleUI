@@ -83,7 +83,7 @@ void VaQuoleWebPage::OpenURL(const TCHAR* NewURL)
 	std::lock_guard<std::mutex> guard(mutex);
 
 	Q_CHECK_PTR(ExtComm);
-	ExtComm->NewURL = QString("http://forestmist.org/blog/html5-audio-loops/");//QString::fromUtf16((const ushort*)NewURL);
+	ExtComm->NewURL = QString::fromUtf16((const ushort*)NewURL);
 }
 
 void VaQuoleWebPage::OpenBenchmark()
@@ -168,27 +168,61 @@ void VaQuoleWebPage::ClearCachedCommands()
 //////////////////////////////////////////////////////////////////////////
 // Player input
 
-void VaQuoleWebPage::MouseMove(int X, int Y)
-{
-	return;
-	Q_CHECK_PTR(ExtComm);
-
-	//VaQuole::simulateMouseMove(WebView, QPoint(x,y));
-	//pApp->processEvents();
-}
-
-void VaQuoleWebPage::MouseClick(int X, int Y, VaQuole::EMouseButton::Type Button,
-								bool bPressed,
+void VaQuoleWebPage::InputMouse(int X, int Y, VaQuole::EMouseButton::Type Button,
+								bool bMouseDown,
 								const VaQuole::KeyModifiers Modifiers)
 {
-	return;
-	Q_CHECK_PTR(ExtComm);
+	std::lock_guard<std::mutex> guard(mutex);
 
-	/*VaQuole::simulateMouseClick(WebView, QPoint(x,y),
-								(Qt::MouseButton) button,
-								(Qt::KeyboardModifiers) modifiers,
-								bPressed);*/
-	//pApp->processEvents();
+	MouseEvent Event;
+	Event.eventPos = QPoint(X,Y);
+	Event.bButtonPressed = bMouseDown;
+
+	// Convert button from UE4 to Qt enum value
+	switch (Button)
+	{
+	case VaQuole::EMouseButton::NoButton:
+		Event.button = Qt::NoButton;
+		break;
+
+	case VaQuole::EMouseButton::LeftButton:
+		Event.button = Qt::LeftButton;
+		break;
+
+	case VaQuole::EMouseButton::RightButton:
+		Event.button = Qt::RightButton;
+		break;
+
+	case VaQuole::EMouseButton::MiddleButton:
+		Event.button = Qt::MiddleButton;
+		break;
+
+	case VaQuole::EMouseButton::XButton1:
+		Event.button = Qt::XButton1;
+		break;
+
+	case VaQuole::EMouseButton::XButton2:
+		Event.button = Qt::XButton2;
+		break;
+
+	case VaQuole::EMouseButton::ScrollUp:
+		break;
+
+	case VaQuole::EMouseButton::ScrollDown:
+		break;
+
+	default:
+		Event.button = Qt::NoButton;
+		break;
+	}
+
+	// Prepare modifiers
+	Modifiers.bAltDown == true ? Event.modifiers |= Qt::AltModifier : 0;
+	Modifiers.bCtrlDown == true ? Event.modifiers |= Qt::ControlModifier : 0;
+	Modifiers.bShiftDown == true ? Event.modifiers |= Qt::ShiftModifier : 0;
+
+	Q_CHECK_PTR(ExtComm);
+	ExtComm->MouseEvents.append(Event);
 }
 
 void VaQuoleWebPage::InputKey(const TCHAR *Key,

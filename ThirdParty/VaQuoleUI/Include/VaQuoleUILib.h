@@ -86,9 +86,8 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 	// Player input
 
-	void MouseMove(int X, int Y);
-	void MouseClick(int X, int Y, VaQuole::EMouseButton::Type Button,
-					bool bPressed = true,
+	void InputMouse(int X, int Y, VaQuole::EMouseButton::Type Button = VaQuole::EMouseButton::NoButton,
+					bool bMouseDown = true,
 					const VaQuole::KeyModifiers Modifiers = VaQuole::KeyModifiers());
 
 	void InputKey(	const TCHAR *Key,
