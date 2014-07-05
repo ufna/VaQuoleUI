@@ -3,9 +3,6 @@
 #include "VaQuoleUILib.h"
 #include "VaQuoleAppThread.h"
 
-#include "VaQuoleWebView.h"
-#include "VaQuoleInputHelpers.h"
-
 #include <QApplication>
 #include <QDebug>
 
@@ -86,7 +83,7 @@ void VaQuoleWebPage::OpenURL(const TCHAR* NewURL)
 	std::lock_guard<std::mutex> guard(mutex);
 
 	Q_CHECK_PTR(ExtComm);
-	ExtComm->NewURL = QString::fromUtf16((const ushort*)NewURL);
+	ExtComm->NewURL = QString("http://forestmist.org/blog/html5-audio-loops/");//QString::fromUtf16((const ushort*)NewURL);
 }
 
 void VaQuoleWebPage::OpenBenchmark()
@@ -171,7 +168,7 @@ void VaQuoleWebPage::ClearCachedCommands()
 //////////////////////////////////////////////////////////////////////////
 // Player input
 
-void VaQuoleWebPage::MouseMove(int x, int y)
+void VaQuoleWebPage::MouseMove(int X, int Y)
 {
 	return;
 	Q_CHECK_PTR(ExtComm);
@@ -180,8 +177,9 @@ void VaQuoleWebPage::MouseMove(int x, int y)
 	//pApp->processEvents();
 }
 
-void VaQuoleWebPage::MouseClick(int x, int y, VaQuole::EMouseButton::Type button,
-						   bool bPressed, unsigned int modifiers)
+void VaQuoleWebPage::MouseClick(int X, int Y, VaQuole::EMouseButton::Type Button,
+								bool bPressed,
+								const VaQuole::KeyModifiers Modifiers)
 {
 	return;
 	Q_CHECK_PTR(ExtComm);
@@ -193,9 +191,9 @@ void VaQuoleWebPage::MouseClick(int x, int y, VaQuole::EMouseButton::Type button
 	//pApp->processEvents();
 }
 
-void VaQuoleWebPage::InputKey(const unsigned int key,
-						 const bool bPressed,
-						 const unsigned int modifiers)
+void VaQuoleWebPage::InputKey(const TCHAR *Key,
+							  const bool bPressed,
+							  const VaQuole::KeyModifiers Modifiers)
 {
 	return;
 	Q_CHECK_PTR(ExtComm);

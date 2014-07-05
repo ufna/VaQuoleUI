@@ -12,12 +12,11 @@ UVaQuoleUIComponent::UVaQuoleUIComponent(const class FPostConstructInitializePro
 
 	WebPage = NULL;
 
-	bool bResizeRequested = false;
-	float LastResizeRequestTime = 0.0f;
-
 	bEnabled = true;
-	bHUD = true;
 	bTransparent = true;
+
+	bSceneUI = false;
+	SceneInputDistanceMax = 400;
 
 	Width = 256;
 	Height = 256;
@@ -31,9 +30,6 @@ void UVaQuoleUIComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
 
-	// Init key map storage
-	InitKeyMap();
-
 	// Create web view
 	WebPage = VaQuole::ConstructNewPage();
 
@@ -45,10 +41,30 @@ void UVaQuoleUIComponent::InitializeComponent()
 
 	// Open default URL
 	OpenURL(DefaultURL);
+
+	// Register page with Viewport Client to receive input
+	if (!bSceneUI && GEngine && GEngine->GameViewport)
+	{
+		UVaQuoleUIViewportClient* ViewportClient = Cast<UVaQuoleUIViewportClient>(GEngine->GameViewport);
+		if (ViewportClient)
+		{
+			ViewportClient->RegisterWebUI(this);
+		}
+	}
 }
 
 void UVaQuoleUIComponent::BeginDestroy()
 {
+	// Unregister page from Viewport
+	if (!bSceneUI && GEngine && GEngine->GameViewport)
+	{
+		UVaQuoleUIViewportClient* ViewportClient = Cast<UVaQuoleUIViewportClient>(GEngine->GameViewport);
+		if (ViewportClient)
+		{
+			ViewportClient->UnregisterWebUI(this);
+		}
+	}
+
 	// Clear web view widget
 	if (WebPage)
 	{
@@ -58,17 +74,6 @@ void UVaQuoleUIComponent::BeginDestroy()
 	DestroyUITexture();
 
 	Super::BeginDestroy();
-}
-
-void UVaQuoleUIComponent::ResetUITexture()
-{
-	DestroyUITexture();
-
-	Texture = UTexture2D::CreateTransient(Width,Height);
-	Texture->AddToRoot();
-	Texture->UpdateResource();
-
-	ResetMaterialInstance();
 }
 
 void UVaQuoleUIComponent::DestroyUITexture()
@@ -89,9 +94,20 @@ void UVaQuoleUIComponent::DestroyUITexture()
 	}
 }
 
+void UVaQuoleUIComponent::ResetUITexture()
+{
+	DestroyUITexture();
+
+	Texture = UTexture2D::CreateTransient(Width,Height);
+	Texture->AddToRoot();
+	Texture->UpdateResource();
+
+	ResetMaterialInstance();
+}
+
 void UVaQuoleUIComponent::ResetMaterialInstance()
 {
-	if (bHUD || !Texture || !BaseMaterial || TextureParameterName.IsNone())
+	if (!Texture || !BaseMaterial || TextureParameterName.IsNone())
 	{
 		return;
 	}
@@ -115,17 +131,62 @@ void UVaQuoleUIComponent::ResetMaterialInstance()
 	MaterialInstance->SetTextureParameterValue(TextureParameterName, GetTexture());
 }
 
-void UVaQuoleUIComponent::Resize(int32 NewWidth, int32 NewHeight)
+void UVaQuoleUIComponent::UpdateUITexture()
 {
-	Width = NewWidth;
-	Height = NewHeight;
-
-	if (WebPage)
+	// Ignore texture update
+	if (!bEnabled || WebPage == NULL)
 	{
-		WebPage->Resize(Width, Height);
+		return;
 	}
 
-	ResetUITexture();
+	// Don't update when WebView resizes or changes texture format
+	if (WebPage->IsPendingVisualEvents())
+	{
+		return;
+	}
+
+	if (Texture && Texture->Resource)
+	{
+		// Check that texture is prepared
+		auto rhiRef = static_cast<FTexture2DResource*>(Texture->Resource)->GetTexture2DRHI();
+		if (!rhiRef)
+			return;
+
+		// Load data from view
+		const UCHAR* my_data = WebPage->GrabView();
+		const size_t size = Width * Height * sizeof(uint32);
+
+		// Copy buffer for rendering thread
+		TArray<uint32> ViewBuffer;
+		ViewBuffer.Init(Width * Height);
+		FMemory::Memcpy(ViewBuffer.GetData(), my_data, size);
+
+		// Constuct buffer storage
+		FVaQuoleTextureDataPtr DataPtr = MakeShareable(new FVaQuoleTextureData);
+		DataPtr->SetRawData(Width, Height, sizeof(uint32), ViewBuffer);
+
+		// Cleanup
+		ViewBuffer.Empty();
+		my_data = 0;
+
+		ENQUEUE_UNIQUE_RENDER_COMMAND_THREEPARAMETER(
+			UpdateVaQuoleTexture,
+			FVaQuoleTextureDataPtr, ImageData, DataPtr,
+			FTexture2DRHIRef, TargetTexture, rhiRef,
+			const size_t, DataSize, size,
+			{
+			uint32 stride = 0;
+			void* MipData = GDynamicRHI->RHILockTexture2D(TargetTexture, 0, RLM_WriteOnly, stride, false);
+
+			if (MipData)
+			{
+				FMemory::Memcpy(MipData, ImageData->GetRawBytesPtr(), ImageData->GetDataSize());
+				GDynamicRHI->RHIUnlockTexture2D(TargetTexture, 0, false);
+			}
+
+			ImageData.Reset();
+			});
+	}
 }
 
 void UVaQuoleUIComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
@@ -160,7 +221,7 @@ void UVaQuoleUIComponent::TickComponent(float DeltaTime, enum ELevelTick TickTyp
 	}*/
 	
 	// Redraw UI texture with current widget state
-	Redraw();
+	UpdateUITexture();
 }
 
 
@@ -182,61 +243,17 @@ void UVaQuoleUIComponent::SetTransparent(bool Transparent)
 	}
 }
 
-void UVaQuoleUIComponent::Redraw() const
+void UVaQuoleUIComponent::Resize(int32 NewWidth, int32 NewHeight)
 {
-	// Ignore texture update
-	if (!bEnabled || WebPage == NULL)
+	Width = NewWidth;
+	Height = NewHeight;
+
+	if (WebPage)
 	{
-		return;
-	}
-	
-	if (WebPage->IsPendingVisualEvents())
-	{
-		return;
+		WebPage->Resize(Width, Height);
 	}
 
-	if (Texture && Texture->Resource)
-	{
-		// Check that texture is prepared
-		auto rhiRef = static_cast<FTexture2DResource*>(Texture->Resource)->GetTexture2DRHI();
-		if (!rhiRef)
-			return;
-
-		// Load data from view
-		const UCHAR* my_data = WebPage->GrabView();
-		const size_t size = Width * Height * sizeof(uint32);
-		
-		// Copy buffer for rendering thread
-		TArray<uint32> ViewBuffer;
-		ViewBuffer.Init(Width * Height);
-		FMemory::Memcpy(ViewBuffer.GetData(), my_data, size);
-
-		// Constuct buffer storage
-		FVaQuoleTextureDataPtr DataPtr = MakeShareable(new FVaQuoleTextureData);
-		DataPtr->SetRawData(Width, Height, sizeof(uint32), ViewBuffer);
-
-		// Cleanup
-		ViewBuffer.Empty();
-		my_data = 0;
-
-		ENQUEUE_UNIQUE_RENDER_COMMAND_THREEPARAMETER(
-			UpdateVaQuoleTexture,
-			FVaQuoleTextureDataPtr, ImageData, DataPtr,
-			FTexture2DRHIRef, TargetTexture, rhiRef,
-			const size_t, DataSize, size,
-			{
-				uint32 stride = 0;
-				void* MipData = GDynamicRHI->RHILockTexture2D(TargetTexture, 0, RLM_WriteOnly, stride, false);
-
-				if (MipData)
-				{
-					FMemory::Memcpy(MipData, ImageData->GetRawBytesPtr(), ImageData->GetDataSize());
-					GDynamicRHI->RHIUnlockTexture2D(TargetTexture, 0, false);
-				}
-
-				ImageData.Reset();
-			});
-	}
+	ResetUITexture();
 }
 
 void UVaQuoleUIComponent::EvaluateJavaScript(const FString& ScriptSource)
@@ -248,115 +265,6 @@ void UVaQuoleUIComponent::EvaluateJavaScript(const FString& ScriptSource)
 
 	WebPage->EvaluateJavaScript(*ScriptSource);
 }
-
-
-//////////////////////////////////////////////////////////////////////////
-// Player input
-
-void UVaQuoleUIComponent::MouseMove(int32 X, int32 Y)
-{
-	if (!bEnabled || WebPage == NULL)
-	{
-		return;
-	}
-
-	WebPage->MouseMove(X, Y);
-}
-
-void UVaQuoleUIComponent::MouseClick(int32 X, int32 Y, VaQuole::EMouseButton::Type Button, bool bPressed, unsigned int Modifiers)
-{
-	if (!bEnabled || WebPage == NULL)
-	{
-		return;
-	}
-
-	WebPage->MouseClick(X, Y, Button, bPressed, Modifiers);
-}
-
-void UVaQuoleUIComponent::InputKeyQ(FViewport* Viewport, FKey Key, EInputEvent EventType, float AmountDepressed, bool bGamepad)
-{
-	if (!bEnabled || WebPage == NULL || !Key.IsValid())
-	{
-		return;
-	}
-
-	if (Key.IsMouseButton())
-	{
-		// @TODO Process mouse button
-	}
-	else if (Key.IsModifierKey())
-	{
-		
-	}
-	else
-	{
-		// Check modifiers
-		bool bShiftDown = Viewport->KeyState(EKeys::LeftShift) || Viewport->KeyState(EKeys::RightShift);
-		bool bCtrlDown = Viewport->KeyState(EKeys::LeftControl) || Viewport->KeyState(EKeys::RightControl);
-		bool bAltDown = Viewport->KeyState(EKeys::LeftAlt) || Viewport->KeyState(EKeys::RightAlt);
-
-		uint32 Modifiers = VaQuole::EKeyboardModifier::NoModifier;
-
-		if (bShiftDown)
-		{
-			Modifiers |= VaQuole::EKeyboardModifier::ShiftModifier;
-		}
-
-		if (bCtrlDown)
-		{
-			Modifiers |= VaQuole::EKeyboardModifier::ControlModifier;
-		}
-
-		if (bAltDown)
-		{
-			Modifiers |= VaQuole::EKeyboardModifier::AltModifier;
-		}
-
-		// Check extra key codes
-		uint32 KeyCode = 0x20;
-		if (Key == EKeys::BackSpace)
-		{
-			KeyCode = 0x01000003;
-		}
-		else
-		{
-			KeyCode = GetKeyCodeFromKey(Key);
-		}
-
-		// Send event
-		switch (EventType)
-		{
-		case IE_Pressed:
-			WebPage->InputKey(KeyCode, true, Modifiers);
-			break;
-		case IE_Released:
-			WebPage->InputKey(KeyCode, false, Modifiers);
-			break;
-		case IE_Repeat:
-			WebPage->InputKey(KeyCode, true, Modifiers);
-			break;
-		case IE_DoubleClick:
-			break;
-		case IE_Axis:
-			break;
-		case IE_MAX:
-			break;
-		default:
-			break;
-		}
-	}
-}
-
-void UVaQuoleUIComponent::InitKeyMap()
-{
-	for (int i = 0; i <= MAX_int16; i++)
-	{
-		KeyMapEnumToCode.Add(FInputKeyManager::Get().GetKeyFromCodes(i, i), i);
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////
-// Content control
 
 void UVaQuoleUIComponent::OpenURL(const FString& URL)
 {
@@ -404,24 +312,131 @@ UTexture2D* UVaQuoleUIComponent::GetTexture() const
 
 UMaterialInstanceDynamic* UVaQuoleUIComponent::GetMaterialInstance() const
 {
-	if (bHUD)
-	{
-		return nullptr;
-	}
-
-	check(MaterialInstance);
-
 	return MaterialInstance;
 }
 
-uint16 UVaQuoleUIComponent::GetKeyCodeFromKey(FKey& Key) const
-{
-	const uint16* Value = KeyMapEnumToCode.Find(Key);
 
-	if (Value != NULL)
+//////////////////////////////////////////////////////////////////////////
+// Player input
+
+bool UVaQuoleUIComponent::InputKey(FViewport* Viewport, int32 ControllerId, FKey Key, EInputEvent EventType, float AmountDepressed, bool bGamepad)
+{
+	if (!bEnabled || WebPage == NULL || !Key.IsValid())
 	{
-		return *Value;
+		return false;
 	}
-	
-	return 0;
+
+	// Check modifiers
+	bool bShiftDown = Viewport->KeyState(EKeys::LeftShift) || Viewport->KeyState(EKeys::RightShift);
+	bool bCtrlDown = Viewport->KeyState(EKeys::LeftControl) || Viewport->KeyState(EKeys::RightControl);
+	bool bAltDown = Viewport->KeyState(EKeys::LeftAlt) || Viewport->KeyState(EKeys::RightAlt);
+
+	if (Key.IsMouseButton())
+	{
+		if (Key == EKeys::MouseScrollUp)
+		{
+
+		}
+		else if (Key == EKeys::MouseScrollDown)
+		{
+
+		}
+		else if (Key == EKeys::LeftMouseButton)
+		{
+
+		}
+		else if (Key == EKeys::RightMouseButton)
+		{
+
+		}
+		else if (Key == EKeys::MiddleMouseButton)
+		{
+
+		}
+		else if (Key == EKeys::ThumbMouseButton)
+		{
+
+		}
+		else if (Key == EKeys::ThumbMouseButton2)
+		{
+
+		}
+
+		UE_LOG(LogVaQuole, Warning, TEXT("Views: %d"), (int)EventType);
+		// @TODO Process mouse button
+	}
+	else if (Key.IsModifierKey())
+	{
+
+	}
+	else
+	{
+		// Check extra key codes
+		/*uint32 KeyCode = 0x20;
+		if (Key == EKeys::BackSpace)
+		{
+			KeyCode = 0x01000003;
+		}
+		else
+		{
+			KeyCode = GetKeyCodeFromKey(Key);
+		}*/
+
+		// Send event
+		/*switch (EventType)
+		{
+		case IE_Pressed:
+			WebPage->InputKey(KeyCode, true, Modifiers);
+			break;
+		case IE_Released:
+			WebPage->InputKey(KeyCode, false, Modifiers);
+			break;
+		case IE_Repeat:
+			WebPage->InputKey(KeyCode, true, Modifiers);
+			break;
+		case IE_DoubleClick:
+			break;
+		case IE_Axis:
+			break;
+		case IE_MAX:
+			break;
+		default:
+			break;
+		}*/
+	}
+
+	return false;
+}
+
+void UVaQuoleUIComponent::MouseMove(int32 X, int32 Y)
+{
+	if (!bEnabled || WebPage == NULL)
+	{
+		return;
+	}
+
+	WebPage->MouseMove(X, Y);
+}
+
+void UVaQuoleUIComponent::MouseClick(int32 X, int32 Y, VaQuole::EMouseButton::Type Button, bool bPressed, VaQuole::KeyModifiers Modifiers)
+{
+	if (!bEnabled || WebPage == NULL)
+	{
+		return;
+	}
+
+	WebPage->MouseClick(X, Y, Button, bPressed, Modifiers);
+}
+
+bool UVaQuoleUIComponent::GetMouseScreenPosition(FVector2D& MousePosition)
+{
+#if PLATFORM_DESKTOP
+	if (GEngine && GEngine->GameViewport)
+	{
+		MousePosition = GEngine->GameViewport->GetMousePosition();
+		return true;
+	}
+#endif	
+
+	return false;
 }

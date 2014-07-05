@@ -62,10 +62,13 @@ struct FVaQuoleTextureData
 private:
 	/** Raw uncompressed texture data */
 	TArray<uint32> Bytes;
+
 	/** Width of the texture */
 	uint32 Width;
+
 	/** Height of the texture */
 	uint32 Height;
+
 	/** The number of bytes of each pixel */
 	uint32 StrideBytes;
 
@@ -82,16 +85,31 @@ class UVaQuoleUIComponent : public UActorComponent
 {
 	GENERATED_UCLASS_BODY()
 
+	// Begin UActorComponent Interface
+	virtual void InitializeComponent() OVERRIDE;
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) OVERRIDE;
+	// End UActorComponent Interface
+
+	// Begin UObject Interface
+	virtual void BeginDestroy() OVERRIDE;
+	// End UObject Interface
+
+
 	//////////////////////////////////////////////////////////////////////////
 	// View configuration
+
+	/** Scene UI receives input we're looking on it.
+	 * Non-scene UI (f.e. HUD) receives input directly before local PlayerController */
+	UPROPERTY(EditAnywhere, Category = "Input")
+	bool bSceneUI;
+
+	/** Maximum distance the UI can reveice input when enabled */
+	UPROPERTY(EditAnywhere, Category = "Input")
+	float SceneInputDistanceMax;
 
 	/** Indicates whether the View enabled (receive player input or not) */
 	UPROPERTY(EditAnywhere, Category = "View")
 	bool bEnabled;
-
-	/** Indicates whether the View used as HUD (material instance won't be created for HUD)*/
-	UPROPERTY(EditAnywhere, Category = "View")
-	bool bHUD;
 
 	/** Indicates whether the View is transparent or composed on white */
 	UPROPERTY(EditAnywhere, Category = "View")
@@ -133,35 +151,13 @@ class UVaQuoleUIComponent : public UActorComponent
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
 	void Resize(int32 NewWidth, int32 NewHeight);
 
-	/** Requests a View to completely re-draw itself */
-	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
-	void Redraw() const;
-
 	/** JS code will be passed directly to web view */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
 	void EvaluateJavaScript(const FString& ScriptSource);
 
-
-	//////////////////////////////////////////////////////////////////////////
-	// Content control
-
 	/** Requests a new URL to be loaded in the View */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
 	void OpenURL(const FString& URL);
-
-
-	//////////////////////////////////////////////////////////////////////////
-	// Player input
-
-	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
-	void MouseMove(int32 X, int32 Y);
-
-	// @TODO Make enum type blueprintable
-	// UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
-	void MouseClick(int32 X, int32 Y, VaQuole::EMouseButton::Type Button, bool bPressed = true, unsigned int Modifiers = VaQuole::EKeyboardModifier::NoModifier);
-
-	//UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
-	void InputKeyQ(FViewport* Viewport, FKey Key, EInputEvent EventType, float AmountDepressed, bool bGamepad);
 
 
 	//////////////////////////////////////////////////////////////////////////
@@ -183,26 +179,33 @@ class UVaQuoleUIComponent : public UActorComponent
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
 	UMaterialInstanceDynamic* GetMaterialInstance() const;
 
-	/** Key to unicode conversion */
-	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
-	uint16 GetKeyCodeFromKey(FKey& Key) const;
-	
 
-public:
-	// Begin UActorComponent Interface
-	virtual void InitializeComponent() OVERRIDE;
-	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) OVERRIDE;
-	// End UActorComponent Interface
+	//////////////////////////////////////////////////////////////////////////
+	// Player input
 
-	// Begin UObject Interface
-	virtual void BeginDestroy() OVERRIDE;
-	// End UObject Interface
+	virtual bool InputKey(FViewport* Viewport, int32 ControllerId, FKey Key, EInputEvent EventType, float AmountDepressed = 1.f, bool bGamepad = false);
+
+	void MouseMove(int32 X, int32 Y);
+	void MouseClick(int32 X, int32 Y, VaQuole::EMouseButton::Type Button, bool bPressed = true, VaQuole::KeyModifiers Modifiers = VaQuole::KeyModifiers());
+
+
+	//////////////////////////////////////////////////////////////////////////
+	// Materials setup
 
 protected:
-	void ResetUITexture();
+	/** Release Texture resources */
 	void DestroyUITexture();
 
+	/** Release current Texture and create new with desired size */
+	void ResetUITexture();
+
+	/** Material instance update */
 	void ResetMaterialInstance();
+	
+	/** Update Texture with WebView cached data */
+	void UpdateUITexture();
+
+	
 
 	/** Texture that stores current widget UI */
 	UTexture2D* Texture;
@@ -213,14 +216,12 @@ protected:
 	/** Web view loaded from library */
 	VaQuole::VaQuoleWebPage* WebPage;
 
-private:
+
 	//////////////////////////////////////////////////////////////////////////
-	// Keyboard input helpers
+	// Input helpers
+private:
 
-	/** Map unicode values for keys (because some UE4 functions are not implemented yet) */
-	TMap<FKey, uint16> KeyMapEnumToCode;
-
-	/** Initializes key map */
-	void InitKeyMap();
+	/** Mouse screen position helper */
+	bool GetMouseScreenPosition(FVector2D& MousePosition);
 
 };

@@ -46,6 +46,7 @@ struct UIDataKeeper
 
 	/** Image data */
 	uchar* ImageBits;
+	int ImageDataSize;
 
 	/** Defaults */
 	UIDataKeeper::UIDataKeeper()
@@ -56,6 +57,9 @@ struct UIDataKeeper
 		bDesiredTransparency = false;
 		DesiredWidth = 32;
 		DesiredHeight = 32;
+
+		ImageBits = 0;
+		ImageDataSize = 0;
 	}
 };
 
@@ -97,6 +101,10 @@ protected:
 
 public:
 	void AddPage(VaQuoleWebPage *Page);
+
+private:
+	/** Check that we have valid buffer to keep the image bits */
+	void UpdateImageBuffer(UIDataKeeper *ExtComm, int DataSize);
 
 private:
 	/** Locker to be used with external commands */

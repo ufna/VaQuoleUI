@@ -20,7 +20,4 @@ DECLARE_LOG_CATEGORY_EXTERN(LogVaQuole, Log, All);
 #include "HideWindowsPlatformTypes.h"
 
 // Engine plugin implementation
-#include "VaQuoleUIComponent.h"
-#include "VaQuoleHUD.h"
-#include "VaQuoleUIViewportClient.h"
-#include "VaQuoleUIPlayerController.h"
+#include "VaQuoleUIPluginClasses.h"

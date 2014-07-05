@@ -44,6 +44,7 @@ void VaQuoleWebView::updateImageCache(QSize ImageSize)
 	}
 }
 
+
 //////////////////////////////////////////////////////////////////////////
 // View control functions
 
@@ -94,6 +95,17 @@ uchar *VaQuoleWebView::getImageData()
 
 	QImage *backBuffer = dynamic_cast<QImage*>(backingStore()->paintDevice());
 	return backBuffer->bits();
+}
+
+int VaQuoleWebView::getImageDataSize()
+{
+	if (bTransparent)
+	{
+		return ImageCache.byteCount();
+	}
+
+	QImage *backBuffer = dynamic_cast<QImage*>(backingStore()->paintDevice());
+	return backBuffer->byteCount();
 }
 
 int VaQuoleWebView::getCachedCommandsNumber()

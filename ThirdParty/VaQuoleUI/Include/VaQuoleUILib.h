@@ -86,14 +86,14 @@ public:
 	//////////////////////////////////////////////////////////////////////////
 	// Player input
 
-	void MouseMove(int x, int y);
-	void MouseClick(int x, int y, VaQuole::EMouseButton::Type button,
+	void MouseMove(int X, int Y);
+	void MouseClick(int X, int Y, VaQuole::EMouseButton::Type Button,
 					bool bPressed = true,
-					unsigned int modifiers = VaQuole::EKeyboardModifier::NoModifier);
+					const VaQuole::KeyModifiers Modifiers = VaQuole::KeyModifiers());
 
-	void InputKey(	const unsigned int key,
+	void InputKey(	const TCHAR *Key,
 					const bool bPressed = true,
-					const unsigned int modifiers = VaQuole::EKeyboardModifier::NoModifier);
+					const VaQuole::KeyModifiers Modifiers = VaQuole::KeyModifiers());
 
 
 	//////////////////////////////////////////////////////////////////////////
@@ -103,11 +103,10 @@ public:
 	std::mutex mutex;
 
 private:
-	/** Data keeper to store external commands */
+	/** Data keeper to share data between threads */
 	UIDataKeeper* ExtComm;
 
 };
-
 
 } // namespace VaQuole
 

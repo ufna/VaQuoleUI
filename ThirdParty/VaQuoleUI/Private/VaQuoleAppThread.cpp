@@ -211,4 +211,17 @@ void VaQuoleUIManager::AddPage(VaQuoleWebPage *Page)
 	WebPages.append(Page);
 }
 
+void VaQuoleUIManager::UpdateImageBuffer(UIDataKeeper *ExtComm, int DataSize)
+{
+	if(ExtComm->ImageDataSize != DataSize)
+	{
+		if(ExtComm->ImageBits)
+		{
+			delete ExtComm->ImageBits;
+		}
+
+		ExtComm->ImageBits = new uchar[DataSize];
+	}
+}
+
 } // namespace VaQuole

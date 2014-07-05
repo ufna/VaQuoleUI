@@ -31,6 +31,9 @@ public:
 	/** Get refence to image cache data */
 	uchar * getImageData();
 
+	/** Cached image data size to make a memcopy */
+	int getImageDataSize();
+
 	/** Count cached commands */
 	int getCachedCommandsNumber();
 
