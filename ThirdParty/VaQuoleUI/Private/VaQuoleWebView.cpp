@@ -164,6 +164,11 @@ void VaQuoleWebView::paintEvent(QPaintEvent *ev)
 	p.end();
 }
 
+void VaQuoleWebView::contextMenuEvent(QContextMenuEvent *event)
+{
+	qDebug() << "Context menu";
+}
+
 
 //////////////////////////////////////////////////////////////////////////
 // Page communication

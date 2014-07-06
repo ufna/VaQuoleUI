@@ -174,6 +174,12 @@ void VaQuoleUIManager::run()
 					// It's a mouse move event
 					VaQuole::simulateMouseMove(WebView, Event.eventPos);
 				}
+				else if(Event.button == Qt::RightButton && Event.bButtonPressed == true)
+				{
+					// We're simulation right mouse click as a context menu request
+					// because QWebView doesn't process RMB properly
+					VaQuole::simulateContextMenu(WebView, Event.eventPos, Event.modifiers);
+				}
 				else
 				{
 					VaQuole::simulateMouseClick(WebView, Event.eventPos, Event.button, Event.modifiers, Event.bButtonPressed);

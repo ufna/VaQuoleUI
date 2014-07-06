@@ -53,6 +53,10 @@ void simulateMouseClick(	QWidget* const pWidget,
 
 void simulateMouseMove(	QWidget* const pWidget, const QPoint& widgetPos);
 
+void simulateContextMenu(	QWidget* const pWidget,
+							const QPoint& widgetPos,
+							const Qt::KeyboardModifiers modifiers);
+
 
 //////////////////////////////////////////////////////////////////////////
 // Keyboard input

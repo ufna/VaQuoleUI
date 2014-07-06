@@ -3,9 +3,11 @@
 #include "VaQuoleInputHelpers.h"
 
 #include <QApplication>
-#include <QMouseEvent>
 #include <QPoint>
 #include <QWidget>
+
+#include <QMouseEvent>
+#include <QContextMenuEvent>
 
 namespace VaQuole
 {
@@ -76,6 +78,18 @@ void simulateMouseMove(	QWidget* const pWidget, const QPoint& widgetPos)
 										Qt::NoModifier, Qt::NoButton);
 
 	QApplication::instance()->postEvent(pWidget, pMouseEvent);
+}
+
+void simulateContextMenu(	QWidget* const pWidget,
+							const QPoint& widgetPos,
+							const Qt::KeyboardModifiers modifiers)
+{
+	QContextMenuEvent* Event = new QContextMenuEvent(QContextMenuEvent::Mouse,
+													 widgetPos,
+													 pWidget->mapToGlobal(widgetPos),
+													 modifiers);
+
+	QApplication::instance()->postEvent(pWidget, Event);
 }
 
 
