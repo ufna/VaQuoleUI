@@ -19,7 +19,7 @@
 namespace VaQuole
 {
 
-class VaQuoleWebPage;
+class VaQuoleWebUI;
 
 /**
  * Keeps data that we can't store in header because of non-Qt lib use
@@ -104,7 +104,7 @@ protected:
 	// End VaThread Interface
 
 public:
-	void AddPage(VaQuoleWebPage *Page);
+	void AddPage(VaQuoleWebUI *Page);
 
 private:
 	/** Check that we have valid buffer to keep the image bits */
@@ -115,7 +115,7 @@ private:
 	std::mutex mutex;
 
 	/** List of all opened web pages */
-	QList<VaQuoleWebPage*> WebPages;
+	QList<VaQuoleWebUI*> WebPages;
 
 	/** Map of all Qt WebView windows */
 	QHash<QString, VaQuoleWebView*> WebViews;

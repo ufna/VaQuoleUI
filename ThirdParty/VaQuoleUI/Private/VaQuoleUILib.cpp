@@ -39,9 +39,9 @@ void Cleanup()
 	}
 }
 
-VaQuoleWebPage* ConstructNewPage()
+VaQuoleWebUI* ConstructNewUI()
 {
-	VaQuoleWebPage* NewUI = new VaQuoleWebPage();
+	VaQuoleWebUI* NewUI = new VaQuoleWebUI();
 	NewUI->Register();
 
 	return NewUI;
@@ -51,12 +51,12 @@ VaQuoleWebPage* ConstructNewPage()
 //////////////////////////////////////////////////////////////////////////
 // WebPage class
 
-VaQuoleWebPage::VaQuoleWebPage()
+VaQuoleWebUI::VaQuoleWebUI()
 {
 	ExtComm = new UIDataKeeper;
 }
 
-void VaQuoleWebPage::Destroy()
+void VaQuoleWebUI::Destroy()
 {
 	std::lock_guard<std::mutex> guard(mutex);
 
@@ -64,21 +64,21 @@ void VaQuoleWebPage::Destroy()
 	ExtComm->bMarkedForDelete = true;
 }
 
-UIDataKeeper* VaQuoleWebPage::GetData()
+UIDataKeeper* VaQuoleWebUI::GetData()
 {
 	Q_CHECK_PTR(ExtComm);
 	return ExtComm;
 }
 
 /** Register UI page in global UI manager */
-void VaQuoleWebPage::Register()
+void VaQuoleWebUI::Register()
 {
 	Q_CHECK_PTR(pAppThread);
 
 	pAppThread->AddPage(this);
 }
 
-void VaQuoleWebPage::OpenURL(const TCHAR* NewURL)
+void VaQuoleWebUI::OpenURL(const TCHAR* NewURL)
 {
 	std::lock_guard<std::mutex> guard(mutex);
 
@@ -86,12 +86,12 @@ void VaQuoleWebPage::OpenURL(const TCHAR* NewURL)
 	ExtComm->NewURL = QString::fromUtf16((const ushort*)NewURL);
 }
 
-void VaQuoleWebPage::OpenBenchmark()
+void VaQuoleWebUI::OpenBenchmark()
 {
 	OpenURL(L"http://www.smashcat.org/av/canvas_test/");
 }
 
-void VaQuoleWebPage::EvaluateJavaScript(const TCHAR *ScriptSource)
+void VaQuoleWebUI::EvaluateJavaScript(const TCHAR *ScriptSource)
 {
 	return;
 	Q_CHECK_PTR(ExtComm);
@@ -100,7 +100,7 @@ void VaQuoleWebPage::EvaluateJavaScript(const TCHAR *ScriptSource)
 	//WebView->page()->mainFrame()->evaluateJavaScript(Str);
 }
 
-const uchar * VaQuoleWebPage::GrabView()
+const uchar * VaQuoleWebUI::GrabView()
 {
 	std::lock_guard<std::mutex> guard(mutex);
 
@@ -108,7 +108,7 @@ const uchar * VaQuoleWebPage::GrabView()
 	return ExtComm->ImageBits;
 }
 
-void VaQuoleWebPage::SetTransparent(bool Transparent)
+void VaQuoleWebUI::SetTransparent(bool Transparent)
 {
 	std::lock_guard<std::mutex> guard(mutex);
 
@@ -116,7 +116,7 @@ void VaQuoleWebPage::SetTransparent(bool Transparent)
 	ExtComm->bDesiredTransparency = Transparent;
 }
 
-void VaQuoleWebPage::Resize(int w, int h)
+void VaQuoleWebUI::Resize(int w, int h)
 {
 	std::lock_guard<std::mutex> guard(mutex);
 
@@ -125,7 +125,7 @@ void VaQuoleWebPage::Resize(int w, int h)
 	ExtComm->DesiredHeight = h;
 }
 
-bool VaQuoleWebPage::IsPendingVisualEvents()
+bool VaQuoleWebUI::IsPendingVisualEvents()
 {
 	std::lock_guard<std::mutex> guard(mutex);
 
@@ -140,7 +140,7 @@ bool VaQuoleWebPage::IsPendingVisualEvents()
 //////////////////////////////////////////////////////////////////////////
 // JS commands callback
 
-int VaQuoleWebPage::GetCachedCommandsNumber()
+int VaQuoleWebUI::GetCachedCommandsNumber()
 {
 	return 0;
 	Q_CHECK_PTR(ExtComm);
@@ -148,7 +148,7 @@ int VaQuoleWebPage::GetCachedCommandsNumber()
 	//return WebView->getCachedCommandsNumber();
 }
 
-TCHAR * VaQuoleWebPage::GetCachedCommand(int Index)
+TCHAR * VaQuoleWebUI::GetCachedCommand(int Index)
 {
 	return NULL;
 	Q_CHECK_PTR(ExtComm);
@@ -156,7 +156,7 @@ TCHAR * VaQuoleWebPage::GetCachedCommand(int Index)
 	//return (TCHAR *)WebView->getCachedCommand(Index).utf16();
 }
 
-void VaQuoleWebPage::ClearCachedCommands()
+void VaQuoleWebUI::ClearCachedCommands()
 {
 	return;
 	Q_CHECK_PTR(ExtComm);
@@ -168,7 +168,7 @@ void VaQuoleWebPage::ClearCachedCommands()
 //////////////////////////////////////////////////////////////////////////
 // Player input
 
-void VaQuoleWebPage::InputMouse(int X, int Y, VaQuole::EMouseButton::Type Button,
+void VaQuoleWebUI::InputMouse(int X, int Y, VaQuole::EMouseButton::Type Button,
 								bool bMouseDown,
 								const VaQuole::KeyModifiers Modifiers)
 {
@@ -225,7 +225,7 @@ void VaQuoleWebPage::InputMouse(int X, int Y, VaQuole::EMouseButton::Type Button
 	ExtComm->MouseEvents.append(Event);
 }
 
-void VaQuoleWebPage::InputKey(const TCHAR *Key,
+void VaQuoleWebUI::InputKey(const TCHAR *Key,
 							  const bool bPressed,
 							  const VaQuole::KeyModifiers Modifiers)
 {

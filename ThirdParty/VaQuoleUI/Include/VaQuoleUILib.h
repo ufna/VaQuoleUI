@@ -10,7 +10,7 @@
 namespace VaQuole
 {
 
-class VaQuoleWebPage;
+class VaQuoleWebUI;
 struct UIDataKeeper;
 
 /**
@@ -25,18 +25,18 @@ extern "C"
 	void Cleanup();
 
 	/** Construct new web page view */
-	VaQuoleWebPage* ConstructNewPage();
+	VaQuoleWebUI* ConstructNewUI();
 }
 
 /**
  * Class that handles view of one web page
  */
-class VaQuoleWebPage
+class VaQuoleWebUI
 {
 public:
 #ifdef NOT_UE
 	/** Create new instance of web UI */
-	VaQuoleWebPage();
+	VaQuoleWebUI();
 
 	/** Register UI page in global UI manager */
 	void Register();

@@ -29,13 +29,15 @@ INCLUDEPATH += ./Include \
 SOURCES += Private/VaQuoleUILib.cpp \
     Private/VaQuoleWebView.cpp \
     Private/VaQuoleInputHelpers.cpp \
-    Private/VaQuoleAppThread.cpp
+    Private/VaQuoleAppThread.cpp \
+    Private/VaQuoleWebPage.cpp
 
 HEADERS += Include/VaQuoleUILib.h \
     Private/VaQuoleWebView.h \
     Include/VaQuolePublicPCH.h \
     Private/VaQuoleInputHelpers.h \
-    Private/VaQuoleAppThread.h
+    Private/VaQuoleAppThread.h \
+    Private/VaQuoleWebPage.h
 
 unix {
     target.path = /usr/lib

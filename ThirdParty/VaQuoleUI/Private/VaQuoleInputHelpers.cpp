@@ -84,12 +84,12 @@ void simulateContextMenu(	QWidget* const pWidget,
 							const QPoint& widgetPos,
 							const Qt::KeyboardModifiers modifiers)
 {
-	QContextMenuEvent* Event = new QContextMenuEvent(QContextMenuEvent::Mouse,
+	QContextMenuEvent* pEvent = new QContextMenuEvent(QContextMenuEvent::Mouse,
 													 widgetPos,
 													 pWidget->mapToGlobal(widgetPos),
 													 modifiers);
 
-	QApplication::instance()->postEvent(pWidget, Event);
+	QApplication::instance()->postEvent(pWidget, pEvent);
 }
 
 

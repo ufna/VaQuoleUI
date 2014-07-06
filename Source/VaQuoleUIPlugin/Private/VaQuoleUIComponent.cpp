@@ -10,7 +10,7 @@ UVaQuoleUIComponent::UVaQuoleUIComponent(const class FPostConstructInitializePro
 	PrimaryComponentTick.bCanEverTick = true;
 	PrimaryComponentTick.TickGroup = TG_PrePhysics;
 
-	WebPage = NULL;
+	WebUI = NULL;
 
 	bEnabled = true;
 	bTransparent = true;
@@ -28,7 +28,7 @@ void UVaQuoleUIComponent::InitializeComponent()
 	Super::InitializeComponent();
 
 	// Create web view
-	WebPage = VaQuole::ConstructNewPage();
+	WebUI = VaQuole::ConstructNewUI();
 
 	// Init texture for the first time 
 	SetTransparent(bTransparent);
@@ -43,9 +43,9 @@ void UVaQuoleUIComponent::InitializeComponent()
 void UVaQuoleUIComponent::BeginDestroy()
 {
 	// Clear web view widget
-	if (WebPage)
+	if (WebUI)
 	{
-		WebPage->Destroy();
+		WebUI->Destroy();
 	}
 
 	DestroyUITexture();
@@ -111,13 +111,13 @@ void UVaQuoleUIComponent::ResetMaterialInstance()
 void UVaQuoleUIComponent::UpdateUITexture()
 {
 	// Ignore texture update
-	if (!bEnabled || WebPage == NULL)
+	if (!bEnabled || WebUI == NULL)
 	{
 		return;
 	}
 
 	// Don't update when WebView resizes or changes texture format
-	if (WebPage->IsPendingVisualEvents())
+	if (WebUI->IsPendingVisualEvents())
 	{
 		return;
 	}
@@ -130,7 +130,7 @@ void UVaQuoleUIComponent::UpdateUITexture()
 			return;
 
 		// Load data from view
-		const UCHAR* my_data = WebPage->GrabView();
+		const UCHAR* my_data = WebUI->GrabView();
 		const size_t size = Width * Height * sizeof(uint32);
 
 		// Copy buffer for rendering thread
@@ -168,12 +168,12 @@ void UVaQuoleUIComponent::UpdateUITexture()
 
 void UVaQuoleUIComponent::UpdateMousePosition()
 {
-	if (!bEnabled || WebPage == NULL)
+	if (!bEnabled || WebUI == NULL)
 	{
 		return;
 	}
 
-	WebPage->InputMouse((int32)MouseWidgetPosition.X, (int32)MouseWidgetPosition.Y);
+	WebUI->InputMouse((int32)MouseWidgetPosition.X, (int32)MouseWidgetPosition.Y);
 }
 
 void UVaQuoleUIComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
@@ -227,9 +227,9 @@ void UVaQuoleUIComponent::SetTransparent(bool Transparent)
 {
 	bTransparent = Transparent;
 
-	if (WebPage)
+	if (WebUI)
 	{
-		WebPage->SetTransparent(bTransparent);
+		WebUI->SetTransparent(bTransparent);
 	}
 }
 
@@ -238,9 +238,9 @@ void UVaQuoleUIComponent::Resize(int32 NewWidth, int32 NewHeight)
 	Width = NewWidth;
 	Height = NewHeight;
 
-	if (WebPage)
+	if (WebUI)
 	{
-		WebPage->Resize(Width, Height);
+		WebUI->Resize(Width, Height);
 	}
 
 	ResetUITexture();
@@ -248,17 +248,17 @@ void UVaQuoleUIComponent::Resize(int32 NewWidth, int32 NewHeight)
 
 void UVaQuoleUIComponent::EvaluateJavaScript(const FString& ScriptSource)
 {
-	if (!bEnabled || WebPage == NULL)
+	if (!bEnabled || WebUI == NULL)
 	{
 		return;
 	}
 
-	WebPage->EvaluateJavaScript(*ScriptSource);
+	WebUI->EvaluateJavaScript(*ScriptSource);
 }
 
 void UVaQuoleUIComponent::OpenURL(const FString& URL)
 {
-	if (!bEnabled || WebPage == NULL)
+	if (!bEnabled || WebUI == NULL)
 	{
 		return;
 	}
@@ -271,11 +271,11 @@ void UVaQuoleUIComponent::OpenURL(const FString& URL)
 
 		UE_LOG(LogVaQuole, Log, TEXT("VaQuole opens %s"), *LocalFile);
 
-		WebPage->OpenURL(*LocalFile);
+		WebUI->OpenURL(*LocalFile);
 	}
 	else
 	{
-		WebPage->OpenURL(*URL);
+		WebUI->OpenURL(*URL);
 	}
 }
 
@@ -316,7 +316,7 @@ UMaterialInstanceDynamic* UVaQuoleUIComponent::GetMaterialInstance() const
 
 bool UVaQuoleUIComponent::InputKey(FViewport* Viewport, int32 ControllerId, FKey Key, EInputEvent EventType, float AmountDepressed, bool bGamepad)
 {
-	if (!bEnabled || WebPage == NULL || !Key.IsValid())
+	if (!bEnabled || WebUI == NULL || !Key.IsValid())
 	{
 		return false;
 	}
@@ -363,11 +363,11 @@ bool UVaQuoleUIComponent::InputKey(FViewport* Viewport, int32 ControllerId, FKey
 		switch (EventType)
 		{
 		case IE_Pressed:
-			WebPage->InputMouse((int32)MouseWidgetPosition.X, (int32)MouseWidgetPosition.Y, MouseButton, true, Modifiers);
+			WebUI->InputMouse((int32)MouseWidgetPosition.X, (int32)MouseWidgetPosition.Y, MouseButton, true, Modifiers);
 			break;
 
 		case IE_Released:
-			WebPage->InputMouse((int32)MouseWidgetPosition.X, (int32)MouseWidgetPosition.Y, MouseButton, false, Modifiers);
+			WebUI->InputMouse((int32)MouseWidgetPosition.X, (int32)MouseWidgetPosition.Y, MouseButton, false, Modifiers);
 			break;
 
 		default:
@@ -395,13 +395,13 @@ bool UVaQuoleUIComponent::InputKey(FViewport* Viewport, int32 ControllerId, FKey
 		/*switch (EventType)
 		{
 		case IE_Pressed:
-			WebPage->InputKey(KeyCode, true, Modifiers);
+			WebUI->InputKey(KeyCode, true, Modifiers);
 			break;
 		case IE_Released:
-			WebPage->InputKey(KeyCode, false, Modifiers);
+			WebUI->InputKey(KeyCode, false, Modifiers);
 			break;
 		case IE_Repeat:
-			WebPage->InputKey(KeyCode, true, Modifiers);
+			WebUI->InputKey(KeyCode, true, Modifiers);
 			break;
 		case IE_DoubleClick:
 			break;

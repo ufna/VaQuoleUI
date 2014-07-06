@@ -214,7 +214,7 @@ protected:
 	UMaterialInstanceDynamic* MaterialInstance;
 
 	/** Web view loaded from library */
-	VaQuole::VaQuoleWebPage* WebPage;
+	VaQuole::VaQuoleWebUI* WebUI;
 
 
 	//////////////////////////////////////////////////////////////////////////

@@ -2,6 +2,7 @@
 
 #include "VaQuoleAppThread.h"
 #include "VaQuoleUILib.h"
+#include "VaQuoleWebPage.h"
 
 #include <QApplication>
 #include <QNetworkProxyFactory>
@@ -88,7 +89,7 @@ void VaQuoleUIManager::run()
 			// [START] Lock pages list
 			mutex.lock();
 
-			VaQuoleWebPage* Page = WebPages.at(i);
+			VaQuoleWebUI* Page = WebPages.at(i);
 
 			// [START] Lock data to read values
 			Page->mutex.lock();
@@ -100,6 +101,11 @@ void VaQuoleUIManager::run()
 			if(WebView == NULL)
 			{
 				WebView = new VaQuoleWebView();
+
+				// Constuct page that ignores modal JS dialogs
+				VaQuoleWebPage *WebPage = new VaQuoleWebPage(WebView);
+				WebView->setPage(WebPage);
+
 				WebView->show();
 				WebViews.insert(ExtComm->ObjectId, WebView);
 			}
@@ -203,7 +209,7 @@ void VaQuoleUIManager::run()
 			if(WebPages.at(j)->GetData()->bMarkedForDelete)
 			{
 				VaQuoleWebView* ViewToDelete = WebViews.value(WebPages.at(j)->GetData()->ObjectId);
-				VaQuoleWebPage* PageToDelete = WebPages.at(j);
+				VaQuoleWebUI* PageToDelete = WebPages.at(j);
 
 				WebViews.remove(WebPages.at(j)->GetData()->ObjectId);
 				WebPages.removeAt(j);
@@ -230,7 +236,7 @@ void VaQuoleUIManager::run()
 	qDebug() << "About to exit";
 }
 
-void VaQuoleUIManager::AddPage(VaQuoleWebPage *Page)
+void VaQuoleUIManager::AddPage(VaQuoleWebUI *Page)
 {
 	std::lock_guard<std::mutex> guard(mutex);
 
