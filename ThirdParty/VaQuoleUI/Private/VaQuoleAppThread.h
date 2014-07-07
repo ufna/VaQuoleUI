@@ -63,7 +63,7 @@ struct UIDataKeeper
 		DesiredWidth = 32;
 		DesiredHeight = 32;
 
-		ImageBits = 0;
+		ImageBits = NULL;
 		ImageDataSize = 0;
 	}
 };
@@ -109,7 +109,7 @@ public:
 
 private:
 	/** Check that we have valid buffer to keep the image bits */
-	void UpdateImageBuffer(UIDataKeeper *ExtComm, int DataSize);
+	void UpdateImageBuffer(UIDataKeeper *ExtComm, VaQuoleWebView *WebView);
 
 private:
 	/** Locker to be used with external commands */

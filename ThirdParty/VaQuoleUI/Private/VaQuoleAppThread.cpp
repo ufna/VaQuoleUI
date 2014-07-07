@@ -134,7 +134,7 @@ void VaQuoleUIManager::run()
 			ExtComm->KeyEvents.clear();
 
 			// Update grabbed view
-			ExtComm->ImageBits = WebView->getImageData();
+			UpdateImageBuffer(ExtComm, WebView);
 
 			// [END] Unlock page data
 			Page->mutex.unlock();
@@ -163,7 +163,7 @@ void VaQuoleUIManager::run()
 				ExtComm->bTransparent = WebView->getTransparency();
 				ExtComm->Width = WebView->width();
 				ExtComm->Height = WebView->height();
-				ExtComm->ImageBits = WebView->getImageData();
+				UpdateImageBuffer(ExtComm, WebView);
 				Page->mutex.unlock();
 			}
 
@@ -253,17 +253,19 @@ void VaQuoleUIManager::AddPage(VaQuoleWebUI *Page)
 	WebPages.append(Page);
 }
 
-void VaQuoleUIManager::UpdateImageBuffer(UIDataKeeper *ExtComm, int DataSize)
+void VaQuoleUIManager::UpdateImageBuffer(UIDataKeeper *ExtComm, VaQuoleWebView *WebView)
 {
-	if(ExtComm->ImageDataSize != DataSize)
+	if(ExtComm->ImageDataSize != WebView->getImageDataSize())
 	{
 		if(ExtComm->ImageBits)
 		{
 			delete ExtComm->ImageBits;
 		}
 
-		ExtComm->ImageBits = new uchar[DataSize];
+		ExtComm->ImageDataSize = WebView->getImageDataSize();
+		ExtComm->ImageBits = new uchar[ExtComm->ImageDataSize];
 	}
+	memcpy(ExtComm->ImageBits, WebView->getImageData(), ExtComm->ImageDataSize);
 }
 
 } // namespace VaQuole
