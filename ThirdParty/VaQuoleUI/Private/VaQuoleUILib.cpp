@@ -439,7 +439,6 @@ void VaQuoleWebUI::InputKey(const TCHAR *Key,
 	else
 	{
 		Event.text = Event.text.toLower();
-		qDebug() << Event.text;
 	}
 
 	// Apply keypad modifier for numpad data
