@@ -118,6 +118,14 @@ class UVaQuoleUIComponent : public UActorComponent
 	UPROPERTY(EditAnywhere, Category = "View")
 	FString DefaultURL;
 
+	/** Should widget consume mouse input? (mouse events won't be delivered to other actors) */
+	UPROPERTY(EditAnywhere, Category = "Input")
+	bool bConsumeMouseInput;
+
+	/** Should widget consume keyboard input? (key events won't be delivered to other actors) */
+	UPROPERTY(EditAnywhere, Category = "Input")
+	bool bConsumeKeyboardInput;
+
 	/** Material that will be instanced to load UI texture into it */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Material")
 	UMaterialInterface* BaseMaterial;
@@ -137,6 +145,14 @@ class UVaQuoleUIComponent : public UActorComponent
 	/** Changes background transparency */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
 	void SetTransparent(const bool Transparent);
+
+	/** Set consume input state for mouse events */
+	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI|Input")
+	void SetConsumeMouseInput(const bool ConsumeInput);
+
+	/** Set consume input state for keyboard events */
+	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI|Input")
+	void SetConsumeKeyboardInput(const bool ConsumeInput);
 
 	/** Resizes the View */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")

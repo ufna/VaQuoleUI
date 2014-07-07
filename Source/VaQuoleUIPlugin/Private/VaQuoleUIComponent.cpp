@@ -15,6 +15,9 @@ UVaQuoleUIComponent::UVaQuoleUIComponent(const class FPostConstructInitializePro
 	bEnabled = true;
 	bTransparent = true;
 
+	bConsumeMouseInput = false;
+	bConsumeKeyboardInput = false;
+
 	Width = 256;
 	Height = 256;
 
@@ -233,6 +236,16 @@ void UVaQuoleUIComponent::SetTransparent(bool Transparent)
 	}
 }
 
+void UVaQuoleUIComponent::SetConsumeMouseInput(const bool ConsumeInput)
+{
+	bConsumeMouseInput = ConsumeInput;
+}
+
+void UVaQuoleUIComponent::SetConsumeKeyboardInput(const bool ConsumeInput)
+{
+	bConsumeKeyboardInput = ConsumeInput;
+}
+
 void UVaQuoleUIComponent::Resize(int32 NewWidth, int32 NewHeight)
 {
 	Width = NewWidth;
@@ -373,6 +386,8 @@ bool UVaQuoleUIComponent::InputKey(FViewport* Viewport, int32 ControllerId, FKey
 		default:
 			break;
 		}
+
+		return bConsumeMouseInput;
 	}
 	else if (Key.IsModifierKey())
 	{
@@ -403,6 +418,8 @@ bool UVaQuoleUIComponent::InputKey(FViewport* Viewport, int32 ControllerId, FKey
 		default:
 			break;
 		}
+
+		return bConsumeKeyboardInput;
 	}
 
 	return false;
