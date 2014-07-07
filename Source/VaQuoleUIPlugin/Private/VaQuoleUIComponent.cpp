@@ -329,7 +329,7 @@ bool UVaQuoleUIComponent::InputKey(FViewport* Viewport, int32 ControllerId, FKey
 
 	if (Key.IsMouseButton())
 	{
-		VaQuole::EMouseButton::Type MouseButton;
+		VaQuole::EMouseButton::Type MouseButton = VaQuole::EMouseButton::NoButton;
 
 		if (Key == EKeys::MouseScrollUp)
 		{
@@ -376,42 +376,33 @@ bool UVaQuoleUIComponent::InputKey(FViewport* Viewport, int32 ControllerId, FKey
 	}
 	else if (Key.IsModifierKey())
 	{
-
+		// Modifiers are ignored here because we're using their values from Viewport
+		return false;
 	}
 	else
 	{
-		// Check extra key codes
-		/*uint32 KeyCode = 0x20;
-		if (Key == EKeys::BackSpace)
-		{
-			KeyCode = 0x01000003;
-		}
-		else
-		{
-			KeyCode = GetKeyCodeFromKey(Key);
-		}*/
+		const uint16 *KeyCode = 0;
+		const uint16 *CharCode = 0;
+		FInputKeyManager::Get().GetCodesFromKey(Key, KeyCode, CharCode);
+
+		// Mark non-unicode characters with -1
+		int32 KeyCodeVal = (KeyCode != NULL) ? *KeyCode : -1;
 
 		// Send event
-		/*switch (EventType)
+		switch (EventType)
 		{
 		case IE_Pressed:
-			WebUI->InputKey(KeyCode, true, Modifiers);
+			WebUI->InputKey(*Key.ToString(), KeyCodeVal, true, Modifiers);
 			break;
 		case IE_Released:
-			WebUI->InputKey(KeyCode, false, Modifiers);
+			WebUI->InputKey(*Key.ToString(), KeyCodeVal, false, Modifiers);
 			break;
 		case IE_Repeat:
-			WebUI->InputKey(KeyCode, true, Modifiers);
-			break;
-		case IE_DoubleClick:
-			break;
-		case IE_Axis:
-			break;
-		case IE_MAX:
+			WebUI->InputKey(*Key.ToString(), KeyCodeVal, true, Modifiers);
 			break;
 		default:
 			break;
-		}*/
+		}
 	}
 
 	return false;

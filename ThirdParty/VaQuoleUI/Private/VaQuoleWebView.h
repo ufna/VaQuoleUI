@@ -60,7 +60,6 @@ private:
 
 protected:
 	void paintEvent(QPaintEvent*);
-	void contextMenuEvent(QContextMenuEvent *event);
 
 private slots:
 	/** Puts reference to this class object into JS code */

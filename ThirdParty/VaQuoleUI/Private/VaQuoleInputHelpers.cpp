@@ -97,7 +97,7 @@ void simulateContextMenu(	QWidget* const pWidget,
 // Keyboard input
 
 QKeyEvent* createKeyEvent(	const QEvent::Type eventType,
-							int key,
+							const int key,
 							const Qt::KeyboardModifiers modifiers,
 							QString & text,
 							bool autorep,
@@ -116,6 +116,7 @@ QKeyEvent* createKeyEvent(	const QEvent::Type eventType,
 void simulateKey(	QWidget* const pWidget,
 					const unsigned int key,
 					const Qt::KeyboardModifiers modifiers,
+					QString & text,
 					const bool bKeyPressed)
 {
 	if (pWidget == NULL || QApplication::instance() == NULL)
@@ -127,11 +128,11 @@ void simulateKey(	QWidget* const pWidget,
 
 	if(bKeyPressed)
 	{
-		pKeyEvent = createKeyEvent(QEvent::KeyPress, key, modifiers);
+		pKeyEvent = createKeyEvent(QEvent::KeyPress, key, modifiers, text);
 	}
 	else
 	{
-		pKeyEvent = createKeyEvent(QEvent::KeyRelease, key, modifiers);
+		pKeyEvent = createKeyEvent(QEvent::KeyRelease, key, modifiers, text);
 	}
 
 	QApplication::instance()->sendEvent(pWidget, pKeyEvent);

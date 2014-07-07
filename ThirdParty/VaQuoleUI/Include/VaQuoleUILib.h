@@ -21,6 +21,9 @@ extern "C"
 	/** Initialize QApplication */
 	void Init();
 
+	/** Initialize UE4->Qt key map */
+	void InitKeyMaps();
+
 	/** Clean all Qt and lib related data */
 	void Cleanup();
 
@@ -91,6 +94,7 @@ public:
 					const VaQuole::KeyModifiers Modifiers = VaQuole::KeyModifiers());
 
 	void InputKey(	const TCHAR *Key,
+					const unsigned int KeyCode,
 					const bool bPressed = true,
 					const VaQuole::KeyModifiers Modifiers = VaQuole::KeyModifiers());
 

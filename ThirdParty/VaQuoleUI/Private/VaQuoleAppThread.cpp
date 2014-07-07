@@ -101,6 +101,7 @@ void VaQuoleUIManager::run()
 			if(WebView == NULL)
 			{
 				WebView = new VaQuoleWebView();
+				WebView->setContextMenuPolicy(Qt::NoContextMenu);
 
 				// Constuct page that ignores modal JS dialogs
 				VaQuoleWebPage *WebPage = new VaQuoleWebPage(WebView);
@@ -122,13 +123,15 @@ void VaQuoleUIManager::run()
 
 			// Extract mouse events
 			QList<MouseEvent> MouseEvents = ExtComm->MouseEvents;
+			QList<KeyEvent> KeyEvents = ExtComm->KeyEvents;
 
-			// External data update
+			// External data update (mark we've read it)
 			ExtComm->NewURL = "";
 			ExtComm->bTransparent = WebView->getTransparency();
 			ExtComm->Width = WebView->width();
 			ExtComm->Height = WebView->height();
 			ExtComm->MouseEvents.clear();
+			ExtComm->KeyEvents.clear();
 
 			// Update grabbed view
 			ExtComm->ImageBits = WebView->getImageData();
@@ -172,24 +175,31 @@ void VaQuoleUIManager::run()
 			}
 
 			// Process mouse events
-			MouseEvent Event;
-			foreach(Event, MouseEvents)
+			MouseEvent MyMouseEvent;
+			foreach(MyMouseEvent, MouseEvents)
 			{
-				if(Event.button == Qt::NoButton)
+				if(MyMouseEvent.button == Qt::NoButton)
 				{
 					// It's a mouse move event
-					VaQuole::simulateMouseMove(WebView, Event.eventPos);
+					VaQuole::simulateMouseMove(WebView, MyMouseEvent.eventPos);
 				}
-				else if(Event.button == Qt::RightButton && Event.bButtonPressed == true)
+				else if(MyMouseEvent.button == Qt::RightButton && MyMouseEvent.bButtonPressed == true)
 				{
 					// We're simulation right mouse click as a context menu request
 					// because QWebView doesn't process RMB properly
-					VaQuole::simulateContextMenu(WebView, Event.eventPos, Event.modifiers);
+					VaQuole::simulateContextMenu(WebView, MyMouseEvent.eventPos, MyMouseEvent.modifiers);
 				}
 				else
 				{
-					VaQuole::simulateMouseClick(WebView, Event.eventPos, Event.button, Event.modifiers, Event.bButtonPressed);
+					VaQuole::simulateMouseClick(WebView, MyMouseEvent.eventPos, MyMouseEvent.button, MyMouseEvent.modifiers, MyMouseEvent.bButtonPressed);
 				}
+			}
+
+			// Process key events
+			KeyEvent MyKeyEvent;
+			foreach(MyKeyEvent, KeyEvents)
+			{
+				VaQuole::simulateKey(WebView, MyKeyEvent.key, MyKeyEvent.modifiers, MyKeyEvent.text, MyKeyEvent.bKeyPressed);
 			}
 
 			// Update pages num to be sure that we're in array bounds

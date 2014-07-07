@@ -51,6 +51,7 @@ struct UIDataKeeper
 
 	/** Input data */
 	QList<MouseEvent> MouseEvents;
+	QList<KeyEvent> KeyEvents;
 
 	/** Defaults */
 	UIDataKeeper::UIDataKeeper()

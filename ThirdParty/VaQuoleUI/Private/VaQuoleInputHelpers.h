@@ -34,6 +34,22 @@ struct MouseEvent
 	}
 };
 
+struct KeyEvent
+{
+	Qt::Key key;
+	Qt::KeyboardModifiers modifiers;
+	bool bKeyPressed;
+	QString text;
+
+	KeyEvent::KeyEvent()
+	{
+		key = Qt::Key_unknown;
+		modifiers = Qt::NoModifier;
+		bKeyPressed = false;
+		text = QString();
+	}
+};
+
 
 //////////////////////////////////////////////////////////////////////////
 // Mouse input
@@ -62,16 +78,18 @@ void simulateContextMenu(	QWidget* const pWidget,
 // Keyboard input
 
 QKeyEvent* createKeyEvent(	const QEvent::Type eventType,
-							int key,
+							const int key,
 							const Qt::KeyboardModifiers modifiers,
 							QString & text = QString(),
 							bool autorep = false,
 							ushort count = 1);
 
+/** Attn.! Obsolete - QtTest used instead */
 void simulateKey(	QWidget* const pWidget,
 					const unsigned int key,
 					const Qt::KeyboardModifiers modifiers,
-					const bool bKeyPressed);
+					QString & text = QString(),
+					const bool bKeyPressed = true);
 
 
 } // namespace VaQuole
