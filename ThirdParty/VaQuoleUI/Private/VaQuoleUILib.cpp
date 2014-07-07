@@ -419,6 +419,8 @@ void VaQuoleWebUI::InputKey(const TCHAR *Key,
 		Event.key = (Qt::Key)KeyCode;
 	}
 
+#pragma message ("@FIXME QT-40100 bug temporary solution")
+
 	// [1] Qt bug temporary solution
 	// https://bugreports.qt-project.org/browse/QTBUG-40100
 	if(Event.text.isEmpty())
