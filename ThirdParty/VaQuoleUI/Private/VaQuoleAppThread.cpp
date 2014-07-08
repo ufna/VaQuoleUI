@@ -181,17 +181,6 @@ void VaQuoleUIManager::run()
 				{
 					WebView->resize(NewWidth, NewHeight);
 				}
-
-				// Process events immediately
-				qApp->processEvents();
-
-				// Update external data
-				Page->mutex.lock();
-				ExtComm->bTransparent = WebView->getTransparency();
-				ExtComm->Width = WebView->width();
-				ExtComm->Height = WebView->height();
-				UpdateImageBuffer(ExtComm, WebView);
-				Page->mutex.unlock();
 			}
 
 			// Check URL

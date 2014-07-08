@@ -26,7 +26,7 @@ VaQuoleWebView::VaQuoleWebView(QWidget *parent) :
 
 	// Register us with JavaScript
 	connect(this, SIGNAL(loadFinished(bool)), this, SLOT(registerJavaScriptWindowObject(bool)));
-	connect(page()->mainFrame(), SIGNAL(loadFinished(bool)), this, SLOT(markLoadFinished(bool)));
+	connect(this, SIGNAL(loadFinished(bool)), this, SLOT(markLoadFinished(bool)));
 }
 
 void VaQuoleWebView::updateImageCache(QSize ImageSize)
