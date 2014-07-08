@@ -8,15 +8,28 @@ UVaQuoleUIViewportClient::UVaQuoleUIViewportClient(const class FPostConstructIni
 
 }
 
-void UVaQuoleUIViewportClient::RegisterWebUI(UVaQuoleUIComponent* WebView)
+void UVaQuoleUIViewportClient::RegisterHudUI(UVaQuoleUIComponent* WebView)
 {
-	UE_LOG(LogVaQuole, Warning, TEXT("Register UI"));
+	UE_LOG(LogVaQuole, Warning, TEXT("HUD UI registered"));
 	HudViews.AddUnique(WebView);
 }
 
-void UVaQuoleUIViewportClient::UnregisterWebUI(UVaQuoleUIComponent* WebView)
+void UVaQuoleUIViewportClient::UnregisterHudUI(UVaQuoleUIComponent* WebView)
 {
+	UE_LOG(LogVaQuole, Log, TEXT("HUD UI unregistered"));
 	HudViews.Remove(WebView);
+}
+
+void UVaQuoleUIViewportClient::RegisterSceneUI(UVaQuoleUIComponent* WebView)
+{
+	UE_LOG(LogVaQuole, Warning, TEXT("Scene UI registered"));
+	SceneViews.AddUnique(WebView);
+}
+
+void UVaQuoleUIViewportClient::UnregisterSceneUI(UVaQuoleUIComponent* WebView)
+{
+	UE_LOG(LogVaQuole, Log, TEXT("Scene UI unregistered"));
+	SceneViews.Remove(WebView);
 }
 
 bool UVaQuoleUIViewportClient::InputKey(FViewport* InViewport, int32 ControllerId, FKey Key, EInputEvent EventType, float AmountDepressed, bool bGamepad)
@@ -36,9 +49,9 @@ bool UVaQuoleUIViewportClient::InputKey(FViewport* InViewport, int32 ControllerI
 			UE_LOG(LogVaQuole, Warning, TEXT("Key: %s"), *Key.ToString());
 
 			// Process input with HUD views
-			for (auto WebView : HudViews)
+			for (auto HudView : HudViews)
 			{
-				bResult = WebView->InputKey(Viewport, ControllerId, Key, EventType, AmountDepressed, bGamepad);
+				bResult = HudView->InputKey(Viewport, ControllerId, Key, EventType, AmountDepressed, bGamepad);
 
 				// If view consumed input, break the loop
 				if (bResult)
@@ -47,7 +60,17 @@ bool UVaQuoleUIViewportClient::InputKey(FViewport* InViewport, int32 ControllerI
 				}
 			}
 
-			// @TODO Give a chance to UIs we're looking at
+			// Give a chance to UIs we're looking at
+			for (auto SceneView : SceneViews)
+			{
+				bResult = SceneView->InputKey(Viewport, ControllerId, Key, EventType, AmountDepressed, bGamepad);
+
+				// If view consumed input, break the loop
+				if (bResult)
+				{
+					break;
+				}
+			}
 
 			// Give a chance to player controller
 			if (!bResult)

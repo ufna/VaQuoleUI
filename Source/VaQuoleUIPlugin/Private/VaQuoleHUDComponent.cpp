@@ -29,7 +29,7 @@ void UVaQuoleHUDComponent::InitializeComponent()
 		UVaQuoleUIViewportClient* ViewportClient = Cast<UVaQuoleUIViewportClient>(GEngine->GameViewport);
 		if (ViewportClient)
 		{
-			ViewportClient->RegisterWebUI(this);
+			ViewportClient->RegisterHudUI(this);
 		}
 	}
 }
@@ -42,7 +42,7 @@ void UVaQuoleHUDComponent::BeginDestroy()
 		UVaQuoleUIViewportClient* ViewportClient = Cast<UVaQuoleUIViewportClient>(GEngine->GameViewport);
 		if (ViewportClient)
 		{
-			ViewportClient->UnregisterWebUI(this);
+			ViewportClient->UnregisterHudUI(this);
 		}
 	}
 

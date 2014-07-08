@@ -84,7 +84,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FScriptEvent, const FString&, Event
 /**
  * Class that handles view of one web page
  */
-UCLASS(ClassGroup=UI, editinlinenew, meta=(BlueprintSpawnableComponent))
+UCLASS(Abstract)
 class UVaQuoleUIComponent : public UActorComponent
 {
 	GENERATED_UCLASS_BODY()
@@ -214,7 +214,6 @@ class UVaQuoleUIComponent : public UActorComponent
 
 	virtual bool InputKey(FViewport* Viewport, int32 ControllerId, FKey Key, EInputEvent EventType, float AmountDepressed = 1.f, bool bGamepad = false);
 
-	/** Set new mouse position (relative to widget!) */
 	void SetMousePosition(float X, float Y);
 
 protected:
