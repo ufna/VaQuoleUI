@@ -14,6 +14,8 @@ UVaQuoleSceneUIComponent::UVaQuoleSceneUIComponent(const class FPostConstructIni
 	DefaultURL = "http://html5test.com";
 
 	TextureParameterName = TEXT("VaQuoleUITexture");
+
+	SurfaceMapping = ESurfaceMapping::Planar;
 }
 
 void UVaQuoleSceneUIComponent::BeginDestroy()
@@ -38,4 +40,9 @@ void UVaQuoleSceneUIComponent::BeginDestroy()
 void UVaQuoleSceneUIComponent::MouseMove(float X, float Y)
 {
 	SetMousePosition(X, Y);
+}
+
+bool UVaQuoleSceneUIComponent::MouseMoveFromHitResult(FHitResult& HitResult)
+{
+	return false;
 }
