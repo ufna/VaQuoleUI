@@ -97,7 +97,10 @@ class UVaQuoleUIComponent : public UActorComponent
 
 	// Begin UObject Interface
 	virtual void BeginDestroy() OVERRIDE;
+
+#if WITH_EDITORONLY_DATA
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) OVERRIDE;
+#endif // WITH_EDITORONLY_DATA
 	// End UObject Interface
 
 

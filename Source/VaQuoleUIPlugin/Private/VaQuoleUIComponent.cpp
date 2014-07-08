@@ -189,12 +189,14 @@ void UVaQuoleUIComponent::UpdateUITexture()
 	}
 }
 
+#if WITH_EDITORONLY_DATA
 void UVaQuoleUIComponent::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 
 	ResetWebUI();
 }
+#endif // WITH_EDITORONLY_DATA
 
 void UVaQuoleUIComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
 {
