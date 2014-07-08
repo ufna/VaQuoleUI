@@ -16,19 +16,14 @@ UVaQuoleSceneUIComponent::UVaQuoleSceneUIComponent(const class FPostConstructIni
 	TextureParameterName = TEXT("VaQuoleUITexture");
 
 	SurfaceMapping = ESurfaceMapping::Planar;
+
+	bRegisteredUI = false;
 }
 
 void UVaQuoleSceneUIComponent::BeginDestroy()
 {
 	// Force unregister page from Viewport
-	if (GEngine && GEngine->GameViewport)
-	{
-		UVaQuoleUIViewportClient* ViewportClient = Cast<UVaQuoleUIViewportClient>(GEngine->GameViewport);
-		if (ViewportClient)
-		{
-			ViewportClient->UnregisterSceneUI(this);
-		}
-	}
+	RegisterInput(false);
 
 	Super::BeginDestroy();
 }
@@ -37,12 +32,74 @@ void UVaQuoleSceneUIComponent::BeginDestroy()
 //////////////////////////////////////////////////////////////////////////
 // View control
 
+bool UVaQuoleSceneUIComponent::IsInputRegistered()
+{
+	return bRegisteredUI;
+}
+
+void UVaQuoleSceneUIComponent::RegisterInput(bool bRegisterInput)
+{
+	if (GEngine && GEngine->GameViewport)
+	{
+		UVaQuoleUIViewportClient* ViewportClient = Cast<UVaQuoleUIViewportClient>(GEngine->GameViewport);
+		if (ViewportClient)
+		{
+			if (bRegisterInput)
+			{
+				ViewportClient->RegisterSceneUI(this);
+			}
+			else
+			{
+				ViewportClient->UnregisterSceneUI(this);
+			}
+
+			bRegisteredUI = bRegisterInput;
+		}
+	}
+}
+
+void UVaQuoleSceneUIComponent::UnregisterInput()
+{
+	RegisterInput(false);
+}
+
 void UVaQuoleSceneUIComponent::MouseMove(float X, float Y)
 {
 	SetMousePosition(X, Y);
 }
 
-bool UVaQuoleSceneUIComponent::MouseMoveFromHitResult(FHitResult& HitResult)
+bool UVaQuoleSceneUIComponent::MouseMoveFromHitResult(const FHitResult& HitResult)
 {
+	AActor* Owner = GetOwner();
+	if (Owner == NULL)
+	{
+		return false;
+	}
+
+	// We suggest that UI applied to static mesh
+	UStaticMeshComponent* TargetMesh = Owner->FindComponentByClass<UStaticMeshComponent>();
+	if (TargetMesh != NULL)
+	{
+		FTransform ToActor = HitResult.Actor->GetTransform().InverseSafe();
+		FVector ActorImpact = ToActor.TransformPosition(HitResult.ImpactPoint);
+
+		FVector Min, Max;
+		TargetMesh->GetLocalBounds(Min, Max);
+
+		UE_LOG(LogVaQuole, Warning, TEXT("Min %s"), *Min.ToString());
+		UE_LOG(LogVaQuole, Warning, TEXT("Max %s"), *Max.ToString());
+
+		// @TODO Add rotation modificator
+		int32 X = GetWidth() * (ActorImpact.X - Min.X) / (Max.X - Min.X);
+		int32 Y = GetHeight() * (Max.Z - ActorImpact.Z) / (Max.Z - Min.Z);
+
+		MouseMove(X, Y);
+
+		UE_LOG(LogVaQuole, Warning, TEXT("Mouse X %d"), X);
+		UE_LOG(LogVaQuole, Warning, TEXT("Mouse Y %d"), Y);
+
+		return true;
+	}
+
 	return false;
 }

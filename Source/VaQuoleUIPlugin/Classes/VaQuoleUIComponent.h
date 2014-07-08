@@ -84,7 +84,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FScriptEvent, const FString&, Event
 /**
  * Class that handles view of one web page
  */
-UCLASS(Abstract)
+UCLASS(Abstract, BlueprintType, Blueprintable)
 class UVaQuoleUIComponent : public UActorComponent
 {
 	GENERATED_UCLASS_BODY()

@@ -426,7 +426,8 @@ bool UVaQuoleUIComponent::InputKey(FViewport* Viewport, int32 ControllerId, FKey
 			break;
 		}
 
-		return bConsumeMouseInput;
+		// Don't consume IE_Released events to process action cancellation properly
+		return (EventType == IE_Released) ? false : bConsumeMouseInput;
 	}
 	else if (Key.IsModifierKey())
 	{
@@ -458,7 +459,8 @@ bool UVaQuoleUIComponent::InputKey(FViewport* Viewport, int32 ControllerId, FKey
 			break;
 		}
 
-		return bConsumeKeyboardInput;
+		// Don't consume IE_Released events to process action cancellation properly
+		return (EventType == IE_Released) ? false : bConsumeKeyboardInput;
 	}
 
 	return false;

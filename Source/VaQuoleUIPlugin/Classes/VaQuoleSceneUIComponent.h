@@ -33,8 +33,21 @@ class UVaQuoleSceneUIComponent : public UVaQuoleUIComponent
 	UPROPERTY(EditAnywhere, Category = "View")
 	TEnumAsByte<ESurfaceMapping::Type> SurfaceMapping;
 
+
 	//////////////////////////////////////////////////////////////////////////
 	// View control
+
+	/** Is WebUI registered to receive player input? */
+	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI|SceneUI")
+	bool IsInputRegistered();
+
+	/** Register UI component to receive player input */
+	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI|SceneUI")
+	void RegisterInput(bool bRegisterInput = true);
+
+	/** Unregister UI component (it won't receive player input) */
+	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI|SceneUI")
+	void UnregisterInput();
 
 	/** Set new mouse position (relative to widget!) */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI|SceneUI")
@@ -42,6 +55,14 @@ class UVaQuoleSceneUIComponent : public UVaQuoleUIComponent
 
 	/** Set mouse position from trace result */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI|SceneUI")
-	bool MouseMoveFromHitResult(FHitResult& HitResult);
+	bool MouseMoveFromHitResult(const FHitResult& HitResult);
+
+
+	//////////////////////////////////////////////////////////////////////////
+	// Input control data
+private:
+
+	/** Being registered WebUI receives direct player input from VieportClient */
+	bool bRegisteredUI;
 
 };
