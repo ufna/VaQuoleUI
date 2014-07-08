@@ -22,7 +22,7 @@ void UVaQuoleUIViewportClient::UnregisterHudUI(UVaQuoleUIComponent* WebView)
 
 void UVaQuoleUIViewportClient::RegisterSceneUI(UVaQuoleUIComponent* WebView)
 {
-	UE_LOG(LogVaQuole, Warning, TEXT("Scene UI registered"));
+	UE_LOG(LogVaQuole, Log, TEXT("Scene UI registered"));
 	SceneViews.AddUnique(WebView);
 }
 
