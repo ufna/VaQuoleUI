@@ -259,13 +259,18 @@ void VaQuoleWebUI::OpenBenchmark()
 	OpenURL(L"http://www.smashcat.org/av/canvas_test/");
 }
 
-void VaQuoleWebUI::EvaluateJavaScript(const TCHAR *ScriptSource)
+TCHAR* VaQuoleWebUI::EvaluateJavaScript(const TCHAR *ScriptSource)
 {
-	return;
-	Q_CHECK_PTR(ExtComm);
+	QString ScriptUuid = QUuid::createUuid().toString();
 
-	//QString Str = QString::fromUtf16((const ushort*)ScriptSource);
-	//WebView->page()->mainFrame()->evaluateJavaScript(Str);
+	QPair<QString, QString> ScriptCommand;
+	ScriptCommand.first = ScriptUuid;
+	ScriptCommand.second = QString::fromUtf16((const ushort*)ScriptSource);
+
+	Q_CHECK_PTR(ExtComm);
+	ExtComm->ScriptCommands.append(ScriptCommand);
+
+	return (TCHAR *)ScriptUuid.utf16();
 }
 
 const uchar * VaQuoleWebUI::GrabView()
@@ -308,28 +313,42 @@ bool VaQuoleWebUI::IsPendingVisualEvents()
 //////////////////////////////////////////////////////////////////////////
 // JS commands callback
 
-int VaQuoleWebUI::GetCachedCommandsNumber()
+void VaQuoleWebUI::GetScriptResults(std::vector<ScriptEval>& Evals)
 {
-	return 0;
+	std::lock_guard<std::mutex> guard(mutex);
+
 	Q_CHECK_PTR(ExtComm);
 
-	//return WebView->getCachedCommandsNumber();
+	QPair<QString, QString> ScriptResult;
+	foreach (ScriptResult, ExtComm->ScriptResults)
+	{
+		ScriptEval Eval;
+		Eval.ScriptUuid = (TCHAR *)ScriptResult.first.utf16();
+		Eval.ScriptResult = (TCHAR *)ScriptResult.second.utf16();
+		Evals.push_back(Eval);
+	}
+
+	// Clear cached results
+	ExtComm->ScriptResults.clear();
 }
 
-TCHAR * VaQuoleWebUI::GetCachedCommand(int Index)
+void VaQuoleWebUI::GetScriptEvents(std::vector<ScriptEvent>& Events)
 {
-	return NULL;
+	std::lock_guard<std::mutex> guard(mutex);
+
 	Q_CHECK_PTR(ExtComm);
 
-	//return (TCHAR *)WebView->getCachedCommand(Index).utf16();
-}
+	QPair<QString, QString> EventPair;
+	foreach (EventPair, ExtComm->ScriptEvents)
+	{
+		ScriptEvent Event;
+		Event.EventName = (TCHAR *)EventPair.first.utf16();
+		Event.EventMessage = (TCHAR *)EventPair.second.utf16();
+		Events.push_back(Event);
+	}
 
-void VaQuoleWebUI::ClearCachedCommands()
-{
-	return;
-	Q_CHECK_PTR(ExtComm);
-
-	//WebView->clearCachedCommands();
+	// Clear cached results
+	ExtComm->ScriptEvents.clear();
 }
 
 

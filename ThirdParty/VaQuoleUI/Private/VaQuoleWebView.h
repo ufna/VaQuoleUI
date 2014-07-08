@@ -34,14 +34,8 @@ public:
 	/** Cached image data size to make a memcopy */
 	int getImageDataSize();
 
-	/** Count cached commands */
-	int getCachedCommandsNumber();
-
-	/** Get one particular command */
-	QString getCachedCommand(int index);
-
-	/** Clears cached JS commands */
-	void clearCachedCommands();
+	/** Get cached events from JavaScript and optionally clear cache */
+	void getCachedEvents(QList< QPair<QString, QString> >& Events, bool bClearCache = true);
 
 
 private:
@@ -54,8 +48,8 @@ private:
 	/** Indicates whether the View is transparent or composed on white */
 	bool bTransparent;
 
-	/** Cache of commands received from JS */
-	QStringList cachedJavaScriptCommands;
+	/** Events received from JavaScript */
+	QList< QPair<QString, QString> > CachedScriptEvents;		// Event, Message
 
 
 protected:
@@ -66,8 +60,8 @@ private slots:
 	void registerJavaScriptWindowObject(bool pageLoaded);
 
 public slots:
-	/** Simple text command from javascript received here */
-	void scriptCommand(QString command);
+	/** Callback from JavaSript */
+	void scriptEvent(QString event, QString message = QString());
 
 };
 

@@ -77,6 +77,10 @@ private:
 typedef TSharedPtr<FVaQuoleTextureData, ESPMode::ThreadSafe> FVaQuoleTextureDataPtr;
 typedef TSharedRef<FVaQuoleTextureData, ESPMode::ThreadSafe> FVaQuoleTextureDataRef;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FScriptEvalResult, const FString&, EvalUuid, const FString&, EvalResult);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FScriptEvent, const FString&, EventName, const FString&, EventMessage);
+
+
 /**
  * Class that handles view of one web page
  */
@@ -92,6 +96,7 @@ class UVaQuoleUIComponent : public UActorComponent
 
 	// Begin UObject Interface
 	virtual void BeginDestroy() OVERRIDE;
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) OVERRIDE;
 	// End UObject Interface
 
 
@@ -158,9 +163,10 @@ class UVaQuoleUIComponent : public UActorComponent
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
 	virtual void Resize(int32 NewWidth, int32 NewHeight);
 
-	/** JS code will be passed directly to web view */
+	/** Evaluates the JavaScript defined by ScriptSource and returns the call UUID
+	 * to get the result of the last executed statement from OnScriptReturn callback */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
-	void EvaluateJavaScript(const FString& ScriptSource);
+	FString EvaluateJavaScript(const FString& ScriptSource);
 
 	/** Requests a new URL to be loaded in the View */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
@@ -189,6 +195,18 @@ class UVaQuoleUIComponent : public UActorComponent
 	/** Material instance that contains texture inside it */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
 	UMaterialInstanceDynamic* GetMaterialInstance() const;
+
+
+	//////////////////////////////////////////////////////////////////////////
+	// Blueprintable events
+
+	/** Called when JavaScript function evaluated with return value */
+	UPROPERTY(BlueprintAssignable)
+	FScriptEvalResult ScriptEvalResult;
+
+	/** Called when JavaScript emits a special event for engine */
+	UPROPERTY(BlueprintAssignable)
+	FScriptEvent ScriptEvent;
 
 
 	//////////////////////////////////////////////////////////////////////////
@@ -228,6 +246,19 @@ protected:
 
 	/** Material instance that contains texture inside it */
 	UMaterialInstanceDynamic* MaterialInstance;
+
+
+	//////////////////////////////////////////////////////////////////////////
+	// WebUI setup
+
+	/** Reset all WebUI states to defaults */
+	void ResetWebUI();
+
+	/** Get return values of evaluated JS code and emit events */
+	void UpdateScriptResults();
+
+	/** Check WebUI for queued events and emit them */
+	void UpdateScriptEvents();
 
 	/** Web view loaded from library */
 	VaQuole::VaQuoleWebUI* WebUI;

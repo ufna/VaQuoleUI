@@ -31,16 +31,13 @@ void UVaQuoleUIComponent::InitializeComponent()
 	Super::InitializeComponent();
 
 	// Create web view
-	WebUI = VaQuole::ConstructNewUI();
+	if (!WebUI)
+	{
+		WebUI = VaQuole::ConstructNewUI();
+	}
 
-	// Init texture for the first time 
-	SetTransparent(bTransparent);
-	
-	// Resize texture to correspond desired size
-	Resize(Width, Height);
-
-	// Open default URL
-	OpenURL(DefaultURL);
+	// Init WebUI for the first time
+	ResetWebUI();
 }
 
 void UVaQuoleUIComponent::BeginDestroy()
@@ -169,14 +166,11 @@ void UVaQuoleUIComponent::UpdateUITexture()
 	}
 }
 
-void UVaQuoleUIComponent::UpdateMousePosition()
+void UVaQuoleUIComponent::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
-	if (!bEnabled || WebUI == NULL)
-	{
-		return;
-	}
+	Super::PostEditChangeProperty(PropertyChangedEvent);
 
-	WebUI->InputMouse((int32)MouseWidgetPosition.X, (int32)MouseWidgetPosition.Y);
+	ResetWebUI();
 }
 
 void UVaQuoleUIComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
@@ -189,32 +183,69 @@ void UVaQuoleUIComponent::TickComponent(float DeltaTime, enum ELevelTick TickTyp
 	// Mouse move is updated each frame
 	UpdateMousePosition();
 
-	// Process JS callback commands (currenly HUD only)
-	/*if (UIWidget.IsValid())
+	// Process JS callback commands
+	UpdateScriptResults();
+	UpdateScriptEvents();
+}
+
+void UVaQuoleUIComponent::UpdateScriptResults()
+{
+	if (!WebUI)
 	{
-		AHUD* MyHUD = Cast<AHUD>(GetOwner());
-		APlayerController* const PlayerController = MyHUD ? MyHUD->PlayerOwner : NULL;
+		return;
+	}
 
-		// It will work only for players
-		if (PlayerController)
+	std::vector<VaQuole::ScriptEval> Evals;
+	WebUI->GetScriptResults(Evals);
+
+	// Process results only if we're enabled
+	// Cached commands were cleared in GetScriptResults function
+	if (bEnabled)
+	{
+		for (auto Eval : Evals)
 		{
-			int32 Amount = UIWidget->GetCachedCommandsNumber();
-			FString Command;
+			FString ScriptUuid = Eval.ScriptUuid;
+			FString ScriptResult = Eval.ScriptResult;
 
-			for (int i = 0; i < Amount; i++)
-			{
-				Command = UIWidget->GetCachedCommand(i);
-
-				if (!Command.IsEmpty())
-				{
-					PlayerController->ConsoleCommand(Command);
-				}
-			}
+			ScriptEvalResult.Broadcast(ScriptUuid, ScriptResult);
 		}
+	}
+}
 
-		// Attn.! It's neccessary to prevent commands spam!
-		UIWidget->ClearCachedCommands();
-	}*/
+void UVaQuoleUIComponent::UpdateScriptEvents()
+{
+	if (!WebUI)
+	{
+		return;
+	}
+
+	std::vector<VaQuole::ScriptEvent> Events;
+	WebUI->GetScriptEvents(Events);
+
+	// Process results only if we're enabled
+	// Cached commands were cleared in GetScriptResults function
+	if (bEnabled)
+	{
+		for (auto Event : Events)
+		{
+			FString EventName = Event.EventName;
+			FString EventMessage = Event.EventMessage;
+
+			ScriptEvent.Broadcast(EventName, EventMessage);
+		}
+	}
+}
+
+void UVaQuoleUIComponent::ResetWebUI()
+{
+	// Update transparency state
+	SetTransparent(bTransparent);
+
+	// Resize texture to correspond desired size
+	Resize(Width, Height);
+
+	// Open default URL
+	OpenURL(DefaultURL);
 }
 
 
@@ -259,14 +290,14 @@ void UVaQuoleUIComponent::Resize(int32 NewWidth, int32 NewHeight)
 	ResetUITexture();
 }
 
-void UVaQuoleUIComponent::EvaluateJavaScript(const FString& ScriptSource)
+FString UVaQuoleUIComponent::EvaluateJavaScript(const FString& ScriptSource)
 {
 	if (!bEnabled || WebUI == NULL)
 	{
-		return;
+		return TEXT("");
 	}
 
-	WebUI->EvaluateJavaScript(*ScriptSource);
+	return WebUI->EvaluateJavaScript(*ScriptSource);
 }
 
 void UVaQuoleUIComponent::OpenURL(const FString& URL)
@@ -428,6 +459,16 @@ bool UVaQuoleUIComponent::InputKey(FViewport* Viewport, int32 ControllerId, FKey
 void UVaQuoleUIComponent::SetMousePosition(float X, float Y)
 {
 	MouseWidgetPosition = FVector2D(X, Y);
+}
+
+void UVaQuoleUIComponent::UpdateMousePosition()
+{
+	if (!bEnabled || WebUI == NULL)
+	{
+		return;
+	}
+
+	WebUI->InputMouse((int32)MouseWidgetPosition.X, (int32)MouseWidgetPosition.Y);
 }
 
 

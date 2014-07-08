@@ -11,6 +11,7 @@
 #include <QtDebug>
 #include <QFile>
 #include <QThread>
+#include <QWebFrame>
 
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
@@ -97,6 +98,7 @@ void VaQuoleUIManager::run()
 			UIDataKeeper* ExtComm = Page->GetData();
 			Q_CHECK_PTR(ExtComm);
 
+			// Create webview if necessary
 			VaQuoleWebView* WebView = WebViews.value(ExtComm->ObjectId, NULL);
 			if(WebView == NULL)
 			{
@@ -111,6 +113,7 @@ void VaQuoleUIManager::run()
 				WebViews.insert(ExtComm->ObjectId, WebView);
 			}
 
+			// Cache data from struct
 			QString NewURL = ExtComm->NewURL;
 
 			bool bNewTransparency = ExtComm->bDesiredTransparency;
@@ -125,6 +128,28 @@ void VaQuoleUIManager::run()
 			QList<MouseEvent> MouseEvents = ExtComm->MouseEvents;
 			QList<KeyEvent> KeyEvents = ExtComm->KeyEvents;
 
+			// Process JavaScript commands
+			QPair<QString, QString> ScriptCommand;
+			foreach (ScriptCommand, ExtComm->ScriptCommands)
+			{
+				QVariant ScriptResult = WebView->page()->mainFrame()->evaluateJavaScript(ScriptCommand.second);
+
+				QString ScriptResultStr = ScriptResult.toString();
+				if(!ScriptResultStr.isEmpty() && !ScriptResultStr.isNull())
+				{
+					QPair<QString, QString> ScriptResultPair;
+					ScriptResultPair.first = ScriptCommand.first;
+					ScriptResultPair.second = ScriptResultStr;
+
+					ExtComm->ScriptResults.append(ScriptResultPair);
+				}
+			}
+
+			// Extract JavaScript events
+			QList< QPair<QString, QString> > ScriptEvents;
+			WebView->getCachedEvents(ScriptEvents, true);
+			ExtComm->ScriptEvents.append(ScriptEvents);
+
 			// External data update (mark we've read it)
 			ExtComm->NewURL = "";
 			ExtComm->bTransparent = WebView->getTransparency();
@@ -132,6 +157,7 @@ void VaQuoleUIManager::run()
 			ExtComm->Height = WebView->height();
 			ExtComm->MouseEvents.clear();
 			ExtComm->KeyEvents.clear();
+			ExtComm->ScriptCommands.clear();
 
 			// Update grabbed view
 			UpdateImageBuffer(ExtComm, WebView);
@@ -176,7 +202,7 @@ void VaQuoleUIManager::run()
 
 			// Process mouse events
 			MouseEvent MyMouseEvent;
-			foreach(MyMouseEvent, MouseEvents)
+			foreach (MyMouseEvent, MouseEvents)
 			{
 				if(MyMouseEvent.button == Qt::NoButton)
 				{
@@ -197,7 +223,7 @@ void VaQuoleUIManager::run()
 
 			// Process key events
 			KeyEvent MyKeyEvent;
-			foreach(MyKeyEvent, KeyEvents)
+			foreach (MyKeyEvent, KeyEvents)
 			{
 				VaQuole::simulateKey(WebView, MyKeyEvent.key, MyKeyEvent.modifiers, MyKeyEvent.text, MyKeyEvent.bKeyPressed);
 			}

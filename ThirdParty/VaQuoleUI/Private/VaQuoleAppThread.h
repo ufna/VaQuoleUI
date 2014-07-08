@@ -53,6 +53,11 @@ struct UIDataKeeper
 	QList<MouseEvent> MouseEvents;
 	QList<KeyEvent> KeyEvents;
 
+	/** JavaScript data stored in QList to keep strict order */
+	QList< QPair<QString, QString> > ScriptCommands;	// Uuid, ScriptSource
+	QList< QPair<QString, QString> > ScriptResults;		// Uuid, ReturnValue
+	QList< QPair<QString, QString> > ScriptEvents;		// Event, Message
+
 	/** Defaults */
 	UIDataKeeper::UIDataKeeper()
 		: ObjectId(QUuid::createUuid().toString())

@@ -108,21 +108,14 @@ int VaQuoleWebView::getImageDataSize()
 	return backBuffer->byteCount();
 }
 
-int VaQuoleWebView::getCachedCommandsNumber()
+void VaQuoleWebView::getCachedEvents(QList< QPair<QString, QString> >& Events, bool bClearCache)
 {
-	return cachedJavaScriptCommands.size();
-}
+	Events = CachedScriptEvents;
 
-QString VaQuoleWebView::getCachedCommand(int index)
-{
-	Q_ASSERT(index < cachedJavaScriptCommands.size());
-
-	return cachedJavaScriptCommands.at(index);
-}
-
-void VaQuoleWebView::clearCachedCommands()
-{
-	cachedJavaScriptCommands.clear();
+	if (bClearCache)
+	{
+		CachedScriptEvents.clear();
+	}
 }
 
 
@@ -176,9 +169,13 @@ void VaQuoleWebView::registerJavaScriptWindowObject(bool pageLoaded)
 	}
 }
 
-void VaQuoleWebView::scriptCommand(QString command)
+void VaQuoleWebView::scriptEvent(QString event, QString message)
 {
-	cachedJavaScriptCommands.append(command);
+	QPair<QString, QString> NewEvent;
+	NewEvent.first = event;
+	NewEvent.second = message;
+
+	CachedScriptEvents.append(NewEvent);
 }
 
 } // namespace VaQuole

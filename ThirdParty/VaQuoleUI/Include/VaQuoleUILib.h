@@ -6,6 +6,7 @@
 #include "VaQuolePublicPCH.h"
 
 #include <mutex>
+#include <vector>
 
 namespace VaQuole
 {
@@ -58,7 +59,7 @@ public:
 	void OpenBenchmark();
 
 	/** Evaluate JS script on current page */
-	void EvaluateJavaScript(const TCHAR *ScriptSource);
+	TCHAR* EvaluateJavaScript(const TCHAR *ScriptSource);
 
 	/** Get reference to grabbed screen texture */
 	const uchar * GrabView();
@@ -74,16 +75,13 @@ public:
 
 
 	//////////////////////////////////////////////////////////////////////////
-	// JS commands callback
+	// JavaScript commands callback
 
-	/** Count cached commands */
-	int GetCachedCommandsNumber();
+	/** Get current evaluated scripts return values */
+	void GetScriptResults(std::vector<ScriptEval>& Evals);
 
-	/** Get one particular command */
-	TCHAR * GetCachedCommand(int Index);
-
-	/** Clear commands cache */
-	void ClearCachedCommands();
+	/** Get events triggered by scripts */
+	void GetScriptEvents(std::vector<ScriptEvent> &Events);
 
 
 	//////////////////////////////////////////////////////////////////////////

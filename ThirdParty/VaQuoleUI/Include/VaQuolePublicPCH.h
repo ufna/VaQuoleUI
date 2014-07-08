@@ -52,6 +52,24 @@ struct KeyModifiers
 	}
 };
 
+/**
+ * Simple struct to keep return values from JavaScript calls
+ */
+struct ScriptEval
+{
+	TCHAR* ScriptUuid;
+	TCHAR* ScriptResult;
+};
+
+/**
+ * JavaScript events keeper
+ */
+struct ScriptEvent
+{
+	TCHAR* EventName;
+	TCHAR* EventMessage;
+};
+
 } // namespace VaQuole
 
 #endif // VAQUOLEPUBLICPCH_H
