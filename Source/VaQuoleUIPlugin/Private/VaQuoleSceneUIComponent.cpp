@@ -86,19 +86,44 @@ bool UVaQuoleSceneUIComponent::MouseMoveFromHitResult(const FHitResult& HitResul
 		FVector Min, Max;
 		TargetMesh->GetLocalBounds(Min, Max);
 
-		UE_LOG(LogVaQuole, Warning, TEXT("Min %s"), *Min.ToString());
-		UE_LOG(LogVaQuole, Warning, TEXT("Max %s"), *Max.ToString());
+		float SizeX = (Max.X - Min.X);
+		float SizeY = (Max.Y - Min.Y);
+		float SizeZ = (Max.Z - Min.Z);
 
-		// @TODO Add rotation modificator
-		int32 X = GetWidth() * (ActorImpact.X - Min.X) / (Max.X - Min.X);
-		int32 Y = GetHeight() * (Max.Z - ActorImpact.Z) / (Max.Z - Min.Z);
+		if (SurfaceMapping == ESurfaceMapping::Planar)
+		{
+			// Ensure we haven't zero subdivison
+			if (SizeY > 0.f && SizeX > 0.f)
+			{
+				float X = GetWidth() * (Max.Y - ActorImpact.Y) / SizeY;
+				float Y = GetHeight() * (Max.Z - ActorImpact.Z) / SizeZ;
 
-		MouseMove(X, Y);
+				MouseMove(X, Y);
+			}
+		}
+		else if (SurfaceMapping = ESurfaceMapping::Cylindrical)
+		{
+			// Ensure that we won't get /0 error
+			if (SizeX > 0.f && SizeY > 0.f && SizeZ > 0.f)
+			{
+				float XNormal = 2.f * (ActorImpact.X - Min.X) / SizeX - 1.f;
+				float YNormal = 2.f * (ActorImpact.Y - Min.Y) / SizeY - 1.f;
 
-		UE_LOG(LogVaQuole, Warning, TEXT("Mouse X %d"), X);
-		UE_LOG(LogVaQuole, Warning, TEXT("Mouse Y %d"), Y);
+				float Radius = 0.f;
+				float Angle = 0.f;
 
-		return true;
+				FMath::CartesianToPolar(XNormal, -YNormal, Radius, Angle);
+
+				float X = GetWidth() * (FMath::RadiansToDegrees(Angle) + 180.f) / 360.f;
+				float Y = GetHeight() * (Max.Z - ActorImpact.Z) / SizeZ;
+
+				MouseMove(X, Y);
+
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	return false;
