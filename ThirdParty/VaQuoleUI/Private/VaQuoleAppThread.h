@@ -29,6 +29,9 @@ struct UIDataKeeper
 	/** Unique object instance id */
 	QString ObjectId;
 
+	/** Is page is enabled in game? */
+	bool bEnabled;
+
 	/** Is page should be deleted? */
 	bool bMarkedForDelete;
 
@@ -62,6 +65,7 @@ struct UIDataKeeper
 	UIDataKeeper::UIDataKeeper()
 		: ObjectId(QUuid::createUuid().toString())
 	{
+		bEnabled = false;
 		bMarkedForDelete = false;
 
 		bDesiredTransparency = false;

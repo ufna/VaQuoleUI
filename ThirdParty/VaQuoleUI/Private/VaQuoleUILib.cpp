@@ -281,6 +281,30 @@ const uchar * VaQuoleWebUI::GrabView()
 	return ExtComm->ImageBits;
 }
 
+bool VaQuoleWebUI::IsEnabled()
+{
+	std::lock_guard<std::mutex> guard(mutex);
+
+	Q_CHECK_PTR(ExtComm);
+	return ExtComm->bEnabled;
+}
+
+void VaQuoleWebUI::SetEnabled(bool Enabled)
+{
+	std::lock_guard<std::mutex> guard(mutex);
+
+	Q_CHECK_PTR(ExtComm);
+	ExtComm->bEnabled = Enabled;
+}
+
+bool VaQuoleWebUI::IsTransparent()
+{
+	std::lock_guard<std::mutex> guard(mutex);
+
+	Q_CHECK_PTR(ExtComm);
+	return ExtComm->bTransparent;
+}
+
 void VaQuoleWebUI::SetTransparent(bool Transparent)
 {
 	std::lock_guard<std::mutex> guard(mutex);

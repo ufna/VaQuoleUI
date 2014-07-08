@@ -64,6 +64,15 @@ public:
 	/** Get reference to grabbed screen texture */
 	const uchar * GrabView();
 
+	/** Is the view grabbed bits update enabled? */
+	bool IsEnabled();
+
+	/** Disabled view doesn't update grabbed bits because of performance considerations */
+	void SetEnabled(bool Enabled = true);
+
+	/** Is background marked as transparent? */
+	bool IsTransparent();
+
 	/** Change background transparency */
 	void SetTransparent(bool Transparent = true);
 

@@ -238,6 +238,9 @@ void UVaQuoleUIComponent::UpdateScriptEvents()
 
 void UVaQuoleUIComponent::ResetWebUI()
 {
+	// Update enabled state
+	SetEnabled(bEnabled);
+
 	// Update transparency state
 	SetTransparent(bTransparent);
 
@@ -255,6 +258,11 @@ void UVaQuoleUIComponent::ResetWebUI()
 void UVaQuoleUIComponent::SetEnabled(bool Enabled)
 {
 	bEnabled = Enabled;
+
+	if (WebUI)
+	{
+		WebUI->SetEnabled(bEnabled);
+	}
 }
 
 void UVaQuoleUIComponent::SetTransparent(bool Transparent)

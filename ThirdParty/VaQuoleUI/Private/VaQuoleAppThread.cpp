@@ -291,7 +291,12 @@ void VaQuoleUIManager::UpdateImageBuffer(UIDataKeeper *ExtComm, VaQuoleWebView *
 		ExtComm->ImageDataSize = WebView->getImageDataSize();
 		ExtComm->ImageBits = new uchar[ExtComm->ImageDataSize];
 	}
-	memcpy(ExtComm->ImageBits, WebView->getImageData(), ExtComm->ImageDataSize);
+
+	// Copy image only if page is enabled!
+	if (ExtComm->bEnabled)
+	{
+		memcpy(ExtComm->ImageBits, WebView->getImageData(), ExtComm->ImageDataSize);
+	}
 }
 
 } // namespace VaQuole
