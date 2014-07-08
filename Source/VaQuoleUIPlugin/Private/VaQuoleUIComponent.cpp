@@ -133,12 +133,12 @@ void UVaQuoleUIComponent::UpdateUITexture()
 		const UCHAR* my_data = WebUI->GrabView();
 		const size_t size = Width * Height * sizeof(uint32);
 
-		// Copy buffer for rendering thread
+		// @TODO This is a bit heavy to keep reallocating/deallocating, but not a big deal. Maybe we can ping pong between buffers instead.
 		TArray<uint32> ViewBuffer;
 		ViewBuffer.Init(Width * Height);
 		FMemory::Memcpy(ViewBuffer.GetData(), my_data, size);
 
-		// Constuct buffer storage
+		// This will be passed off to the render thread, which will delete it when it has finished with it
 		FVaQuoleTextureDataPtr DataPtr = MakeShareable(new FVaQuoleTextureData);
 		DataPtr->SetRawData(Width, Height, sizeof(uint32), ViewBuffer);
 
