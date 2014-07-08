@@ -10,14 +10,17 @@ TARGET = VaQuoleUILib
 TEMPLATE = lib
 CONFIG += staticlib
 
-DEFINES += _UNICODE NOT_UE
+DEFINES += _UNICODE NOT_UE #VA_DEBUG
 
-contains(CONFIG,Win64){
-    message("Building 64bit version")
-    DESTDIR = ../VaQuoleUI/Lib/Win64
-}else{
-    message("Building 32bit version")
-    DESTDIR = ../VaQuoleUI/Lib/Win32
+win32 {
+    !contains(QMAKE_TARGET.arch, x86_64) {
+	message("Building 32bit version")
+	DESTDIR = ../VaQuoleUI/Lib/Win32
+
+    } else {
+	message("Building 64bit version")
+	DESTDIR = ../VaQuoleUI/Lib/Win64
+    }
 }
 
 INCLUDEPATH += ./Include \
@@ -25,12 +28,16 @@ INCLUDEPATH += ./Include \
 
 SOURCES += Private/VaQuoleUILib.cpp \
     Private/VaQuoleWebView.cpp \
-    Private/VaQuoleInputHelpers.cpp
+    Private/VaQuoleInputHelpers.cpp \
+    Private/VaQuoleAppThread.cpp \
+    Private/VaQuoleWebPage.cpp
 
 HEADERS += Include/VaQuoleUILib.h \
     Private/VaQuoleWebView.h \
     Include/VaQuolePublicPCH.h \
-    Private/VaQuoleInputHelpers.h
+    Private/VaQuoleInputHelpers.h \
+    Private/VaQuoleAppThread.h \
+    Private/VaQuoleWebPage.h
 
 unix {
     target.path = /usr/lib

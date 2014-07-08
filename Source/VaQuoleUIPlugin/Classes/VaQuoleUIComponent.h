@@ -62,10 +62,13 @@ struct FVaQuoleTextureData
 private:
 	/** Raw uncompressed texture data */
 	TArray<uint32> Bytes;
+
 	/** Width of the texture */
 	uint32 Width;
+
 	/** Height of the texture */
 	uint32 Height;
+
 	/** The number of bytes of each pixel */
 	uint32 StrideBytes;
 
@@ -74,15 +77,29 @@ private:
 typedef TSharedPtr<FVaQuoleTextureData, ESPMode::ThreadSafe> FVaQuoleTextureDataPtr;
 typedef TSharedRef<FVaQuoleTextureData, ESPMode::ThreadSafe> FVaQuoleTextureDataRef;
 
-typedef TSharedPtr<class VaQuole::VaQuoleUI, ESPMode::ThreadSafe> FVaQuoleWebViewPtr;
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FScriptEvalResult, const FString&, EvalUuid, const FString&, EvalResult);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FScriptEvent, const FString&, EventName, const FString&, EventMessage);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLoadFinished);
+
 
 /**
  * Class that handles view of one web page
  */
-UCLASS(ClassGroup=UI, editinlinenew, meta=(BlueprintSpawnableComponent))
+UCLASS(Abstract, BlueprintType, Blueprintable)
 class UVaQuoleUIComponent : public UActorComponent
 {
 	GENERATED_UCLASS_BODY()
+
+	// Begin UActorComponent Interface
+	virtual void InitializeComponent() OVERRIDE;
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) OVERRIDE;
+	// End UActorComponent Interface
+
+	// Begin UObject Interface
+	virtual void BeginDestroy() OVERRIDE;
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) OVERRIDE;
+	// End UObject Interface
+
 
 	//////////////////////////////////////////////////////////////////////////
 	// View configuration
@@ -90,10 +107,6 @@ class UVaQuoleUIComponent : public UActorComponent
 	/** Indicates whether the View enabled (receive player input or not) */
 	UPROPERTY(EditAnywhere, Category = "View")
 	bool bEnabled;
-
-	/** Indicates whether the View used as HUD (material instance won't be created for HUD)*/
-	UPROPERTY(EditAnywhere, Category = "View")
-	bool bHUD;
 
 	/** Indicates whether the View is transparent or composed on white */
 	UPROPERTY(EditAnywhere, Category = "View")
@@ -111,12 +124,20 @@ class UVaQuoleUIComponent : public UActorComponent
 	UPROPERTY(EditAnywhere, Category = "View")
 	FString DefaultURL;
 
+	/** Should widget consume mouse input? (mouse events won't be delivered to other actors) */
+	UPROPERTY(EditAnywhere, Category = "Input")
+	bool bConsumeMouseInput;
+
+	/** Should widget consume keyboard input? (key events won't be delivered to other actors) */
+	UPROPERTY(EditAnywhere, Category = "Input")
+	bool bConsumeKeyboardInput;
+
 	/** Material that will be instanced to load UI texture into it */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Material)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Material")
 	UMaterialInterface* BaseMaterial;
 
 	/** Name of parameter to load UI texture into material */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Material)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Material")
 	FName TextureParameterName;
 
 
@@ -125,27 +146,28 @@ class UVaQuoleUIComponent : public UActorComponent
 
 	/** Changes view activity state. Attn.! qApp will be still active in background! */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
-	void SetEnabled(const bool Enabled);
+	void SetEnabled(bool Enabled);
 
 	/** Changes background transparency */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
-	void SetTransparent(const bool Transparent);
+	void SetTransparent(bool Transparent);
+
+	/** Set consume input state for mouse events */
+	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI|Input")
+	void SetConsumeMouseInput(bool ConsumeInput);
+
+	/** Set consume input state for keyboard events */
+	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI|Input")
+	void SetConsumeKeyboardInput(bool ConsumeInput);
 
 	/** Resizes the View */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
-	void Resize(int32 NewWidth, int32 NewHeight);
+	virtual void Resize(int32 NewWidth, int32 NewHeight);
 
-	/** Requests a View to completely re-draw itself */
+	/** Evaluates the JavaScript defined by ScriptSource and returns the call UUID
+	 * to get the result of the last executed statement from OnScriptReturn callback */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
-	void Redraw() const;
-
-	/** JS code will be passed directly to web view */
-	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
-	void EvaluateJavaScript(const FString& ScriptSource);
-
-
-	//////////////////////////////////////////////////////////////////////////
-	// Content control
+	FString EvaluateJavaScript(const FString& ScriptSource);
 
 	/** Requests a new URL to be loaded in the View */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
@@ -153,24 +175,11 @@ class UVaQuoleUIComponent : public UActorComponent
 
 
 	//////////////////////////////////////////////////////////////////////////
-	// Player input
-
-	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
-	void MouseMove(int32 X, int32 Y);
-
-	// @TODO Make enum type blueprintable
-	// UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
-	void MouseClick(int32 X, int32 Y, VaQuole::EMouseButton::Type Button, bool bPressed = true, unsigned int Modifiers = VaQuole::EKeyboardModifier::NoModifier);
-
-	//UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
-	void InputKeyQ(FViewport* Viewport, FKey Key, EInputEvent EventType, float AmountDepressed, bool bGamepad);
-
-
-	//////////////////////////////////////////////////////////////////////////
 	// Content access
 
-	/** UI widget direct access for test purposes */
-	FVaQuoleWebViewPtr GetUIWidget() { return UIWidget; }
+	/** Is current view enabled? */
+	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
+	bool IsEnabled() const;
 
 	/** Texture that stores current widget UI */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
@@ -188,26 +197,53 @@ class UVaQuoleUIComponent : public UActorComponent
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
 	UMaterialInstanceDynamic* GetMaterialInstance() const;
 
-	/** Key to unicode conversion */
-	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
-	uint16 GetKeyCodeFromKey(FKey& Key) const;
-	
 
-public:
-	// Begin UActorComponent Interface
-	virtual void InitializeComponent() OVERRIDE;
-	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) OVERRIDE;
-	// End UActorComponent Interface
+	//////////////////////////////////////////////////////////////////////////
+	// Blueprintable events
 
-	// Begin UObject Interface
-	virtual void BeginDestroy() OVERRIDE;
-	// End UObject Interface
+	/** Called when JavaScript function evaluated with return value */
+	UPROPERTY(BlueprintAssignable)
+	FScriptEvalResult ScriptEvalResult;
+
+	/** Called when JavaScript emits a special event for engine */
+	UPROPERTY(BlueprintAssignable)
+	FScriptEvent ScriptEvent;
+
+	/** Called when desired URL loading is finished */
+	UPROPERTY(BlueprintAssignable)
+	FLoadFinished LoadFinished;
+
+
+	//////////////////////////////////////////////////////////////////////////
+	// Player input
+
+	virtual bool InputKey(FViewport* Viewport, int32 ControllerId, FKey Key, EInputEvent EventType, float AmountDepressed = 1.f, bool bGamepad = false);
+
+	void SetMousePosition(float X, float Y);
 
 protected:
-	void ResetUITexture();
+	/** Send MouseMove event to the widget */
+	void UpdateMousePosition();
+
+	/** Cached mouse position */
+	FVector2D MouseWidgetPosition;
+
+
+	//////////////////////////////////////////////////////////////////////////
+	// Materials setup
+
+protected:
+	/** Release Texture resources */
 	void DestroyUITexture();
 
+	/** Release current Texture and create new with desired size */
+	void ResetUITexture();
+
+	/** Material instance update */
 	void ResetMaterialInstance();
+	
+	/** Update Texture with WebView cached data */
+	void UpdateUITexture();
 
 	/** Texture that stores current widget UI */
 	UTexture2D* Texture;
@@ -215,21 +251,33 @@ protected:
 	/** Material instance that contains texture inside it */
 	UMaterialInstanceDynamic* MaterialInstance;
 
-	/** Web view loaded from library */
-	FVaQuoleWebViewPtr UIWidget;
 
-private:
-	/** Counter to control life of qApp */
-	FThreadSafeCounter* RefCount;
+	//////////////////////////////////////////////////////////////////////////
+	// WebUI setup
+
+	/** Reset all WebUI states to defaults */
+	void ResetWebUI();
+
+	/** Get return values of evaluated JS code and emit events */
+	void UpdateScriptResults();
+
+	/** Check WebUI for queued events and emit them */
+	void UpdateScriptEvents();
+
+	/** Check that desired URL is opened */
+	void UpdateLoadingState();
+
+	/** Web view loaded from library */
+	VaQuole::VaQuoleWebUI* WebUI;
+
+	/** Is last URL successfully loaded? */
+	bool bPageLoaded;
 
 
 	//////////////////////////////////////////////////////////////////////////
-	// Keyboard input helpers
+	// Input helpers
 
-	/** Map unicode values for keys (because some UE4 functions are not implemented yet) */
-	TMap<FKey, uint16> KeyMapEnumToCode;
-
-	/** Initializes key map */
-	void InitKeyMap();
+	/** Player mouse screen position */
+	bool GetMouseScreenPosition(FVector2D& MousePosition);
 
 };

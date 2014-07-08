@@ -3,9 +3,11 @@
 #include "VaQuoleInputHelpers.h"
 
 #include <QApplication>
-#include <QMouseEvent>
 #include <QPoint>
 #include <QWidget>
+
+#include <QMouseEvent>
+#include <QContextMenuEvent>
 
 namespace VaQuole
 {
@@ -57,12 +59,11 @@ void simulateMouseClick(QWidget* const pWidget,
 	else
 	{
 		pMouseEvent = createMouseEvent(	pWidget, QEvent::MouseButtonRelease,
-										widgetPos, Qt::NoButton,
+										widgetPos, button,
 										modifiers, button);
 	}
 
-	QApplication::instance()->sendEvent(pWidget, pMouseEvent);
-	// QApplication::processEvents();
+	QApplication::instance()->postEvent(pWidget, pMouseEvent);
 }
 
 void simulateMouseMove(	QWidget* const pWidget, const QPoint& widgetPos)
@@ -72,11 +73,50 @@ void simulateMouseMove(	QWidget* const pWidget, const QPoint& widgetPos)
 		return;
 	}
 
-	QMouseEvent* pMouseEvent = createMouseEvent(	pWidget, QEvent::MouseMove,
+	QMouseEvent* pMouseEvent = createMouseEvent(pWidget, QEvent::MouseMove,
 										widgetPos, Qt::NoButton,
 										Qt::NoModifier, Qt::NoButton);
 
-	QApplication::instance()->sendEvent(pWidget, pMouseEvent);
+	QApplication::instance()->postEvent(pWidget, pMouseEvent);
+}
+
+void simulateMouseWheel(QWidget* const pWidget,
+						const QPoint &widgetPos,
+						const Qt::KeyboardModifiers modifiers,
+						const bool bWheelDown)
+{
+	if (pWidget == NULL || QApplication::instance() == NULL)
+	{
+		return;
+	}
+
+	/** Most mouse types work in steps of 15 degrees, in which case
+	 * the delta value is a multiple of 120; i.e., 120 units * 1/8 = 15 degrees. */
+	int delta = 120;
+	if( bWheelDown )
+	{
+		delta *= -1;
+	}
+
+	QWheelEvent* pEvent = new QWheelEvent(	widgetPos,
+											pWidget->mapToGlobal(widgetPos),
+											delta,
+											Qt::NoButton,
+											modifiers);
+
+	QApplication::instance()->postEvent(pWidget, pEvent);
+}
+
+void simulateContextMenu(	QWidget* const pWidget,
+							const QPoint& widgetPos,
+							const Qt::KeyboardModifiers modifiers)
+{
+	QContextMenuEvent* pEvent = new QContextMenuEvent(QContextMenuEvent::Mouse,
+													 widgetPos,
+													 pWidget->mapToGlobal(widgetPos),
+													 modifiers);
+
+	QApplication::instance()->postEvent(pWidget, pEvent);
 }
 
 
@@ -84,7 +124,7 @@ void simulateMouseMove(	QWidget* const pWidget, const QPoint& widgetPos)
 // Keyboard input
 
 QKeyEvent* createKeyEvent(	const QEvent::Type eventType,
-							int key,
+							const int key,
 							const Qt::KeyboardModifiers modifiers,
 							QString & text,
 							bool autorep,
@@ -103,6 +143,7 @@ QKeyEvent* createKeyEvent(	const QEvent::Type eventType,
 void simulateKey(	QWidget* const pWidget,
 					const unsigned int key,
 					const Qt::KeyboardModifiers modifiers,
+					QString & text,
 					const bool bKeyPressed)
 {
 	if (pWidget == NULL || QApplication::instance() == NULL)
@@ -114,11 +155,11 @@ void simulateKey(	QWidget* const pWidget,
 
 	if(bKeyPressed)
 	{
-		pKeyEvent = createKeyEvent(QEvent::KeyPress, key, modifiers);
+		pKeyEvent = createKeyEvent(QEvent::KeyPress, key, modifiers, text);
 	}
 	else
 	{
-		pKeyEvent = createKeyEvent(QEvent::KeyRelease, key, modifiers);
+		pKeyEvent = createKeyEvent(QEvent::KeyRelease, key, modifiers, text);
 	}
 
 	QApplication::instance()->sendEvent(pWidget, pKeyEvent);

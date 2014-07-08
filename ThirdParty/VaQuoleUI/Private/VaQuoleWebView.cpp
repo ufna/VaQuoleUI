@@ -7,11 +7,17 @@
 #include <QPaintEvent>
 #include <QBackingStore>
 
+namespace VaQuole
+{
+
 VaQuoleWebView::VaQuoleWebView(QWidget *parent) :
 	QWebView(parent)
 {
 	// It should never be empty
 	ImageCache = QImage(32,32,QImage::Format_RGB32);
+
+	// Defaults
+	bPageLoaded = false;
 
 #ifndef VA_DEBUG
 	// Hide window in taskbar
@@ -19,8 +25,8 @@ VaQuoleWebView::VaQuoleWebView(QWidget *parent) :
 #endif
 
 	// Register us with JavaScript
-	connect(this, SIGNAL(loadFinished(bool)),
-			this, SLOT(registerJavaScriptWindowObject(bool)));
+	connect(this, SIGNAL(loadFinished(bool)), this, SLOT(registerJavaScriptWindowObject(bool)));
+	connect(this, SIGNAL(loadFinished(bool)), this, SLOT(markLoadFinished(bool)));
 }
 
 void VaQuoleWebView::updateImageCache(QSize ImageSize)
@@ -41,8 +47,19 @@ void VaQuoleWebView::updateImageCache(QSize ImageSize)
 	}
 }
 
+void VaQuoleWebView::markLoadFinished(bool ok)
+{
+	// We just want to know is it finished or not, but not the result
+	bPageLoaded = true;
+}
+
 //////////////////////////////////////////////////////////////////////////
 // View control functions
+
+bool VaQuoleWebView::getTransparency() const
+{
+	return bTransparent;
+}
 
 void VaQuoleWebView::setTransparent(bool transparent)
 {
@@ -58,6 +75,16 @@ void VaQuoleWebView::setTransparent(bool transparent)
 	{
 		setStyleSheet("");
 	}
+}
+
+bool VaQuoleWebView::isLoadFinished() const
+{
+	return bPageLoaded;
+}
+
+void VaQuoleWebView::resetPageLoadState()
+{
+	bPageLoaded = false;
 }
 
 void VaQuoleWebView::resize(int w, int h)
@@ -77,7 +104,7 @@ void VaQuoleWebView::resize(int w, int h)
 //////////////////////////////////////////////////////////////////////////
 // Data access
 
-const uchar * VaQuoleWebView::getImageData()
+uchar *VaQuoleWebView::getImageData()
 {
 	if (bTransparent)
 	{
@@ -88,21 +115,25 @@ const uchar * VaQuoleWebView::getImageData()
 	return backBuffer->bits();
 }
 
-int VaQuoleWebView::getCachedCommandsNumber()
+int VaQuoleWebView::getImageDataSize()
 {
-	return cachedJavaScriptCommands.size();
+	if (bTransparent)
+	{
+		return ImageCache.byteCount();
+	}
+
+	QImage *backBuffer = dynamic_cast<QImage*>(backingStore()->paintDevice());
+	return backBuffer->byteCount();
 }
 
-QString VaQuoleWebView::getCachedCommand(int index)
+void VaQuoleWebView::getCachedEvents(QList< QPair<QString, QString> >& Events, bool bClearCache)
 {
-	Q_ASSERT(index < cachedJavaScriptCommands.size());
+	Events = CachedScriptEvents;
 
-	return cachedJavaScriptCommands.at(index);
-}
-
-void VaQuoleWebView::clearCachedCommands()
-{
-	cachedJavaScriptCommands.clear();
+	if (bClearCache)
+	{
+		CachedScriptEvents.clear();
+	}
 }
 
 
@@ -156,7 +187,13 @@ void VaQuoleWebView::registerJavaScriptWindowObject(bool pageLoaded)
 	}
 }
 
-void VaQuoleWebView::scriptCommand(QString command)
+void VaQuoleWebView::scriptEvent(QString event, QString message)
 {
-	cachedJavaScriptCommands.append(command);
+	QPair<QString, QString> NewEvent;
+	NewEvent.first = event;
+	NewEvent.second = message;
+
+	CachedScriptEvents.append(NewEvent);
 }
+
+} // namespace VaQuole

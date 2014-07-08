@@ -1,21 +1,34 @@
 // Copyright 2014 Vladimir Alyamkin. All Rights Reserved.
 
 #include "VaQuoleUILib.h"
-#include "VaQuoleWebView.h"
-#include "VaQuoleInputHelpers.h"
+#include "VaQuoleAppThread.h"
 
 #include <QApplication>
-#include <QNetworkProxyFactory>
-#include <QWebSettings>
+#include <QDebug>
 
 #include <QImage>
 #include <QWebFrame>
+#include <QString>
+#include <QHash>
 
 namespace VaQuole
 {
 
-/** Main Qt class object */
-static QApplication* pApp = NULL;
+/** Main app thread with QApplication */
+static VaQuoleUIManager* pAppThread = NULL;
+
+/** Key map to convert UE4 keys to Qt ones */
+QHash<QString, Qt::Key> KeyMap;
+
+/** Key map to convert UE4 keys to QString characters */
+QHash<QString, QString> KeyTextMap;
+
+/**
+ * Key map to apply SHIFT modificator. Seemed as Qt bug,
+ * Check https://bugreports.qt-project.org/browse/QTBUG-40100
+ */
+QHash<QString, QString> KeyShiftMap;
+
 
 //////////////////////////////////////////////////////////////////////////
 // Common lib functions
@@ -25,160 +38,474 @@ void Init()
 	// Check that we haven't qApp already
 	if (QApplication::instance() == nullptr)
 	{
-		// Create qApp
-		int argc = 1;
-		char arg1[] = "VaQuoleUILib";
-		char* argv[1] = {arg1};
-		pApp = new QApplication(argc, argv);
-		pApp->setQuitOnLastWindowClosed(false);
-		pApp->processEvents();
+		pAppThread = new VaQuoleUIManager();
+		pAppThread->start();
+	}
 
-		// Set network config
-		QNetworkProxyFactory::setUseSystemConfiguration (true);
-		QWebSettings::globalSettings()->setAttribute(QWebSettings::PluginsEnabled, true);
-		QWebSettings::globalSettings()->setAttribute(QWebSettings::AutoLoadImages, true);
-	}
-	else
-	{
-		pApp = qApp;
-	}
-}
-
-void Update()
-{
-	if (QApplication::instance() != nullptr)
-	{
-		QApplication::instance()->processEvents();
-	}
+	InitKeyMaps();
 }
 
 void Cleanup()
 {
-	if (QApplication::instance() != nullptr)
+	qDebug() << "Clean so clean";
+
+	if (pAppThread != NULL)
 	{
-		QApplication::instance()->quit();
+		pAppThread->~VaQuoleUIManager();//->stop();
 	}
+}
+
+VaQuoleWebUI* ConstructNewUI()
+{
+	VaQuoleWebUI* NewUI = new VaQuoleWebUI();
+	NewUI->Register();
+
+	return NewUI;
+}
+
+void InitKeyMaps()
+{
+	KeyMap.clear();
+
+	KeyMap.insert("BackSpace", Qt::Key_Backspace);
+	KeyMap.insert("Tab", Qt::Key_Tab);
+	KeyMap.insert("Enter", Qt::Key_Enter);
+	KeyMap.insert("Pause", Qt::Key_Pause);
+
+	KeyMap.insert("CapsLock", Qt::Key_CapsLock);
+	KeyMap.insert("Escape", Qt::Key_Escape);
+	KeyMap.insert("SpaceBar", Qt::Key_Space);
+	KeyMap.insert("PageUp", Qt::Key_PageUp);
+	KeyMap.insert("PageDown", Qt::Key_PageDown);
+	KeyMap.insert("End", Qt::Key_End);
+	KeyMap.insert("Home", Qt::Key_Home);
+
+	KeyMap.insert("Left", Qt::Key_Left);
+	KeyMap.insert("Up", Qt::Key_Up);
+	KeyMap.insert("Right", Qt::Key_Right);
+	KeyMap.insert("Down", Qt::Key_Down);
+	KeyMap.insert("Insert", Qt::Key_Insert);
+	KeyMap.insert("Delete", Qt::Key_Delete);
+
+	KeyMap.insert("NumPadZero", Qt::Key_0);
+	KeyMap.insert("NumPadOne", Qt::Key_1);
+	KeyMap.insert("NumPadTwo", Qt::Key_2);
+	KeyMap.insert("NumPadThree", Qt::Key_3);
+	KeyMap.insert("NumPadFour", Qt::Key_4);
+	KeyMap.insert("NumPadFive", Qt::Key_5);
+	KeyMap.insert("NumPadSix", Qt::Key_6);
+	KeyMap.insert("NumPadSeven", Qt::Key_7);
+	KeyMap.insert("NumPadEight", Qt::Key_8);
+	KeyMap.insert("NumPadNine", Qt::Key_9);
+
+	/* Will be processed as text values (see below)
+	KeyMap.insert("Multiply", Qt::Key_multiply);
+	KeyMap.insert("Add", Qt::Key_Plus);
+	KeyMap.insert("Subtract", Qt::Key_Minus);
+	KeyMap.insert("Decimal", Qt::Key_Percent);
+	KeyMap.insert("Divide", Qt::Key_division);*/
+
+	KeyMap.insert("F1", Qt::Key_F1);
+	KeyMap.insert("F2", Qt::Key_F2);
+	KeyMap.insert("F3", Qt::Key_F3);
+	KeyMap.insert("F4", Qt::Key_F4);
+	KeyMap.insert("F5", Qt::Key_F5);
+	KeyMap.insert("F6", Qt::Key_F6);
+	KeyMap.insert("F7", Qt::Key_F7);
+	KeyMap.insert("F8", Qt::Key_F8);
+	KeyMap.insert("F9", Qt::Key_F9);
+	KeyMap.insert("F10", Qt::Key_F10);
+	KeyMap.insert("F11", Qt::Key_F11);
+	KeyMap.insert("F12", Qt::Key_F12);
+
+	KeyMap.insert("NumLock", Qt::Key_NumLock);
+	KeyMap.insert("ScrollLock", Qt::Key_ScrollLock);
+
+	KeyMap.insert("LeftShift", Qt::Key_Shift);
+	KeyMap.insert("RightShift", Qt::Key_Shift);
+	KeyMap.insert("LeftControl", Qt::Key_Control);
+	KeyMap.insert("RightControl", Qt::Key_Control);
+	KeyMap.insert("LeftAlt", Qt::Key_Alt);
+	KeyMap.insert("RightAlt", Qt::Key_Alt);
+	KeyMap.insert("LeftCommand", Qt::Key_Meta);
+	KeyMap.insert("RightCommand", Qt::Key_Meta);
+
+	/* Will be processed as text values (see below)
+	KeyMap.insert("Semicolon", Qt::Key_Semicolon);
+	KeyMap.insert("Equals", Qt::Key_Equal);
+	KeyMap.insert("Comma", Qt::Key_Comma);
+	KeyMap.insert("Underscore", Qt::Key_Underscore);
+	KeyMap.insert("Period", Qt::Key_Period);
+	KeyMap.insert("Slash", Qt::Key_Slash);
+	KeyMap.insert("Tilde", Qt::Key_AsciiTilde);
+	KeyMap.insert("LeftBracket", Qt::Key_BracketLeft);
+	KeyMap.insert("Backslash", Qt::Key_Backslash);
+	KeyMap.insert("RightBracket", Qt::Key_BracketRight);
+	KeyMap.insert("Quote", Qt::Key_QuoteDbl);*/
+
+
+	//--------------------------------------------------------------
+	KeyTextMap.clear();
+
+	KeyTextMap.insert("Zero", "0");
+	KeyTextMap.insert("One", "1");
+	KeyTextMap.insert("Two", "2");
+	KeyTextMap.insert("Three", "3");
+	KeyTextMap.insert("Four", "4");
+	KeyTextMap.insert("Five", "5");
+	KeyTextMap.insert("Six", "6");
+	KeyTextMap.insert("Seven", "7");
+	KeyTextMap.insert("Eight", "8");
+	KeyTextMap.insert("Nine", "9");
+
+	KeyTextMap.insert("NumPadZero", "0");
+	KeyTextMap.insert("NumPadOne", "1");
+	KeyTextMap.insert("NumPadTwo", "2");
+	KeyTextMap.insert("NumPadThree", "3");
+	KeyTextMap.insert("NumPadFour", "4");
+	KeyTextMap.insert("NumPadFive", "5");
+	KeyTextMap.insert("NumPadSix", "6");
+	KeyTextMap.insert("NumPadSeven", "7");
+	KeyTextMap.insert("NumPadEight", "8");
+	KeyTextMap.insert("NumPadNine", "9");
+
+	KeyTextMap.insert("Multiply", "*");
+	KeyTextMap.insert("Add", "+");
+	KeyTextMap.insert("Subtract", "-");
+	KeyTextMap.insert("Decimal", "%");
+	KeyTextMap.insert("Divide", "/");
+
+	KeyTextMap.insert("Semicolon", ";");
+	KeyTextMap.insert("Equals", "=");
+	KeyTextMap.insert("Comma", ",");
+	KeyTextMap.insert("Underscore", "_");
+	KeyTextMap.insert("Period", ".");
+	KeyTextMap.insert("Slash", "/");
+	KeyTextMap.insert("Tilde", "`");
+	KeyTextMap.insert("LeftBracket", "[");
+	KeyTextMap.insert("Backslash", "\\");
+	KeyTextMap.insert("RightBracket", "]");
+	KeyTextMap.insert("Quote", "'");
+
+
+	//--------------------------------------------------------------
+	KeyShiftMap.clear();
+
+	KeyShiftMap.insert("0", ")");
+	KeyShiftMap.insert("1", "!");
+	KeyShiftMap.insert("2", "@");
+	KeyShiftMap.insert("3", "#");
+	KeyShiftMap.insert("4", "$");
+	KeyShiftMap.insert("5", "%");
+	KeyShiftMap.insert("6", "^");
+	KeyShiftMap.insert("7", "&");
+	KeyShiftMap.insert("8", "*");
+	KeyShiftMap.insert("9", "(");
+
+	KeyShiftMap.insert(";", ":");
+	KeyShiftMap.insert("=", "+");
+	KeyShiftMap.insert(".", ">");
+	KeyShiftMap.insert("-", "_");
+	KeyShiftMap.insert(",", "<");
+	KeyShiftMap.insert("/", "?");
+	KeyShiftMap.insert("`", "~");
+	KeyShiftMap.insert("[", "{");
+	KeyShiftMap.insert("\\", "|");
+	KeyShiftMap.insert("]", "}");
+	KeyShiftMap.insert("'", "\"");
 }
 
 
 //////////////////////////////////////////////////////////////////////////
-// WebView class
+// WebPage class
 
-VaQuoleUI::VaQuoleUI()
+VaQuoleWebUI::VaQuoleWebUI()
 {
-	WebView = new VaQuoleWebView();
-	WebView->show();
+	ExtComm = new UIDataKeeper;
 }
 
-void VaQuoleUI::Destroy()
+void VaQuoleWebUI::Destroy()
 {
-	if(WebView)
-	{
-		WebView->close();
-		delete WebView;
-		WebView = 0;
-	}
+	std::lock_guard<std::mutex> guard(mutex);
+
+	Q_CHECK_PTR(ExtComm);
+	ExtComm->bMarkedForDelete = true;
 }
 
-void VaQuoleUI::OpenURL(const TCHAR* NewURL)
+UIDataKeeper* VaQuoleWebUI::GetData()
 {
-	Q_CHECK_PTR(WebView);
-
-	QString Str = QString::fromUtf16((const ushort*)NewURL);
-	WebView->load(QUrl(Str));
+	Q_CHECK_PTR(ExtComm);
+	return ExtComm;
 }
 
-void VaQuoleUI::OpenBenchmark()
+/** Register UI page in global UI manager */
+void VaQuoleWebUI::Register()
+{
+	Q_CHECK_PTR(pAppThread);
+
+	pAppThread->AddPage(this);
+}
+
+void VaQuoleWebUI::OpenURL(const TCHAR* NewURL)
+{
+	std::lock_guard<std::mutex> guard(mutex);
+
+	Q_CHECK_PTR(ExtComm);
+	ExtComm->NewURL = QString::fromUtf16((const ushort*)NewURL);
+}
+
+void VaQuoleWebUI::OpenBenchmark()
 {
 	OpenURL(L"http://www.smashcat.org/av/canvas_test/");
 }
 
-void VaQuoleUI::EvaluateJavaScript(const TCHAR *ScriptSource)
+TCHAR* VaQuoleWebUI::EvaluateJavaScript(const TCHAR *ScriptSource)
 {
-	Q_CHECK_PTR(WebView);
+	QString ScriptUuid = QUuid::createUuid().toString();
 
-	QString Str = QString::fromUtf16((const ushort*)ScriptSource);
-	WebView->page()->mainFrame()->evaluateJavaScript(Str);
+	QPair<QString, QString> ScriptCommand;
+	ScriptCommand.first = ScriptUuid;
+	ScriptCommand.second = QString::fromUtf16((const ushort*)ScriptSource);
+
+	Q_CHECK_PTR(ExtComm);
+	ExtComm->ScriptCommands.append(ScriptCommand);
+
+	return (TCHAR *)ScriptUuid.utf16();
 }
 
-const uchar * VaQuoleUI::GrabView()
+const uchar * VaQuoleWebUI::GrabView()
 {
-	Q_CHECK_PTR(WebView);
+	std::lock_guard<std::mutex> guard(mutex);
 
-	return WebView->getImageData();
+	Q_CHECK_PTR(ExtComm);
+	return ExtComm->ImageBits;
 }
 
-void VaQuoleUI::SetTransparent(bool transparent)
+bool VaQuoleWebUI::IsEnabled()
 {
-	Q_CHECK_PTR(WebView);
+	std::lock_guard<std::mutex> guard(mutex);
 
-	WebView->setTransparent(transparent);
+	Q_CHECK_PTR(ExtComm);
+	return ExtComm->bEnabled;
 }
 
-void VaQuoleUI::Resize(int w, int h)
+void VaQuoleWebUI::SetEnabled(bool Enabled)
 {
-	Q_CHECK_PTR(WebView);
+	std::lock_guard<std::mutex> guard(mutex);
 
-	WebView->resize(w,h);
+	Q_CHECK_PTR(ExtComm);
+	ExtComm->bEnabled = Enabled;
+}
+
+bool VaQuoleWebUI::IsTransparent()
+{
+	std::lock_guard<std::mutex> guard(mutex);
+
+	Q_CHECK_PTR(ExtComm);
+	return ExtComm->bTransparent;
+}
+
+void VaQuoleWebUI::SetTransparent(bool Transparent)
+{
+	std::lock_guard<std::mutex> guard(mutex);
+
+	Q_CHECK_PTR(ExtComm);
+	ExtComm->bDesiredTransparency = Transparent;
+}
+
+bool VaQuoleWebUI::IsPageLoaded()
+{
+	std::lock_guard<std::mutex> guard(mutex);
+
+	Q_CHECK_PTR(ExtComm);
+	return ExtComm->bPageLoaded;
+}
+
+void VaQuoleWebUI::Resize(int w, int h)
+{
+	std::lock_guard<std::mutex> guard(mutex);
+
+	Q_CHECK_PTR(ExtComm);
+	ExtComm->DesiredWidth = w;
+	ExtComm->DesiredHeight = h;
+}
+
+bool VaQuoleWebUI::IsPendingVisualEvents()
+{
+	std::lock_guard<std::mutex> guard(mutex);
+
+	Q_CHECK_PTR(ExtComm);
+	bool bPendingTransparency = ExtComm->bTransparent != ExtComm->bDesiredTransparency;
+	bool bPendingSize = (ExtComm->Width != ExtComm->DesiredWidth) || (ExtComm->Height != ExtComm->DesiredHeight);
+
+	return (bPendingTransparency || bPendingSize);
 }
 
 
 //////////////////////////////////////////////////////////////////////////
 // JS commands callback
 
-int VaQuoleUI::GetCachedCommandsNumber()
+void VaQuoleWebUI::GetScriptResults(std::vector<ScriptEval>& Evals)
 {
-	Q_CHECK_PTR(WebView);
+	std::lock_guard<std::mutex> guard(mutex);
 
-	return WebView->getCachedCommandsNumber();
+	Q_CHECK_PTR(ExtComm);
+
+	QPair<QString, QString> ScriptResult;
+	foreach (ScriptResult, ExtComm->ScriptResults)
+	{
+		ScriptEval Eval;
+		Eval.ScriptUuid = (TCHAR *)ScriptResult.first.utf16();
+		Eval.ScriptResult = (TCHAR *)ScriptResult.second.utf16();
+		Evals.push_back(Eval);
+	}
+
+	// Clear cached results
+	ExtComm->ScriptResults.clear();
 }
 
-TCHAR * VaQuoleUI::GetCachedCommand(int Index)
+void VaQuoleWebUI::GetScriptEvents(std::vector<ScriptEvent>& Events)
 {
-	Q_CHECK_PTR(WebView);
+	std::lock_guard<std::mutex> guard(mutex);
 
-	return (TCHAR *)WebView->getCachedCommand(Index).utf16();
-}
+	Q_CHECK_PTR(ExtComm);
 
-void VaQuoleUI::ClearCachedCommands()
-{
-	Q_CHECK_PTR(WebView);
+	QPair<QString, QString> EventPair;
+	foreach (EventPair, ExtComm->ScriptEvents)
+	{
+		ScriptEvent Event;
+		Event.EventName = (TCHAR *)EventPair.first.utf16();
+		Event.EventMessage = (TCHAR *)EventPair.second.utf16();
+		Events.push_back(Event);
+	}
 
-	WebView->clearCachedCommands();
+	// Clear cached results
+	ExtComm->ScriptEvents.clear();
 }
 
 
 //////////////////////////////////////////////////////////////////////////
 // Player input
 
-void VaQuoleUI::MouseMove(int x, int y)
+void VaQuoleWebUI::InputMouse(int X, int Y, VaQuole::EMouseButton::Type Button,
+								bool bMouseDown,
+								const VaQuole::KeyModifiers Modifiers)
 {
-	Q_CHECK_PTR(WebView);
+	std::lock_guard<std::mutex> guard(mutex);
 
-	VaQuole::simulateMouseMove(WebView, QPoint(x,y));
-	pApp->processEvents();
+	MouseEvent Event;
+	Event.eventPos = QPoint(X,Y);
+	Event.bButtonPressed = bMouseDown;
+
+	// Prepare modifiers
+	Modifiers.bAltDown == true ? Event.modifiers |= Qt::AltModifier : 0;
+	Modifiers.bCtrlDown == true ? Event.modifiers |= Qt::ControlModifier : 0;
+	Modifiers.bShiftDown == true ? Event.modifiers |= Qt::ShiftModifier : 0;
+
+	// Convert button from UE4 to Qt enum value
+	switch (Button)
+	{
+	case VaQuole::EMouseButton::NoButton:
+		Event.button = Qt::NoButton;
+		break;
+
+	case VaQuole::EMouseButton::LeftButton:
+		Event.button = Qt::LeftButton;
+		break;
+
+	case VaQuole::EMouseButton::RightButton:
+		Event.button = Qt::RightButton;
+		break;
+
+	case VaQuole::EMouseButton::MiddleButton:
+		Event.button = Qt::MiddleButton;
+		break;
+
+	case VaQuole::EMouseButton::XButton1:
+		Event.button = Qt::XButton1;
+		break;
+
+	case VaQuole::EMouseButton::XButton2:
+		Event.button = Qt::XButton2;
+		break;
+
+	case VaQuole::EMouseButton::ScrollUp:
+		Event.button = Qt::NoButton;
+		Event.bScrollUp = true;
+		break;
+
+	case VaQuole::EMouseButton::ScrollDown:
+		Event.button = Qt::NoButton;
+		Event.bScrollDown = true;
+		break;
+
+	default:
+		Event.button = Qt::NoButton;
+		break;
+	}
+
+	Q_CHECK_PTR(ExtComm);
+	ExtComm->MouseEvents.append(Event);
 }
 
-void VaQuoleUI::MouseClick(int x, int y, VaQuole::EMouseButton::Type button,
-						   bool bPressed, unsigned int modifiers)
+void VaQuoleWebUI::InputKey(const TCHAR *Key,
+							const unsigned int KeyCode,
+							const bool bPressed,
+							const VaQuole::KeyModifiers Modifiers)
 {
-	Q_CHECK_PTR(WebView);
+	std::lock_guard<std::mutex> guard(mutex);
 
-	VaQuole::simulateMouseClick(WebView, QPoint(x,y),
-								(Qt::MouseButton) button,
-								(Qt::KeyboardModifiers) modifiers,
-								bPressed);
-	pApp->processEvents();
-}
+	KeyEvent Event;
+	Event.bKeyPressed = bPressed;
 
-void VaQuoleUI::InputKey(const unsigned int key,
-						 const bool bPressed,
-						 const unsigned int modifiers)
-{
-	Q_CHECK_PTR(WebView);
+	// Prepare modifiers
+	Modifiers.bAltDown == true ? Event.modifiers |= Qt::AltModifier : 0;
+	Modifiers.bCtrlDown == true ? Event.modifiers |= Qt::ControlModifier : 0;
+	Modifiers.bShiftDown == true ? Event.modifiers |= Qt::ShiftModifier : 0;
 
-	VaQuole::simulateKey(WebView, key, (Qt::KeyboardModifiers) modifiers, bPressed);
-	pApp->processEvents();
+	// Prepare key
+	QString KeyStr = QString::fromUtf16((const ushort*)Key);
+	Event.key = KeyMap.value(KeyStr, Qt::Key_unknown);
+	Event.text = KeyTextMap.value(KeyStr);
+
+	// Give a chance for UE4 to determine the character
+	if(Event.key == Qt::Key_unknown && KeyCode != -1)
+	{
+		Event.key = (Qt::Key)KeyCode;
+	}
+
+#pragma message ("@FIXME QT-40100 bug temporary solution")
+
+	// [1] Qt bug temporary solution
+	// https://bugreports.qt-project.org/browse/QTBUG-40100
+	if(Event.text.isEmpty())
+	{
+		Event.text = QString(QChar(Event.key));
+	}
+
+	// [2] Qt bug temporary solution
+	// Apply shift modificator
+	if( Modifiers.bShiftDown )
+	{
+		QString ShiftedStr = KeyShiftMap.value(Event.text);
+		if(!ShiftedStr.isNull())
+		{
+			Event.text = ShiftedStr;
+		}
+	}
+	else
+	{
+		Event.text = Event.text.toLower();
+	}
+
+	// Apply keypad modifier for numpad data
+	if (KeyStr.contains("NumPad", Qt::CaseInsensitive))
+	{
+		Event.modifiers |= Qt::KeypadModifier;
+	}
+
+	Q_CHECK_PTR(ExtComm);
+	ExtComm->KeyEvents.append(Event);
 }
 
 } // namespace VaQuole

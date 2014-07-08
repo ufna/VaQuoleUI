@@ -9,6 +9,9 @@
 
 class QImage;
 
+namespace VaQuole
+{
+
 class VaQuoleWebView : public QWebView
 {
 	Q_OBJECT
@@ -16,23 +19,29 @@ class VaQuoleWebView : public QWebView
 public:
 	explicit VaQuoleWebView(QWidget *parent = 0);
 
+	/** Get current background transparency state */
+	bool getTransparency() const;
+
 	/** Changes background transparency */
 	void setTransparent(bool transparent = true);
+
+	/** Get page loading state */
+	bool isLoadFinished() const;
+
+	/** Reset loading state (should be done before new url is set) */
+	void resetPageLoadState();
 
 	/** Resizes the View */
 	void resize(int w, int h);
 
 	/** Get refence to image cache data */
-	const uchar * getImageData();
+	uchar * getImageData();
 
-	/** Count cached commands */
-	int getCachedCommandsNumber();
+	/** Cached image data size to make a memcopy */
+	int getImageDataSize();
 
-	/** Get one particular command */
-	QString getCachedCommand(int index);
-
-	/** Clears cached JS commands */
-	void clearCachedCommands();
+	/** Get cached events from JavaScript and optionally clear cache */
+	void getCachedEvents(QList< QPair<QString, QString> >& Events, bool bClearCache = true);
 
 
 private:
@@ -45,8 +54,11 @@ private:
 	/** Indicates whether the View is transparent or composed on white */
 	bool bTransparent;
 
-	/** Cache of commands received from JS */
-	QStringList cachedJavaScriptCommands;
+	/** Is last desired page loaded or nor */
+	bool bPageLoaded;
+
+	/** Events received from JavaScript */
+	QList< QPair<QString, QString> > CachedScriptEvents;		// Event, Message
 
 
 protected:
@@ -56,10 +68,15 @@ private slots:
 	/** Puts reference to this class object into JS code */
 	void registerJavaScriptWindowObject(bool pageLoaded);
 
+	/** Marks page as loaded for engine */
+	void markLoadFinished(bool ok);
+
 public slots:
-	/** Simple text command from javascript received here */
-	void scriptCommand(QString command);
+	/** Callback from JavaSript */
+	void scriptEvent(QString event, QString message = QString());
 
 };
+
+} // namespace VaQuole
 
 #endif // VAQUOLEWEBVIEW_H
