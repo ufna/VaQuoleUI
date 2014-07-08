@@ -206,8 +206,19 @@ void VaQuoleUIManager::run()
 			{
 				if(MyMouseEvent.button == Qt::NoButton)
 				{
-					// It's a mouse move event
-					VaQuole::simulateMouseMove(WebView, MyMouseEvent.eventPos);
+					if (MyMouseEvent.bScrollUp)
+					{
+						VaQuole::simulateMouseWheel(WebView, MyMouseEvent.eventPos, MyMouseEvent.modifiers, false);
+					}
+					else if (MyMouseEvent.bScrollDown)
+					{
+						VaQuole::simulateMouseWheel(WebView, MyMouseEvent.eventPos, MyMouseEvent.modifiers, true);
+					}
+					else
+					{
+						// It's a mouse move event
+						VaQuole::simulateMouseMove(WebView, MyMouseEvent.eventPos);
+					}
 				}
 				else if(MyMouseEvent.button == Qt::RightButton && MyMouseEvent.bButtonPressed == true)
 				{

@@ -73,11 +73,38 @@ void simulateMouseMove(	QWidget* const pWidget, const QPoint& widgetPos)
 		return;
 	}
 
-	QMouseEvent* pMouseEvent = createMouseEvent(	pWidget, QEvent::MouseMove,
+	QMouseEvent* pMouseEvent = createMouseEvent(pWidget, QEvent::MouseMove,
 										widgetPos, Qt::NoButton,
 										Qt::NoModifier, Qt::NoButton);
 
 	QApplication::instance()->postEvent(pWidget, pMouseEvent);
+}
+
+void simulateMouseWheel(QWidget* const pWidget,
+						const QPoint &widgetPos,
+						const Qt::KeyboardModifiers modifiers,
+						const bool bWheelDown)
+{
+	if (pWidget == NULL || QApplication::instance() == NULL)
+	{
+		return;
+	}
+
+	/** Most mouse types work in steps of 15 degrees, in which case
+	 * the delta value is a multiple of 120; i.e., 120 units * 1/8 = 15 degrees. */
+	int delta = 120;
+	if( bWheelDown )
+	{
+		delta *= -1;
+	}
+
+	QWheelEvent* pEvent = new QWheelEvent(	widgetPos,
+											pWidget->mapToGlobal(widgetPos),
+											delta,
+											Qt::NoButton,
+											modifiers);
+
+	QApplication::instance()->postEvent(pWidget, pEvent);
 }
 
 void simulateContextMenu(	QWidget* const pWidget,

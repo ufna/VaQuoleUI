@@ -46,7 +46,7 @@ bool UVaQuoleUIViewportClient::InputKey(FViewport* InViewport, int32 ControllerI
 		ULocalPlayer* const TargetPlayer = GEngine->GetLocalPlayerFromControllerId(this, ControllerId);
 		if (TargetPlayer && TargetPlayer->PlayerController)
 		{
-			UE_LOG(LogVaQuole, Warning, TEXT("Key: %s"), *Key.ToString());
+			//UE_LOG(LogVaQuole, Warning, TEXT("Key: %s"), *Key.ToString());
 
 			// Process input with HUD views
 			for (auto HudView : HudViews)

@@ -26,11 +26,18 @@ struct MouseEvent
 	Qt::KeyboardModifiers modifiers;
 	bool bButtonPressed;
 
+	/** Scroll event helpers */
+	bool bScrollUp;
+	bool bScrollDown;
+
 	MouseEvent::MouseEvent()
 	{
 		button = Qt::NoButton;
 		modifiers = Qt::NoModifier;
 		bButtonPressed = false;
+
+		bScrollUp = false;
+		bScrollDown = false;
 	}
 };
 
@@ -67,8 +74,15 @@ void simulateMouseClick(	QWidget* const pWidget,
 							const Qt::KeyboardModifiers modifiers,
 							const bool bButtonPressed);
 
-void simulateMouseMove(	QWidget* const pWidget, const QPoint& widgetPos);
+void simulateMouseMove(QWidget* const pWidget, const QPoint& widgetPos);
 
+/** Default wheel speed is used. Additional buttons are not supported */
+void simulateMouseWheel(	QWidget* const pWidget,
+							const QPoint& widgetPos,
+							const Qt::KeyboardModifiers modifiers,
+							const bool bWheelDown = true);
+
+/** Right mouse click for QWebView */
 void simulateContextMenu(	QWidget* const pWidget,
 							const QPoint& widgetPos,
 							const Qt::KeyboardModifiers modifiers);

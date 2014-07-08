@@ -422,9 +422,13 @@ void VaQuoleWebUI::InputMouse(int X, int Y, VaQuole::EMouseButton::Type Button,
 		break;
 
 	case VaQuole::EMouseButton::ScrollUp:
+		Event.button = Qt::NoButton;
+		Event.bScrollUp = true;
 		break;
 
 	case VaQuole::EMouseButton::ScrollDown:
+		Event.button = Qt::NoButton;
+		Event.bScrollDown = true;
 		break;
 
 	default:
