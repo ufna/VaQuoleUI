@@ -4,27 +4,32 @@
 <script type="text/javascript">
 function showhud()
 {
-	VaQuoleWebView.scriptCommand("showhud");
+	VaQuoleWebView.scriptCommand("ConsoleCommand", "showhud");
 }
 
 function statfps()
 {
-	VaQuoleWebView.scriptCommand("stat fps");
+	VaQuoleWebView.scriptCommand("ConsoleCommand", "stat fps");
 }
 
 function statengine()
 {
-	VaQuoleWebView.scriptCommand("stat engine");
+	VaQuoleWebView.scriptCommand("ConsoleCommand", "stat engine");
 }
 
 function statunit()
 {
-	VaQuoleWebView.scriptCommand("stat unit");
+	VaQuoleWebView.scriptCommand("ConsoleCommand", "stat unit");
 }
 
 function exitue()
 {
-	VaQuoleWebView.scriptCommand("exit");
+	VaQuoleWebView.scriptCommand("ConsoleCommand", "exit");
+}
+
+function returnValueToUE()
+{
+	return "Test me, Hardy!";
 }
 </script>
 
