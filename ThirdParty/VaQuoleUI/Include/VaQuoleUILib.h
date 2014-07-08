@@ -76,6 +76,9 @@ public:
 	/** Change background transparency */
 	void SetTransparent(bool Transparent = true);
 
+	/** Is desired page loaded or nor? */
+	bool IsPageLoaded();
+
 	/** Set desired few size */
 	void Resize(int w, int h);
 

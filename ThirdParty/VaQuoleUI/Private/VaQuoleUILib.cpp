@@ -313,6 +313,14 @@ void VaQuoleWebUI::SetTransparent(bool Transparent)
 	ExtComm->bDesiredTransparency = Transparent;
 }
 
+bool VaQuoleWebUI::IsPageLoaded()
+{
+	std::lock_guard<std::mutex> guard(mutex);
+
+	Q_CHECK_PTR(ExtComm);
+	return ExtComm->bPageLoaded;
+}
+
 void VaQuoleWebUI::Resize(int w, int h)
 {
 	std::lock_guard<std::mutex> guard(mutex);

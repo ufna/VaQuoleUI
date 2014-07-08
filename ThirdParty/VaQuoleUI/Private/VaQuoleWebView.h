@@ -25,6 +25,12 @@ public:
 	/** Changes background transparency */
 	void setTransparent(bool transparent = true);
 
+	/** Get page loading state */
+	bool isLoadFinished() const;
+
+	/** Reset loading state (should be done before new url is set) */
+	void resetPageLoadState();
+
 	/** Resizes the View */
 	void resize(int w, int h);
 
@@ -48,6 +54,9 @@ private:
 	/** Indicates whether the View is transparent or composed on white */
 	bool bTransparent;
 
+	/** Is last desired page loaded or nor */
+	bool bPageLoaded;
+
 	/** Events received from JavaScript */
 	QList< QPair<QString, QString> > CachedScriptEvents;		// Event, Message
 
@@ -58,6 +67,9 @@ protected:
 private slots:
 	/** Puts reference to this class object into JS code */
 	void registerJavaScriptWindowObject(bool pageLoaded);
+
+	/** Marks page as loaded for engine */
+	void markLoadFinished(bool ok);
 
 public slots:
 	/** Callback from JavaSript */

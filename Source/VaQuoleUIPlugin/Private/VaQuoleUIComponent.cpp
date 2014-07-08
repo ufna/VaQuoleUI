@@ -11,6 +11,7 @@ UVaQuoleUIComponent::UVaQuoleUIComponent(const class FPostConstructInitializePro
 	PrimaryComponentTick.TickGroup = TG_PrePhysics;
 
 	WebUI = NULL;
+	bPageLoaded = false;
 
 	bEnabled = true;
 	bTransparent = true;
@@ -75,7 +76,7 @@ void UVaQuoleUIComponent::ResetUITexture()
 {
 	DestroyUITexture();
 
-	Texture = UTexture2D::CreateTransient(Width,Height);
+	Texture = UTexture2D::CreateTransient(Width, Height);
 	Texture->AddToRoot();
 	Texture->UpdateResource();
 
@@ -151,7 +152,7 @@ void UVaQuoleUIComponent::UpdateUITexture()
 			FVaQuoleTextureDataPtr, ImageData, DataPtr,
 			FTexture2DRHIRef, TargetTexture, rhiRef,
 			const size_t, DataSize, size,
-			{
+		{
 			uint32 stride = 0;
 			void* MipData = GDynamicRHI->RHILockTexture2D(TargetTexture, 0, RLM_WriteOnly, stride, false);
 
@@ -162,7 +163,7 @@ void UVaQuoleUIComponent::UpdateUITexture()
 			}
 
 			ImageData.Reset();
-			});
+		});
 	}
 }
 
@@ -186,6 +187,9 @@ void UVaQuoleUIComponent::TickComponent(float DeltaTime, enum ELevelTick TickTyp
 	// Process JS callback commands
 	UpdateScriptResults();
 	UpdateScriptEvents();
+
+	// Check page is loaded
+	UpdateLoadingState();
 }
 
 void UVaQuoleUIComponent::UpdateScriptResults()
@@ -232,6 +236,25 @@ void UVaQuoleUIComponent::UpdateScriptEvents()
 			FString EventMessage = Event.EventMessage;
 
 			ScriptEvent.Broadcast(EventName, EventMessage);
+		}
+	}
+}
+
+void UVaQuoleUIComponent::UpdateLoadingState()
+{
+	if (WebUI == nullptr)
+	{
+		return;
+	}
+
+	if (!bPageLoaded)
+	{
+		bPageLoaded = WebUI->IsPageLoaded();
+
+		if (bPageLoaded)
+		{
+			// Currently we won't check the result, just inform that page is loaded
+			LoadFinished.Broadcast();
 		}
 	}
 }
@@ -314,6 +337,9 @@ void UVaQuoleUIComponent::OpenURL(const FString& URL)
 	{
 		return;
 	}
+
+	// Reset loading state
+	bPageLoaded = false;
 
 	if (URL.Contains(TEXT("vaquole://"), ESearchCase::IgnoreCase, ESearchDir::FromStart))
 	{

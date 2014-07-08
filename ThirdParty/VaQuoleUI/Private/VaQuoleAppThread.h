@@ -35,6 +35,9 @@ struct UIDataKeeper
 	/** Is page should be deleted? */
 	bool bMarkedForDelete;
 
+	/** Is last desired page loaded or nor? */
+	bool bPageLoaded;
+
 	/** URL managament */
 	QString NewURL;
 
@@ -67,6 +70,7 @@ struct UIDataKeeper
 	{
 		bEnabled = false;
 		bMarkedForDelete = false;
+		bPageLoaded = false;
 
 		bDesiredTransparency = false;
 		DesiredWidth = 32;

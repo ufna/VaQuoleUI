@@ -153,6 +153,7 @@ void VaQuoleUIManager::run()
 			// External data update (mark we've read it)
 			ExtComm->NewURL = "";
 			ExtComm->bTransparent = WebView->getTransparency();
+			ExtComm->bPageLoaded = WebView->isLoadFinished();
 			ExtComm->Width = WebView->width();
 			ExtComm->Height = WebView->height();
 			ExtComm->MouseEvents.clear();
@@ -197,6 +198,7 @@ void VaQuoleUIManager::run()
 			if(!NewURL.isEmpty())
 			{
 				qDebug() << "Load url:" << NewURL;
+				WebView->resetPageLoadState();
 				WebView->load(QUrl(NewURL));
 			}
 

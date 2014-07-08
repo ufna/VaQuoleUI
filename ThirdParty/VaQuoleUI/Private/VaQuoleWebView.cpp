@@ -16,14 +16,17 @@ VaQuoleWebView::VaQuoleWebView(QWidget *parent) :
 	// It should never be empty
 	ImageCache = QImage(32,32,QImage::Format_RGB32);
 
+	// Defaults
+	bPageLoaded = false;
+
 #ifndef VA_DEBUG
 	// Hide window in taskbar
 	setWindowFlags(Qt::SplashScreen);
 #endif
 
 	// Register us with JavaScript
-	connect(this, SIGNAL(loadFinished(bool)),
-			this, SLOT(registerJavaScriptWindowObject(bool)));
+	connect(this, SIGNAL(loadFinished(bool)), this, SLOT(registerJavaScriptWindowObject(bool)));
+	connect(page()->mainFrame(), SIGNAL(loadFinished(bool)), this, SLOT(markLoadFinished(bool)));
 }
 
 void VaQuoleWebView::updateImageCache(QSize ImageSize)
@@ -44,6 +47,11 @@ void VaQuoleWebView::updateImageCache(QSize ImageSize)
 	}
 }
 
+void VaQuoleWebView::markLoadFinished(bool ok)
+{
+	// We just want to know is it finished or not, but not the result
+	bPageLoaded = true;
+}
 
 //////////////////////////////////////////////////////////////////////////
 // View control functions
@@ -67,6 +75,16 @@ void VaQuoleWebView::setTransparent(bool transparent)
 	{
 		setStyleSheet("");
 	}
+}
+
+bool VaQuoleWebView::isLoadFinished() const
+{
+	return bPageLoaded;
+}
+
+void VaQuoleWebView::resetPageLoadState()
+{
+	bPageLoaded = false;
 }
 
 void VaQuoleWebView::resize(int w, int h)

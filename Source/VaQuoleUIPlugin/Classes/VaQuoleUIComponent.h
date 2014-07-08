@@ -79,6 +79,7 @@ typedef TSharedRef<FVaQuoleTextureData, ESPMode::ThreadSafe> FVaQuoleTextureData
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FScriptEvalResult, const FString&, EvalUuid, const FString&, EvalResult);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FScriptEvent, const FString&, EventName, const FString&, EventMessage);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLoadFinished);
 
 
 /**
@@ -208,6 +209,10 @@ class UVaQuoleUIComponent : public UActorComponent
 	UPROPERTY(BlueprintAssignable)
 	FScriptEvent ScriptEvent;
 
+	/** Called when desired URL loading is finished */
+	UPROPERTY(BlueprintAssignable)
+	FLoadFinished LoadFinished;
+
 
 	//////////////////////////////////////////////////////////////////////////
 	// Player input
@@ -259,8 +264,14 @@ protected:
 	/** Check WebUI for queued events and emit them */
 	void UpdateScriptEvents();
 
+	/** Check that desired URL is opened */
+	void UpdateLoadingState();
+
 	/** Web view loaded from library */
 	VaQuole::VaQuoleWebUI* WebUI;
+
+	/** Is last URL successfully loaded? */
+	bool bPageLoaded;
 
 
 	//////////////////////////////////////////////////////////////////////////
