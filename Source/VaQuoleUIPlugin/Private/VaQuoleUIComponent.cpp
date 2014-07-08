@@ -275,12 +275,12 @@ void UVaQuoleUIComponent::SetTransparent(bool Transparent)
 	}
 }
 
-void UVaQuoleUIComponent::SetConsumeMouseInput(const bool ConsumeInput)
+void UVaQuoleUIComponent::SetConsumeMouseInput(bool ConsumeInput)
 {
 	bConsumeMouseInput = ConsumeInput;
 }
 
-void UVaQuoleUIComponent::SetConsumeKeyboardInput(const bool ConsumeInput)
+void UVaQuoleUIComponent::SetConsumeKeyboardInput(bool ConsumeInput)
 {
 	bConsumeKeyboardInput = ConsumeInput;
 }

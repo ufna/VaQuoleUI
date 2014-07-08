@@ -145,19 +145,19 @@ class UVaQuoleUIComponent : public UActorComponent
 
 	/** Changes view activity state. Attn.! qApp will be still active in background! */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
-	void SetEnabled(const bool Enabled);
+	void SetEnabled(bool Enabled);
 
 	/** Changes background transparency */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
-	void SetTransparent(const bool Transparent);
+	void SetTransparent(bool Transparent);
 
 	/** Set consume input state for mouse events */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI|Input")
-	void SetConsumeMouseInput(const bool ConsumeInput);
+	void SetConsumeMouseInput(bool ConsumeInput);
 
 	/** Set consume input state for keyboard events */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI|Input")
-	void SetConsumeKeyboardInput(const bool ConsumeInput);
+	void SetConsumeKeyboardInput(bool ConsumeInput);
 
 	/** Resizes the View */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
