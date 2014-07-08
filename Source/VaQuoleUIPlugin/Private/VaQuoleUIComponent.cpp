@@ -31,14 +31,26 @@ void UVaQuoleUIComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
 
-	// Create web view
-	if (!WebUI)
-	{
-		WebUI = VaQuole::ConstructNewUI();
-	}
+	// Update enabled state
+	SetEnabled(bEnabled);
 
-	// Init WebUI for the first time
-	ResetWebUI();
+	// Force materials initialization
+	if (!bEnabled)
+	{
+		ResetUITexture();
+	}
+}
+
+void UVaQuoleUIComponent::ResetWebUI()
+{
+	// Update transparency state
+	SetTransparent(bTransparent);
+
+	// Resize texture to correspond desired size
+	Resize(Width, Height);
+
+	// Open default URL
+	OpenURL(DefaultURL);
 }
 
 void UVaQuoleUIComponent::BeginDestroy()
@@ -91,10 +103,20 @@ void UVaQuoleUIComponent::ResetMaterialInstance()
 	}
 
 	// Create material instance
-	MaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterial, NULL);
 	if (!MaterialInstance)
 	{
-		UE_LOG(LogVaQuole, Warning, TEXT("UI Material instance can't be created"));
+		MaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterial, NULL);
+		if (!MaterialInstance)
+		{
+			UE_LOG(LogVaQuole, Warning, TEXT("UI Material instance can't be created"));
+			return;
+		}
+	}
+
+	// Check again, we must have material instance
+	if (!MaterialInstance)
+	{
+		UE_LOG(LogVaQuole, Error, TEXT("UI Material instance wasn't created"));
 		return;
 	}
 
@@ -259,21 +281,6 @@ void UVaQuoleUIComponent::UpdateLoadingState()
 	}
 }
 
-void UVaQuoleUIComponent::ResetWebUI()
-{
-	// Update enabled state
-	SetEnabled(bEnabled);
-
-	// Update transparency state
-	SetTransparent(bTransparent);
-
-	// Resize texture to correspond desired size
-	Resize(Width, Height);
-
-	// Open default URL
-	OpenURL(DefaultURL);
-}
-
 
 //////////////////////////////////////////////////////////////////////////
 // View control
@@ -281,6 +288,15 @@ void UVaQuoleUIComponent::ResetWebUI()
 void UVaQuoleUIComponent::SetEnabled(bool Enabled)
 {
 	bEnabled = Enabled;
+
+	// Create web view if we haven't one
+	if (bEnabled && WebUI == nullptr)
+	{
+		WebUI = VaQuole::ConstructNewUI();
+
+		// Init web UI for the first time
+		ResetWebUI();
+	}
 
 	if (WebUI)
 	{
