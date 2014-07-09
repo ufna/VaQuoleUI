@@ -16,6 +16,7 @@ UVaQuoleUIComponent::UVaQuoleUIComponent(const class FPostConstructInitializePro
 	bEnabled = true;
 	bTransparent = true;
 
+	bInputEnabled = true;
 	bConsumeMouseInput = false;
 	bConsumeKeyboardInput = false;
 
@@ -318,6 +319,11 @@ void UVaQuoleUIComponent::SetTransparent(bool Transparent)
 	}
 }
 
+void UVaQuoleUIComponent::SetInputEnabled(bool EnableInput)
+{
+	bInputEnabled = EnableInput;
+}
+
 void UVaQuoleUIComponent::SetConsumeMouseInput(bool ConsumeInput)
 {
 	bConsumeMouseInput = ConsumeInput;
@@ -386,6 +392,11 @@ bool UVaQuoleUIComponent::IsEnabled() const
 	return bEnabled;
 }
 
+bool UVaQuoleUIComponent::IsInputEnabled() const
+{
+	return bInputEnabled;
+}
+
 int32 UVaQuoleUIComponent::GetWidth() const
 {
 	return Width;
@@ -414,7 +425,7 @@ UMaterialInstanceDynamic* UVaQuoleUIComponent::GetMaterialInstance() const
 
 bool UVaQuoleUIComponent::InputKey(FViewport* Viewport, int32 ControllerId, FKey Key, EInputEvent EventType, float AmountDepressed, bool bGamepad)
 {
-	if (!bEnabled || WebUI == NULL || !Key.IsValid())
+	if (!bEnabled || !bInputEnabled || WebUI == nullptr || !Key.IsValid())
 	{
 		return false;
 	}
@@ -519,7 +530,7 @@ void UVaQuoleUIComponent::SetMousePosition(float X, float Y)
 
 void UVaQuoleUIComponent::UpdateMousePosition()
 {
-	if (!bEnabled || WebUI == NULL)
+	if (!bEnabled || !bInputEnabled || WebUI == nullptr)
 	{
 		return;
 	}
