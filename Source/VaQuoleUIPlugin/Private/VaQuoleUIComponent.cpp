@@ -194,7 +194,9 @@ void UVaQuoleUIComponent::PostEditChangeProperty(FPropertyChangedEvent& Property
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 
-	ResetWebUI();
+	// Don't reset UI here for now. I should check it when preview plane will be added, but it's not
+	// necessary to update the UI before blueprint compilation
+	//ResetWebUI();
 }
 #endif // WITH_EDITORONLY_DATA
 
