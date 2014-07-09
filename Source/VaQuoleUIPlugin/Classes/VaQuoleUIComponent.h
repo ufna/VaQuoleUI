@@ -127,6 +127,10 @@ class UVaQuoleUIComponent : public UActorComponent
 	UPROPERTY(EditAnywhere, Category = "View")
 	FString DefaultURL;
 
+	/** Should widget reveice any input? */
+	UPROPERTY(EditAnywhere, Category = "Input")
+	bool bInputEnabled;
+
 	/** Should widget consume mouse input? (mouse events won't be delivered to other actors) */
 	UPROPERTY(EditAnywhere, Category = "Input")
 	bool bConsumeMouseInput;
@@ -154,6 +158,10 @@ class UVaQuoleUIComponent : public UActorComponent
 	/** Changes background transparency */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
 	void SetTransparent(bool Transparent);
+
+	/** Determine should widget receive input or not */
+	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI|Input")
+	void SetInputEnabled(bool EnableInput);
 
 	/** Set consume input state for mouse events */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI|Input")
@@ -183,6 +191,10 @@ class UVaQuoleUIComponent : public UActorComponent
 	/** Is current view enabled? */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
 	bool IsEnabled() const;
+
+	/** Is input enabled for widget? */
+	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI|Input")
+	bool IsInputEnabled() const;
 
 	/** Texture that stores current widget UI */
 	UFUNCTION(BlueprintCallable, Category = "UI|VaQuoleUI")
