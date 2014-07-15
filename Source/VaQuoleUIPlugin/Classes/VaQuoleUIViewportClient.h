@@ -6,7 +6,7 @@
 #include "VaQuoleUIViewportClient.generated.h"
 
 UCLASS()
-class UVaQuoleUIViewportClient : public UGameViewportClient
+class VAQUOLEUIPLUGIN_API UVaQuoleUIViewportClient : public UGameViewportClient
 {
 	GENERATED_UCLASS_BODY()
 

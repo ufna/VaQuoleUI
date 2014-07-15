@@ -11,7 +11,7 @@ class UVaQuoleUIComponent;
  * Class that handles view of one web page
  */
 UCLASS(ClassGroup=UI)
-class UVaQuoleBlueprintFunctionLibrary : public UBlueprintFunctionLibrary
+class VAQUOLEUIPLUGIN_API UVaQuoleBlueprintFunctionLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_UCLASS_BODY()
 

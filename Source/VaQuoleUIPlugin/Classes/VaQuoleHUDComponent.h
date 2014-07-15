@@ -9,7 +9,7 @@
  * Class that handles view of one web page
  */
 UCLASS(ClassGroup=UI, editinlinenew, meta=(BlueprintSpawnableComponent))
-class UVaQuoleHUDComponent : public UVaQuoleUIComponent
+class VAQUOLEUIPLUGIN_API UVaQuoleHUDComponent : public UVaQuoleUIComponent
 {
 	GENERATED_UCLASS_BODY()
 

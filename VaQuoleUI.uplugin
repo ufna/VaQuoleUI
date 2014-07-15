@@ -2,8 +2,8 @@
     "FileVersion" : 3,
 	
 	"FriendlyName" : "VaQuoleUI",
-	"Version" : 10,
-	"VersionName" : "1.0-b10",
+	"Version" : 11,
+	"VersionName" : "1.0-b11",
 	"CreatedBy" : "Vladimir Alyamkin",
 	"CreatedByURL" : "http://alyamkin.com",
 	"EngineVersion" : 1579795,
@@ -14,7 +14,8 @@
 	[
 		{
 			"Name" : "VaQuoleUIPlugin",
-			"Type" : "Runtime"
+			"Type" : "Runtime",
+            "LoadingPhase": "PreDefault"
 		}
 	]
 }

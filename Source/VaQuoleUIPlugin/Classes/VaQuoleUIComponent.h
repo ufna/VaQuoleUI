@@ -86,7 +86,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLoadFinished);
  * Class that handles view of one web page
  */
 UCLASS(Abstract, BlueprintType, Blueprintable)
-class UVaQuoleUIComponent : public UActorComponent
+class VAQUOLEUIPLUGIN_API UVaQuoleUIComponent : public UActorComponent
 {
 	GENERATED_UCLASS_BODY()
 
