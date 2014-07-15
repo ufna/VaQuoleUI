@@ -7,7 +7,7 @@ class FVaQuoleUIPlugin : public IVaQuoleUIPlugin
 	/** IModuleInterface implementation */
 	virtual void StartupModule() OVERRIDE
 	{
-		// Force classes to be compile on shipping build
+		// @HACK Force classes to be compiled on shipping build
 		UVaQuoleUIViewportClient::StaticClass();
 		UVaQuoleBlueprintFunctionLibrary::StaticClass();
 		UVaQuoleUIComponent::StaticClass();
