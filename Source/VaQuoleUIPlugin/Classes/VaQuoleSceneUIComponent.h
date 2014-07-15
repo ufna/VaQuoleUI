@@ -21,7 +21,7 @@ namespace ESurfaceMapping
  * Class that handles view of one web page
  */
 UCLASS(ClassGroup=UI, editinlinenew, meta=(BlueprintSpawnableComponent))
-class UVaQuoleSceneUIComponent : public UVaQuoleUIComponent
+class VAQUOLEUIPLUGIN_API UVaQuoleSceneUIComponent : public UVaQuoleUIComponent
 {
 	GENERATED_UCLASS_BODY()
 

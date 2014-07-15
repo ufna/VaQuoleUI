@@ -14,7 +14,8 @@
 	[
 		{
 			"Name" : "VaQuoleUIPlugin",
-			"Type" : "Runtime"
+			"Type" : "Runtime",
+            "LoadingPhase": "PreDefault"
 		}
 	]
 }
