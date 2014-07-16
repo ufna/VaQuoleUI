@@ -261,6 +261,8 @@ void VaQuoleWebUI::OpenBenchmark()
 
 TCHAR* VaQuoleWebUI::EvaluateJavaScript(const TCHAR *ScriptSource)
 {
+	std::lock_guard<std::mutex> guard(mutex);
+
 	QString ScriptUuid = QUuid::createUuid().toString();
 
 	QPair<QString, QString> ScriptCommand;

@@ -77,6 +77,13 @@ void VaQuoleUIManager::run()
 		QNetworkProxyFactory::setUseSystemConfiguration (true);
 		QWebSettings::globalSettings()->setAttribute(QWebSettings::PluginsEnabled, true);
 		QWebSettings::globalSettings()->setAttribute(QWebSettings::AutoLoadImages, true);
+
+		QWebSettings::globalSettings()->setAttribute(QWebSettings::OfflineStorageDatabaseEnabled, true);
+		QWebSettings::globalSettings()->setAttribute(QWebSettings::OfflineWebApplicationCacheEnabled, true);
+		QWebSettings::globalSettings()->setAttribute(QWebSettings::LocalStorageEnabled, true);
+
+		QWebSettings::globalSettings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
+		QWebSettings::globalSettings()->setAttribute(QWebSettings::ScrollAnimatorEnabled, true);
 	}
 
 	while (!m_stop)
