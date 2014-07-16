@@ -5,7 +5,7 @@
 class FVaQuoleUIPlugin : public IVaQuoleUIPlugin
 {
 	/** IModuleInterface implementation */
-	virtual void StartupModule() OVERRIDE
+	virtual void StartupModule() override
 	{
 		// @HACK Force classes to be compiled on shipping build
 		UVaQuoleUIViewportClient::StaticClass();
@@ -18,7 +18,7 @@ class FVaQuoleUIPlugin : public IVaQuoleUIPlugin
 		VaQuole::Init();
 	}
 
-	virtual void ShutdownModule() OVERRIDE
+	virtual void ShutdownModule() override
 	{
 		// Exit QApplication
 		VaQuole::Cleanup();

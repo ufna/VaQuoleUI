@@ -26,7 +26,7 @@ class VAQUOLEUIPLUGIN_API UVaQuoleSceneUIComponent : public UVaQuoleUIComponent
 	GENERATED_UCLASS_BODY()
 
 	// Begin UObject Interface
-	virtual void BeginDestroy() OVERRIDE;
+	virtual void BeginDestroy() override;
 	// End UObject Interface
 
 	/** How surface we're projected too is mapped */
