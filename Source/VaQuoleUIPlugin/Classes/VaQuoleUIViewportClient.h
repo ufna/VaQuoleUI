@@ -23,7 +23,7 @@ class VAQUOLEUIPLUGIN_API UVaQuoleUIViewportClient : public UGameViewportClient
 	void UnregisterSceneUI(UVaQuoleUIComponent* WebView);
 
 	// FViewportClient interface.
-	virtual bool InputKey(FViewport* Viewport, int32 ControllerId, FKey Key, EInputEvent EventType, float AmountDepressed = 1.f, bool bGamepad = false) OVERRIDE;
+	virtual bool InputKey(FViewport* Viewport, int32 ControllerId, FKey Key, EInputEvent EventType, float AmountDepressed = 1.f, bool bGamepad = false) override;
 	// End of FViewportClient interface.
 
 private:
