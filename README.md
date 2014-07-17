@@ -7,7 +7,7 @@ With the VaQuoleUI plugin you can create interactive User Interfaces for your ga
 
 Check the **[Wiki](https://github.com/ufna/VaQuoleUI/wiki)** tab to know more about the plugin.
 
-Current version: **1.0 Beta 12**
+Current version: **1.1 Beta 13**
 
 ![SCREENSHOT](SCREENSHOT.jpg)
 
