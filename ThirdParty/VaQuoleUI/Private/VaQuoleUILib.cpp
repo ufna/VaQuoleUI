@@ -357,8 +357,16 @@ void VaQuoleWebUI::GetScriptResults(std::vector<ScriptEval>& Evals)
 	foreach (ScriptResult, ExtComm->ScriptResults)
 	{
 		ScriptEval Eval;
-		Eval.ScriptUuid = (TCHAR *)ScriptResult.first.utf16();
-		Eval.ScriptResult = (TCHAR *)ScriptResult.second.utf16();
+
+		Eval.ScriptUuid = new TCHAR[ScriptResult.first.length()];
+		Eval.ScriptResult = new TCHAR[ScriptResult.second.length()];
+
+		int idx = ScriptResult.first.toWCharArray(Eval.ScriptUuid);
+		Eval.ScriptUuid[idx] = (TCHAR)0;
+
+		idx = ScriptResult.second.toWCharArray(Eval.ScriptResult);
+		Eval.ScriptResult[idx] = (TCHAR)0;
+
 		Evals.push_back(Eval);
 	}
 
@@ -376,8 +384,16 @@ void VaQuoleWebUI::GetScriptEvents(std::vector<ScriptEvent>& Events)
 	foreach (EventPair, ExtComm->ScriptEvents)
 	{
 		ScriptEvent Event;
-		Event.EventName = (TCHAR *)EventPair.first.utf16();
-		Event.EventMessage = (TCHAR *)EventPair.second.utf16();
+
+		Event.EventName = new TCHAR[EventPair.first.length()];
+		Event.EventMessage = new TCHAR[EventPair.second.length()];
+
+		int idx = EventPair.first.toWCharArray(Event.EventName);
+		Event.EventName[idx] = (TCHAR)0;
+
+		idx = EventPair.second.toWCharArray(Event.EventMessage);
+		Event.EventMessage[idx] = (TCHAR)0;
+
 		Events.push_back(Event);
 	}
 
