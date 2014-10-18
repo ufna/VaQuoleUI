@@ -80,7 +80,7 @@ bool UVaQuoleSceneUIComponent::MouseMoveFromHitResult(const FHitResult& HitResul
 	UStaticMeshComponent* TargetMesh = Owner->FindComponentByClass<UStaticMeshComponent>();
 	if (TargetMesh != NULL)
 	{
-		FTransform ToActor = HitResult.Actor->GetTransform().InverseSafe();
+		FTransform ToActor = HitResult.Actor->GetTransform().Inverse();
 		FVector ActorImpact = ToActor.TransformPosition(HitResult.ImpactPoint);
 
 		FVector Min, Max;
